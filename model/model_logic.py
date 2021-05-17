@@ -41,7 +41,7 @@ class Subregion():
 #%% Bed-related functions
 # TODO: consider if Bed (and Model) functions should be refactored into classes
 
-@Timer("Get_event_particles", text="get_event_particles call: {:.3f} seconds")
+@Timer("Get_event_particles", text="get_event_particles call: {:.3f} seconds", logger=None)
 def get_event_particles(e_events, subregions, model_particles):
     """ Find and return list of particles to be entrained
 
@@ -98,7 +98,7 @@ def get_event_particles(e_events, subregions, model_particles):
         
     return event_particles
 
-@Timer("define_subregions", text="define_subregions call: {:.3f} seconds")
+@Timer("define_subregions", text="define_subregions call: {:.3f} seconds", logger=None)
 def define_subregions(bed_length, num_subregions):
     """ Define subregion list for model stream.
     
@@ -165,7 +165,7 @@ def add_bed_particle(diam, bed_particles, particle_id, pack_idx):
  
     return particle_id, pack_idx
 
-@Timer("build_streambed", text="build_streambed call: {:.5f} seconds")
+@Timer("build_streambed", text="build_streambed call: {:.5f} seconds", logger=None)
 def build_streambed():
     """ Build the bed particle list.
     
@@ -237,9 +237,9 @@ def determine_num_particles(pack_frac, num_vertices):
 
     return num_particles
 
-@Timer("place_particle", text="place_particle call: {:.5f} seconds")
+@Timer("place_particle", text="place_particle call: {:.5f} seconds", logger=None)
 # https://math.stackexchange.com/questions/2293201/
-def place_particle(particle, particle_diam, model_particles, bed_particles):
+def place_particle(particle, particle_diam, model_particles, bed_particles, h):
     """ Calculate new X and Y of particle based on location in stream.
     
     
@@ -262,23 +262,34 @@ def place_particle(particle, particle_diam, model_particles, bed_particles):
                                                 bed_particles, already_placed=False)
 
     # # # TODO: Make this more readable
-    x1 = left_support[0]
-    y1 = left_support[2]
-    r1 = left_support[1] / 2
+    # x1 = left_support[0]
+    # y1 = left_support[2]
+    # r1 = left_support[1] / 2
     
-    x2 = right_support[0]
-    y2 = right_support[2]
-    r2 = right_support[1] / 2
+    # x2 = right_support[0]
+    # y2 = right_support[2]
+    # r2 = right_support[1] / 2
     
-    rp = particle_diam / 2 
+    # rp = particle_diam / 2 
 
-    a1 = np.multiply(rp, particle_diam)
-    d = np.divide(a1, particle_diam)
-    h = math.sqrt(np.square(particle_diam) - np.square(d))
+    # define symbols for symbolic system solution using SymPy
+    # x3, y3 = sy.symbols('x3 y3')
+    
+    # # create the symbolic system equations
+    # eq1 = sy.Eq(sy.sqrt((x1-x3)**2 + (y1-y3)**2)-r1-rp, 0)
+    # eq2 = sy.Eq(sy.sqrt((x2-x3)**2 + (y2-y3)**2)-r2-rp, 0)
+    
+    # # solve the system of equations
+    # sol_dict = sy.solve((eq1, eq2), (x3, y3))
+        
+    # # Iterate into the solution dictionary to recieve new particle center (x,y)
+    # # Account for 'extra precision' differences by rounding to nearest 100th
+    # p_x = round((sol_dict[1][0]), 2)
+    # p_y = round((sol_dict[1][1]), 2)
     
     return round(particle[0], 2), round(np.add(h, left_support[2]), 2)
 
-@Timer("update_states", text="update_particle_states call: {:.5f} seconds")
+@Timer("update_states", text="update_particle_states call: {:.5f} seconds", logger=None)
 def update_particle_states(model_particles, bed_particles):
     """ Set each model particle's current 'active' state.
     
@@ -328,7 +339,7 @@ def update_particle_states(model_particles, bed_particles):
     
     return model_particles
         
-@Timer("find_supports", text="find_supports call: {:.5f} seconds")
+@Timer("find_supports", text="find_supports call: {:.5f} seconds", logger=None)
 def find_supports(particle, model_particles, bed_particles, already_placed):
     """ Find the 2 supporting particles for a given particle.
     
@@ -404,8 +415,8 @@ def find_supports(particle, model_particles, bed_particles, already_placed):
 
     return left_support[0], right_support[0]
 
-@Timer("create_set_modelp", text="set_model_particles call: {:.5f} seconds")
-def set_model_particles(bed_particles):
+@Timer("create_set_modelp", text="set_model_particles call: {:.5f} seconds", logger=None)
+def set_model_particles(bed_particles, h):
     """ Create model particle list and set in model stream.
     
     
@@ -459,7 +470,8 @@ def set_model_particles(bed_particles):
         p_x, p_y = place_particle(model_particles[particle], 
                                   parameters.set_diam, 
                                   model_particles, 
-                                  bed_particles)
+                                  bed_particles, 
+                                  h)
         
         
         model_particles[particle][0] = p_x
@@ -471,7 +483,7 @@ def set_model_particles(bed_particles):
     
     return model_particles
 
-@Timer("compute_available_vertices", text="compute_avail_vertices call: {:.5f} seconds")
+@Timer("compute_available_vertices", text="compute_avail_vertices call: {:.5f} seconds", logger=None)
 def compute_available_vertices(model_particles, bed_particles, 
                                lifted_particles=None, just_bed=False):
     """ Compute the avaliable vertices in the model 
@@ -551,7 +563,7 @@ def compute_available_vertices(model_particles, bed_particles,
     
 #TODO: Parametrize uniqueness method. User should be able to play 
 # with whether unique entrainments are forced pre- or post-event
-def run_entrainments(model_particles, bed_particles, event_particle_ids, normal_flag):
+def run_entrainments(model_particles, bed_particles, event_particle_ids, normal_flag, h):
     """ This function mimics an 'entrainment event' through
     calls to the entrainment-related functions. 
     
@@ -577,7 +589,8 @@ def run_entrainments(model_particles, bed_particles, event_particle_ids, normal_
                                                 unverified_e, 
                                                 model_particles, 
                                                 bed_particles, 
-                                                avail_vertices)
+                                                avail_vertices, 
+                                                h)
     unique_entrainments, redo_ids = check_unique_entrainments(e_dict)
      
     p_flux_2 = 0
@@ -588,7 +601,8 @@ def run_entrainments(model_particles, bed_particles, event_particle_ids, normal_
                                                             redo_entrainments, 
                                                             model_particles, 
                                                             bed_particles, 
-                                                            avail_vertices)
+                                                            avail_vertices,
+                                                            h)
         unique_entrainments, redo_ids = check_unique_entrainments(e_dict)
         p_flux_2 += tmp_p_flux
 
@@ -629,7 +643,7 @@ def fathel_furbish_hops(event_particle_ids, model_particles, normal=False):
     
     return event_particles
  
-def move_model_particles(event_particles, model_particles, bed_particles, available_vertices):
+def move_model_particles(event_particles, model_particles, bed_particles, available_vertices, h):
     """ Given an array of event particles, move the event particles
     to next closest valid vertex within the model stream and update 
     model_particle array accordingly.
@@ -671,7 +685,7 @@ def move_model_particles(event_particles, model_particles, bed_particles, availa
             # print(hop_msg)
             particle[0] = verified_hop
             placed_x, placed_y = place_particle(particle, parameters.set_diam, 
-                                          model_particles, bed_particles)
+                                          model_particles, bed_particles, h)
             particle[0] = placed_x
             particle[2] = placed_y
             
@@ -704,7 +718,7 @@ def find_closest_vertex(desired_hop, available_vertices):
 
 
 # TODO: confirm the naming of function
-@Timer("check_unique_entrainments", text="check_unique_entrainments call: {:.5f} seconds")      
+@Timer("check_unique_entrainments", text="check_unique_entrainments call: {:.5f} seconds", logger=None)      
 def check_unique_entrainments(entrainment_dict):
     """ Check that all entrainments in the dictionary are unqiue. 
     

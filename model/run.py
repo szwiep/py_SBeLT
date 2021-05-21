@@ -2,7 +2,8 @@ import numpy as np
 import argparse
 from tqdm import tqdm
 from codetiming import Timer
-
+import json
+import logging
 
 import model_logic as ml 
 import parameters as pm
@@ -36,6 +37,7 @@ model_particles = ml.set_model_particles(bed_particles, h)
 subregions = ml.define_subregions(bed_length, pm.num_subregions)
 
 particle_flux_list = []
+plot_snapshot = {}
 for iteration in tqdm(range(pm.n_iterations)):
     
     # print(ITERATION_HEADER.format(iteration=iteration))  
@@ -58,14 +60,21 @@ for iteration in tqdm(range(pm.n_iterations)):
     # Re-calculate avail vertices for plotting.
     available_vertices = ml.compute_available_vertices(model_particles, 
                                                        bed_particles)
-    if no_plots:
-        continue
-    # TODO: Store iteration data/state, allow call to plots only if desired
-    else:
-        plot.stream(iteration, bed_particles, model_particles, pm.x_max, 10, 
-                        available_vertices, to_file=True)
-print(Timer.timers)
-    
+
+    plot_snapshot[iteration] = [np.ndarray.tolist(bed_particles), np.ndarray.tolist(model_particles), np.ndarray.tolist(available_vertices)]
+
+print(Timer.timers) 
+
+print("Writing plotting information to file...")
+json = json.dumps(plot_snapshot)
+f = open("../plots/plot_snapshots.json", "w")
+# Begin by writing the run's paramters to the top of the file
+f.write(json)
+f.close()
+print("Finished writing plotting information to file...")
+
 plot.flux_info(particle_flux_list, to_file=True)
+print("\n\nModel run complete\n\n")
+
     
     

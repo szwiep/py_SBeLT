@@ -4,6 +4,7 @@ from tqdm import tqdm
 from codetiming import Timer
 import json
 import logging
+import time
 
 import model_logic as ml 
 import parameters as pm
@@ -25,7 +26,13 @@ parser.add_argument('--no-plots', action='store_true')
 args = parser.parse_args()
 no_plots = args.no_plots
 
-ml.validate_parameters()     
+ml.validate_parameters()   
+parameters = (
+    f"Pack = {pm.Pack}, x_max = {pm.x_max}, set_diam = {pm.set_diam},"
+    f"num_subregions = {pm.num_subregions}, level_limit = {pm.level_limit},"
+    f"n_iterations = {pm.n_iterations}, lambda_1 = {pm.lambda_1},"
+    f"normal_dist = {pm.normal_dist}, mu = {pm.mu}, sigma = {pm.sigma} \n" 
+)  
     
 # Run the model
 d = np.divide(np.multiply(np.divide(pm.set_diam, 2), pm.set_diam), pm.set_diam)
@@ -38,6 +45,7 @@ subregions = ml.define_subregions(bed_length, pm.num_subregions)
 
 particle_flux_list = []
 plot_snapshot = {}
+plot_snapshot['param'] = parameters 
 for iteration in tqdm(range(pm.n_iterations)):
     
     # print(ITERATION_HEADER.format(iteration=iteration))  
@@ -65,10 +73,11 @@ for iteration in tqdm(range(pm.n_iterations)):
 
 print(Timer.timers) 
 
+timestr = time.strftime("%Y%m%d-%H%M%S")
+
 print("Writing plotting information to file...")
 json = json.dumps(plot_snapshot)
-f = open("../plots/plot_snapshots.json", "w")
-# Begin by writing the run's paramters to the top of the file
+f = open("../plots/run-info-" + timestr + ".json", "w")
 f.write(json)
 f.close()
 print("Finished writing plotting information to file...")

@@ -23,8 +23,11 @@ ITERATION_TEMPLATE = ("""\n
 # Parse command line arguments and validate parameters
 parser = argparse.ArgumentParser()
 parser.add_argument('--no-plots', action='store_true')
+parser.add_argument('--height-dep', action='store_true')
 args = parser.parse_args()
 no_plots = args.no_plots
+height_dep = args.height_dep
+print(height_dep)
 
 ml.validate_parameters()   
 parameters = (
@@ -53,7 +56,7 @@ for iteration in tqdm(range(pm.n_iterations)):
     e_events = np.random.poisson(pm.lambda_1, None)
     # Retrieve the Event Particles
     event_particles = ml.get_event_particles(e_events, subregions,
-                                             model_particles)
+                                             model_particles, pm.level_limit, height_dep)
     # print(ITERATION_TEMPLATE.format(
     #                             e_events=len(event_particles), 
     #                             particles=event_particles))     
@@ -83,7 +86,7 @@ f.close()
 print("Finished writing plotting information to file...")
 
 plot.flux_info(particle_flux_list, to_file=True)
-print("\n\nModel run complete\n\n")
+print("Model run complete")
 
     
     

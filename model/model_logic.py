@@ -42,7 +42,7 @@ class Subregion():
 # TODO: consider if Bed (and Model) functions should be refactored into classes
 
 @Timer("Get_event_particles", text="get_event_particles call: {:.3f} seconds", logger=None)
-def get_event_particles(e_events, subregions, model_particles):
+def get_event_particles(e_events, subregions, model_particles, level_limit, height_dependant=False):
     """ Find and return list of particles to be entrained
 
     Keyword arguments:
@@ -68,17 +68,30 @@ def get_event_particles(e_events, subregions, model_particles):
                                                 subregion_particles[:,0] != -1]
         active_particles =  in_stream_particles[
                                                 in_stream_particles[:,4] != 0]
-        
-        if e_events > len(active_particles):
-            random_sample = random.sample(range(len(active_particles)), 
-                                         len(active_particles))
-        else:
-            random_sample = random.sample(range(len(active_particles)), 
-                                         e_events)
         subregion_event_ids = []  
-        for index in random_sample:
-            #NOTE: this only works because index=id in the model_particle array
-            subregion_event_ids.append(int(active_particles[index][3])  )
+        if height_dependant:
+            # TODO: better approach to identify the level/elevation relationship. This is messy 
+            levels = np.unique(active_particles[:,2])
+            level = levels[::-1]
+            tip_particles = []
+            if len(levels) == level_limit:
+                tip_particles = active_particles[active_particles[:,2] == levels[level_limit-1]]
+            for particle in tip_particles:
+                subregion_event_ids.append(particle[3])
+                active_particles = active_particles[active_particles[:,2] != particle[2]]
+                e_events = e_events - 1
+        if e_events < 1:
+            continue
+        else:
+            if e_events > len(active_particles):
+                random_sample = random.sample(range(len(active_particles)), 
+                                            len(active_particles))
+            else:
+                random_sample = random.sample(range(len(active_particles)), 
+                                            e_events)
+            for index in random_sample:
+                #NOTE: this only works because index=id in the model_particle array
+                subregion_event_ids.append(int(active_particles[index][3])  )
         
         ghost_particles = np.where(model_particles[:,0] == -1)[0]
         for index in ghost_particles:
@@ -90,7 +103,7 @@ def get_event_particles(e_events, subregions, model_particles):
                      f'\nRequested {e_events} events in {subregion.getName()} ' 
                      f'but {len(subregion_event_ids)} are occuring'
             )
-            print(msg)
+            # print(msg)
 
         event_particles = event_particles + subregion_event_ids
     event_particles = np.array(event_particles, dtype=np.intp)
@@ -545,7 +558,7 @@ def compute_available_vertices(model_particles, bed_particles,
         left_vertices = tmp_particles[:,0] - parameters.set_radius
         tmp_shared_vertices = np.intersect1d(left_vertices, right_vertices)
         
-        # Enforce level limit of piles:
+        # Enforce level limit by nulling any vertex above limit:
         if len(elevations)==parameters.level_limit+1 and idx==0: 
             for vertex in tmp_shared_vertices:
                 nulled_vertices.append(vertex)

@@ -4,28 +4,13 @@ import random
 import numpy as np
 import sympy as sy
 import copy
-import parameters # Import the parameters defined in the parameters file
+
 
 #TODO: Refactor functions so that they don't reach into the paramters file
 from collections import defaultdict
 from codetiming import Timer
 
-#############################################################################
-# Set up logging
-#############################################################################
-# TODO: Fix configuration -- info not displaying at function level
 import logging
-import logging.config
-import yaml
-
-# with open('logs/conf.yaml', 'r') as f:
-#     config = yaml.safe_load(f.read())
-#     logging.config.dictConfig(config)
-
-# log = logging.getLogger(__name__)
-
-#############################################################################
-
 
 # TODO: Consider refactoring from class into simple struct 
 class Subregion():
@@ -86,8 +71,8 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
         subregion_event_ids = []  
         if height_dependant:
             # TODO: better approach to identify the level/elevation relationship. This is messy 
-            levels = np.unique(active_particles[:,2])
-            levels[::-1].sort()
+            levels = elevation_list(active_particles[:,2], desc=False)
+
             tip_particles = []
             if len(levels) == level_limit:
                 tip_particles = active_particles[active_particles[:,2] == levels[level_limit-1]]
@@ -123,7 +108,6 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
         event_particles = event_particles + subregion_event_ids
     event_particles = np.array(event_particles, dtype=np.intp)
 
-        
     return event_particles
 
 @Timer("define_subregions", text="define_subregions call: {:.3f} seconds", logger=None)
@@ -195,7 +179,7 @@ def add_bed_particle(diam, bed_particles, particle_id, pack_idx):
     return particle_id, pack_idx
 
 @Timer("build_streambed", text="build_streambed call: {:.5f} seconds", logger=None)
-def build_streambed():
+def build_streambed(x_max, set_diam):
     """ Build the bed particle list.
     
     
@@ -213,42 +197,42 @@ def build_streambed():
                     based on bed list 
     """
 
-    max_particles = int(math.ceil( parameters.x_max / parameters.set_diam ))
+    max_particles = int(math.ceil( x_max / set_diam ))
     bed_particles = np.zeros([max_particles, 6],dtype=float)
     
     running_id = 0
     running_pack_idx = 0
     # This probably doesn't need to be a loop. NumPy! 
     while True:
-        running_id, running_pack_idx = add_bed_particle(parameters.set_diam, 
+        running_id, running_pack_idx = add_bed_particle(set_diam, 
                                                         bed_particles, 
                                                         running_id, 
                                                         running_pack_idx)
-        if bed_complete(running_pack_idx):
+        if bed_complete(running_pack_idx, x_max):
             break
         else: continue
     
     # Bed packing does not always match x_max. Adjust if off
     bed_max = int(math.ceil(bed_particles[running_id-1][1] 
                             + bed_particles[running_id-1][3]))
-    if parameters.x_max != bed_max:
+    if x_max != bed_max:
         msg = (
             f'Bed packing could not match x_max parameter... Updating '
             f'x_max to match packing extent: {bed_max}....'
         )
         logging.warning(msg)
         x_max = bed_max
-    else: x_max = parameters.x_max
+    else: x_max = x_max
     # strip zero element particles tuples from the original array
     valid = ((bed_particles==0).all(axis=(1)))
     bed_particles = bed_particles[~valid]
 
     return bed_particles, x_max
 
-def bed_complete(pack_idx):
+def bed_complete(pack_idx, x_max):
     """Check to see if bed is complete based on model params.""" 
     # similarly, if np.count_nonzero(bed_space) == x_max
-    if pack_idx >= parameters.x_max:
+    if pack_idx >= x_max:
         return 1
     else: return 0
     
@@ -266,7 +250,7 @@ def determine_num_particles(pack_frac, num_vertices):
 
 @Timer("place_particle", text="place_particle call: {:.5f} seconds", logger=None)
 # Second answer: https://math.stackexchange.com/questions/2293201/
-def place_particle(particle, particle_diam, model_particles, bed_particles, h):
+def place_particle(particle, model_particles, bed_particles, h):
     """ Calculate new X and Y of particle based on location in stream.
     
     
@@ -411,8 +395,8 @@ def find_supports(particle, model_particles, bed_particles, already_placed):
        
     # Define location where left and right supporting particles could sit.
     # Note: This limits the model to only using same-sized grains.
-    left_center = particle[0] - (parameters.set_radius)
-    right_center = particle[0] + (parameters.set_radius)
+    left_center = particle[0] - (particle[1] / 2)
+    right_center = particle[0] + (particle[1] / 2)
      
        
     l_candidates = all_particles[all_particles[:,0] == left_center]
@@ -443,7 +427,7 @@ def find_supports(particle, model_particles, bed_particles, already_placed):
     return left_support[0], right_support[0]
 
 @Timer("create_set_modelp", text="set_model_particles call: {:.5f} seconds", logger=None)
-def set_model_particles(bed_particles, h):
+def set_model_particles(bed_particles, available_vertices, set_diam, pack_fraction, h):
     """ Create model particle list and set in model stream.
     
     
@@ -469,12 +453,10 @@ def set_model_particles(bed_particles, h):
     bed_vertices -- list of vertices based on bed particles
     bed_particles -- bed particle list
     
-     """
-    
-    available_vertices = compute_available_vertices([], bed_particles, just_bed=True)    
+     """ 
     num_placement_loc = np.size(available_vertices)
     # determine the number of model particles that should be introduced into the stream bed
-    num_particles = determine_num_particles(parameters.Pack, num_placement_loc)
+    num_particles = determine_num_particles(pack_fraction, num_placement_loc)
     # create an empty n-6 array to store model particle information
     model_particles = np.zeros([num_particles, 6], dtype='float')
   
@@ -488,14 +470,13 @@ def set_model_particles(bed_particles, h):
 
         # intialize the particle information
         model_particles[particle][0] = vertex
-        model_particles[particle][1] = parameters.set_diam
+        model_particles[particle][1] = set_diam
         
         model_particles[particle][3] = particle # id number for each particle
         model_particles[particle][4] = 1 # each particle begins as active
         
         # place particle at the chosen vertex
         p_x, p_y = place_particle(model_particles[particle], 
-                                  parameters.set_diam, 
                                   model_particles, 
                                   bed_particles, 
                                   h)
@@ -511,7 +492,7 @@ def set_model_particles(bed_particles, h):
     return model_particles
 
 @Timer("compute_available_vertices", text="compute_avail_vertices call: {:.5f} seconds", logger=None)
-def compute_available_vertices(model_particles, bed_particles, 
+def compute_available_vertices(model_particles, bed_particles, set_diam, level_limit,
                                lifted_particles=None, just_bed=False):
     """ Compute the avaliable vertices in the model 
     stream.
@@ -556,9 +537,8 @@ def compute_available_vertices(model_particles, bed_particles,
     else:    
         all_particles = np.concatenate((model_particles, 
                                         bed_particles), axis=0)
-    
-    elevations = np.unique(all_particles[:,2])
-    elevations[::-1].sort()
+    # Get unique model particle elevations in stream (descending)
+    elevations = elevation_list(all_particles[:,2])
     
     for idx, elevation in enumerate(elevations):
         tmp_particles = all_particles[all_particles[:,2] == elevation]
@@ -566,12 +546,12 @@ def compute_available_vertices(model_particles, bed_particles,
         for particle in tmp_particles:    
             nulled_vertices.append(particle[0])
         
-        right_vertices = tmp_particles[:,0] + parameters.set_radius
-        left_vertices = tmp_particles[:,0] - parameters.set_radius
+        right_vertices = tmp_particles[:,0] + (set_diam / 2)
+        left_vertices = tmp_particles[:,0] - (set_diam / 2)
         tmp_shared_vertices = np.intersect1d(left_vertices, right_vertices)
         
         # Enforce level limit by nulling any vertex above limit:
-        if len(elevations)==parameters.level_limit+1 and idx==0: 
+        if len(elevations) == level_limit+1 and idx==0: 
             for vertex in tmp_shared_vertices:
                 nulled_vertices.append(vertex)
         
@@ -585,10 +565,18 @@ def compute_available_vertices(model_particles, bed_particles,
     available_vertices = np.array(avail_vertices)
     
     return available_vertices
+
+
+def elevation_list(elevations, desc=True):
+    """ Return a sorted list of unique elevation values """
+    ue = np.unique(elevations)
+    if desc:
+           ue = ue[::-1]
+    return ue
     
 #TODO: Parametrize uniqueness method. User should be able to play 
 # with whether unique entrainments are forced pre- or post-event
-def run_entrainments(model_particles, bed_particles, event_particle_ids, normal_flag, h):
+def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_vertices, unverified_e, h):
     """ This function mimics an 'entrainment event' through
     calls to the entrainment-related functions. 
     
@@ -606,10 +594,7 @@ def run_entrainments(model_particles, bed_particles, event_particle_ids, normal_
         particle_flux -- number (int) of particles which 
                             passed the downstream boundary
     """
-    avail_vertices = compute_available_vertices(model_particles, bed_particles, 
-                                                lifted_particles=event_particle_ids)
-    unverified_e = fathel_furbish_hops(event_particle_ids, model_particles, 
-                                       normal=normal_flag)
+    
     e_dict, p_flux_1, model_particles, avail_vertices = move_model_particles(
                                                 unverified_e, 
                                                 model_particles, 
@@ -639,7 +624,7 @@ def run_entrainments(model_particles, bed_particles, event_particle_ids, normal_
     return model_particles, particle_flux
   
         
-def fathel_furbish_hops(event_particle_ids, model_particles, normal=False):
+def fathel_furbish_hops(event_particle_ids, model_particles, mu, sigma, normal=False):
     """ Given a list of (event) paritcles, this function will 
     add a 'hop' distance to all particles' current x-locations. 
     This value represents the desired hop location of the given 
@@ -659,9 +644,9 @@ def fathel_furbish_hops(event_particle_ids, model_particles, normal=False):
     """
     event_particles = model_particles[event_particle_ids]
     if normal:
-        s = np.random.normal(parameters.mu, parameters.sigma, len(event_particle_ids))
+        s = np.random.normal(mu, sigma, len(event_particle_ids))
     else:
-        s = np.random.lognormal(parameters.mu, parameters.sigma, len(event_particle_ids))
+        s = np.random.lognormal(mu, sigma, len(event_particle_ids))
     s_hop = np.round(s, 1)
     s_hop = list(s_hop)
     event_particles[:,0] = event_particles[:,0] + s_hop
@@ -709,8 +694,7 @@ def move_model_particles(event_particles, model_particles, bed_particles, availa
             )
             logging.info(hop_msg)
             particle[0] = verified_hop
-            placed_x, placed_y = place_particle(particle, parameters.set_diam, 
-                                          model_particles, bed_particles, h)
+            placed_x, placed_y = place_particle(particle, model_particles, bed_particles, h)
             particle[0] = placed_x
             particle[2] = placed_y
             

@@ -137,5 +137,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# Ignore the plots directory and any contents
-plots/
+
+# Ignore run results
+.model/logs/*.log
+.plots/*.json

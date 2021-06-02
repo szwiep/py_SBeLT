@@ -4,11 +4,14 @@ from codetiming import Timer
 import yaml
 import json
 import logging
-import time
+import logging.config
+from datetime import datetime
+from uuid import uuid4
 
-import logic as ml 
-import plotting as plot
+import logic
 import util
+import sys
+import os
 
 ITERATION_HEADER = ("""\n
     --------------------- Iteration {iteration} ---------------------
@@ -19,18 +22,15 @@ ITERATION_TEMPLATE = ("""\n
     Particles to be entrained: {particles}\n                          
                       """)
 
-def main():
-    plots_flag, hp_flag = util.parse_arguments()
-
+def main(run_id):
+    
     #############################################################################
     # Set up logging
     #############################################################################
 
-    import logging
-    import logging.config
-
     with open('logs/conf.yaml', 'r') as f:
         config = yaml.safe_load(f.read())
+        config['handlers']['file']['filename'] = f'logs/{run_id}.log'
         logging.config.dictConfig(config)
     
     #############################################################################
@@ -39,83 +39,113 @@ def main():
 
     with open('param.yaml', 'r') as p:
         parameters = yaml.safe_load(p.read())
+    # TODO: update validation to take dictionary of the parameters
     # util.validate_parameters(parameters)   
 
     #############################################################################
 
-    # parameters = (
-    #     f"Pack = {pm.Pack}, x_max = {pm.x_max}, set_diam = {pm.set_diam},"
-    #     f"num_subregions = {pm.num_subregions}, level_limit = {pm.level_limit},"
-    #     f"n_iterations = {pm.n_iterations}, lambda_1 = {pm.lambda_1},"
-    #     f"normal_dist = {pm.normal_dist}, mu = {pm.mu}, sigma = {pm.sigma} \n" 
-    # )  
-
-    #############################################################################
-
-    logging.info('Beginning model run...')
     # Pre-compute d and h values for particle elevation placement
+    # see d and h here: https://math.stackexchange.com/questions/2293201/
     d = np.divide(np.multiply(np.divide(parameters['set_diam'], 2), 
                                         parameters['set_diam']), 
                                         parameters['set_diam'])
     h = np.sqrt(np.square(parameters['set_diam']) - np.square(d))
 
-    bed_particles, bed_length = ml.build_streambed()   
-    model_particles = ml.set_model_particles(bed_particles, h)
 
-    subregions = ml.define_subregions(bed_length, parameters['num_subregions'])
+    print('Building Bed and  Model particle arrays...')
+    # Create bed particle array and compute corresponding available vertices
+    bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])   
+    available_vertices = logic.compute_available_vertices([], bed_particles, parameters['set_diam'],
+                                                        parameters['level_limit'], just_bed=True)    
+    # Create model particle array and set on top of bed particles
+    model_particles = logic.set_model_particles(bed_particles, available_vertices, parameters['set_diam'], 
+                                                        parameters['pack_density'],  h)
+    # Define stream's subregions
+    subregions = logic.define_subregions(bed_length, parameters['num_subregions'])
 
     particle_flux_list = []
     plot_snapshot = {}
     plot_snapshot['param'] = parameters 
+    plot_snapshot['bed'] = np.ndarray.tolist(bed_particles)
     snapshot_counter = 0
+
+    print('Bed and Model particles built. Beginning entrainments...')
     for iteration in tqdm(range(parameters['n_iterations'])):
         snapshot_counter += 1
-        # print(ITERATION_HEADER.format(iteration=iteration))  
-        # Calculate number of entrainment events per-subregion for iteration
+        # Calculate number of entrainment events iteration
         e_events = np.random.poisson(parameters['lambda_1'], None)
-        # Retrieve the Event Particles
-        event_particles = ml.get_event_particles(e_events, subregions,
-                                                model_particles, parameters['level_limit'], hp_flag)
-        # print(ITERATION_TEMPLATE.format(
-        #                             e_events=len(event_particles), 
-        #                             particles=event_particles))     
-        
-        model_particles, particle_flux = ml.run_entrainments(model_particles, 
-                                                            bed_particles, 
-                                                            event_particles, 
-                                                            parameters['normal_dist'], 
-                                                            h)
+        # Randomly select n (= e_events) particles, per-subregion, to be entrained
+        event_particle_ids = logic.get_event_particles(e_events, subregions,
+                                                    model_particles, 
+                                                    parameters['level_limit'], 
+                                                    parameters['height_dependancy'])
+        # Determine hop distances of all event particles
+        unverified_e = logic.fathel_furbish_hops(event_particle_ids, model_particles, parameters['mu'],
+                                                parameters['sigma'], normal=parameters['normal_dist'])
+        # Compute available vertices based on current model_particles state
+        avail_vertices = logic.compute_available_vertices(model_particles, 
+                                                    bed_particles,
+                                                    parameters['set_diam'],
+                                                    parameters['level_limit'],
+                                                    just_bed=False, 
+                                                    lifted_particles=event_particle_ids)
+        # Run entrainment event                    
+        model_particles, particle_flux = logic.run_entrainments(model_particles, 
+                                                                bed_particles, 
+                                                                event_particle_ids,
+                                                                avail_vertices, 
+                                                                unverified_e, 
+                                                                h)
+        # Record number of particles to cross downstream boundary per-iteration                                                        
         particle_flux_list.append(particle_flux)
 
-        
-        available_vertices = ml.compute_available_vertices(model_particles, 
-                                                        bed_particles)
+        # Record snapshot of relevant iteration information 
+        # Currently recording iteration's: 
+        #               1) model_particles array 
+        #               2) available_vertices used for run_entrainments call
+        #               3) event_particle_ids used for run_entrainments call
         if (snapshot_counter == parameters['snapshot_interval']):
-            plot_snapshot[iteration] = [np.ndarray.tolist(bed_particles), 
+            plot_snapshot[iteration] = [ 
                                         np.ndarray.tolist(model_particles), 
-                                        np.ndarray.tolist(available_vertices)]
+                                        np.ndarray.tolist(available_vertices),
+                                        np.ndarray.tolist(event_particle_ids)]
             snapshot_counter = 0
-    logging.info('Model run complete...')
+    
+    # Store final list of flux information
+    # TODO: might restructure to add flux info per-teration like above; plot_snapshot[iteration]
+    plot_snapshot['flux'] = particle_flux_list
+    print('Model run complete...')
 
+    #############################################################################
+    # Time profiling
     #############################################################################
 
     print(Timer.timers) 
 
-    logging.info('Writing iteration information to file...')
-    timestr = time.strftime("%Y%m%d-%H%M%S")
-    jsn = json.dumps(plot_snapshot)
-    f = open("../plots/run-info-" + timestr + ".json", "w")
-    f.write(jsn)
-    f.close()
+    #############################################################################
 
-    logging.info('Plotting flux information...')
-    plot.flux_info(particle_flux_list, to_file=True)
-    logging.info('Model execution complete.')
+    print('Writing iteration snapshots to file...')
+    plot_snapshot_jsn = json.dumps(plot_snapshot)
+
+    print("Estimated size: " + str(sys.getsizeof(plot_snapshot_jsn) / 1024) + "KB")
+
+    outfilename = "../plots/run-info-" + run_id + ".json"
+    with open(outfilename, 'w') as outfile:
+        outfile.write(plot_snapshot_jsn)
+  
+    print("Actual size: " + str(os.path.getsize(outfilename) / 1024) + "KB")
+
+    # print('Plotting flux information...')
+    # plot.flux_info(particle_flux_list, parameters['n_iterations'], to_file=True)
+    print('Model execution complete.')
 
     #############################################################################
 
 if __name__ == '__main__':
-    main()
+
+    run_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
+
+    main(run_id)
 
     
     

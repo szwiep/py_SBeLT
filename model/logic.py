@@ -71,10 +71,10 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
         subregion_event_ids = []  
         if height_dependant:
             # TODO: better approach to identify the level/elevation relationship. This is messy 
-            levels = elevation_list(active_particles[:,2], desc=False)
+            levels = elevation_list(subregion_particles[:,2], desc=False)
 
             tip_particles = []
-            if len(levels) == level_limit:
+            if len(levels) == level_limit: # or anything greater #TODO: THIS IS BAD -- active particles != stream elevations
                 tip_particles = active_particles[active_particles[:,2] == levels[level_limit-1]]
             for particle in tip_particles:
                 subregion_event_ids.append(particle[3])
@@ -107,6 +107,7 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
 
         event_particles = event_particles + subregion_event_ids
     event_particles = np.array(event_particles, dtype=np.intp)
+    # print(event_particles)
 
     return event_particles
 

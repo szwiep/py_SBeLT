@@ -79,19 +79,17 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
             for particle in tip_particles:
                 subregion_event_ids.append(particle[3])
                 active_particles = active_particles[active_particles[:,2] != particle[2]]
-                e_events = e_events - 1
-        if e_events < 1:
-            continue
+                # e_events = e_events - 1
+        # if e_events > 0:
+        if e_events > len(active_particles):
+            random_sample = random.sample(range(len(active_particles)), 
+                                        len(active_particles))
         else:
-            if e_events > len(active_particles):
-                random_sample = random.sample(range(len(active_particles)), 
-                                            len(active_particles))
-            else:
-                random_sample = random.sample(range(len(active_particles)), 
-                                            e_events)
-            for index in random_sample:
-                #NOTE: this only works because index=id in the model_particle array
-                subregion_event_ids.append(int(active_particles[index][3])  )
+            random_sample = random.sample(range(len(active_particles)), 
+                                        e_events)
+        for index in random_sample:
+            #NOTE: this only works because index=id in the model_particle array
+            subregion_event_ids.append(int(active_particles[index][3])  )
         
         ghost_particles = np.where(model_particles[:,0] == -1)[0]
         for index in ghost_particles:

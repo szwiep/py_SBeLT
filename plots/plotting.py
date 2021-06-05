@@ -58,15 +58,15 @@ def stream(iteration, bed_particles, model_particles, x_lim, y_lim,
 
     filename = f'iter{iteration}.png'
     plots_path = fp_out + filename
-    plt.savefig(plots_path)
+    plt.savefig(plots_path, format='png',)
         
     return
 
-def flux_info(particle_flux_list, iterations, to_file):
+def flux_info(particle_flux_list, iterations, fp_out):
     fig = plt.figure(10)
     ax = fig.add_subplot(1, 1, 1)
     bins = np.arange(-0.5, 11.5, 1) # fixed bin size
-    plt.title('Histogram of Particle Flux, I = %i iterations' % n_iterations, fontsize=10, style='italic')
+    plt.title('Histogram of Particle Flux, I = %i iterations' % iterations, fontsize=10, style='italic')
     plt.xlabel('Downstream Flux (particle count)')
     plt.ylabel('Fraction')
     ax.set_xlim((-1, max(bins)+1))
@@ -87,10 +87,9 @@ def flux_info(particle_flux_list, iterations, to_file):
     plt.plot(bin_middles, poisson(bin_middles, *parameters), color='black', marker='o', fillstyle = 'none', markersize=4, lw=0, markeredgecolor='black', markeredgewidth=1, label='Poisson PMF Fit')
 
     plt.legend(loc='upper right',frameon=0)
-    if to_file:
-        fig.savefig('../plots/FluxDownstreamBoundaryHist.png', format='png', dpi=600)
-    else: 
-        plt.show()
+    filename = 'FluxDownstreamBoundaryHist.png'
+    fi_path = fp_out + filename
+    fig.savefig(fi_path, format='png', dpi=600)
 
     #####
     Flux_CS = np.cumsum(particle_flux_list)
@@ -109,10 +108,9 @@ def flux_info(particle_flux_list, iterations, to_file):
     ax2.tick_params('y', colors='black')
     
     fig.tight_layout()
-    if to_file:
-        fig.savefig('../plots/FluxDownstreamBoundary_2YAx.png', format='png', dpi=600)
-    else:
-        plt.show()
+    filenameCS = 'FluxDownstreamBoundary_2YAx.png'
+    fiCS_path = fp_out + filenameCS
+    fig.savefig(fiCS_path, format='png', dpi=600)
         
 def flux_info2(particle_flux_list, particle_age_list, to_file):
     plt.clf()

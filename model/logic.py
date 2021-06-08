@@ -38,10 +38,10 @@ class Subregion():
     def getName(self):
         return self.name
         
-#%% Bed-related functions
+#%% Bed-related functionss
 # TODO: consider if Bed (and Model) functions should be refactored into classes
 
-@Timer("Get_event_particles", text="get_event_particles call: {:.3f} seconds", logger=None)
+# @Timer("Get_event_particles", text="get_event_particles call: {:.3f} seconds", logger=None)
 def get_event_particles(e_events, subregions, model_particles, level_limit, height_dependant=False):
     """ Find and return list of particles to be entrained
 
@@ -109,7 +109,7 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
 
     return event_particles
 
-@Timer("define_subregions", text="define_subregions call: {:.3f} seconds", logger=None)
+# @Timer("define_subregions", text="define_subregions call: {:.3f} seconds", logger=None)
 def define_subregions(bed_length, num_subregions):
     """ Define subregion list for model stream.
     
@@ -177,7 +177,7 @@ def add_bed_particle(diam, bed_particles, particle_id, pack_idx):
  
     return particle_id, pack_idx
 
-@Timer("build_streambed", text="build_streambed call: {:.5f} seconds", logger=None)
+# @Timer("build_streambed", text="build_streambed call: {:.5f} seconds", logger=None)
 def build_streambed(x_max, set_diam):
     """ Build the bed particle list.
     
@@ -247,7 +247,7 @@ def determine_num_particles(pack_frac, num_vertices):
     
     return num_particles
 
-@Timer("place_particle", text="place_particle call: {:.5f} seconds", logger=None)
+# @Timer("place_particle", text="place_particle call: {:.5f} seconds", logger=None)
 # Second answer: https://math.stackexchange.com/questions/2293201/
 def place_particle(particle, model_particles, bed_particles, h):
     """ Calculate new X and Y of particle based on location in stream.
@@ -299,7 +299,7 @@ def place_particle(particle, model_particles, bed_particles, h):
     
     return round(particle[0], 2), round(np.add(h, left_support[2]), 2)
 
-@Timer("update_states", text="update_particle_states call: {:.5f} seconds", logger=None)
+# @Timer("update_states", text="update_particle_states call: {:.5f} seconds", logger=None)
 def update_particle_states(model_particles, bed_particles):
     """ Set each model particle's current 'active' state.
     
@@ -349,7 +349,7 @@ def update_particle_states(model_particles, bed_particles):
     
     return model_particles
         
-@Timer("find_supports", text="find_supports call: {:.5f} seconds", logger=None)
+@Timer("# find_supports", text="find_supports call: {:.5f} seconds", logger=None)
 def find_supports(particle, model_particles, bed_particles, already_placed):
     """ Find the 2 supporting particles for a given particle.
     
@@ -425,7 +425,7 @@ def find_supports(particle, model_particles, bed_particles, already_placed):
 
     return left_support[0], right_support[0]
 
-@Timer("create_set_modelp", text="set_model_particles call: {:.5f} seconds", logger=None)
+# @Timer("create_set_modelp", text="set_model_particles call: {:.5f} seconds", logger=None)
 def set_model_particles(bed_particles, available_vertices, set_diam, pack_fraction, h):
     """ Create model particle list and set in model stream.
     
@@ -490,7 +490,7 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
     
     return model_particles
 
-@Timer("compute_available_vertices", text="compute_avail_vertices call: {:.5f} seconds", logger=None)
+# @Timer("compute_available_vertices", text="compute_avail_vertices call: {:.5f} seconds", logger=None)
 def compute_available_vertices(model_particles, bed_particles, set_diam, level_limit,
                                lifted_particles=None, just_bed=False):
     """ Compute the avaliable vertices in the model 
@@ -726,7 +726,7 @@ def find_closest_vertex(desired_hop, available_vertices):
 
 
 # TODO: confirm the naming of function
-@Timer("check_unique_entrainments", text="check_unique_entrainments call: {:.5f} seconds", logger=None)      
+# @Timer("check_unique_entrainments", text="check_unique_entrainments call: {:.5f} seconds", logger=None)      
 def check_unique_entrainments(entrainment_dict):
     """ Check that all entrainments in the dictionary are unqiue. 
     

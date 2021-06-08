@@ -23,7 +23,7 @@ ITERATION_TEMPLATE = ("""\n
     Particles to be entrained: {particles}\n                          
                       """)
 
-def main(run_id):
+def main(run_id, pid):
     
     #############################################################################
     # Set up logging
@@ -53,7 +53,7 @@ def main(run_id):
     h = np.sqrt(np.square(parameters['set_diam']) - np.square(d))
 
 
-    print('Building Bed and  Model particle arrays...')
+    print(f'[{pid}] Building Bed and  Model particle arrays...')
     # Create bed particle array and compute corresponding available vertices
     bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])   
     available_vertices = logic.compute_available_vertices([], bed_particles, parameters['set_diam'],
@@ -68,13 +68,14 @@ def main(run_id):
     particle_age_list = []
     particle_range_list = []
     snapshot_counter = 0
+    milestones = [15, 30, 45, 60, 75, 90, 100]
 
-    snapshot_shelve = shelve.open(f"../plots/run-info-{run_id}.shelf")
+    snapshot_shelve = shelve.open(f"../plots/run-info-{run_id}")
     snapshot_shelve['param'] = parameters 
     snapshot_shelve['bed'] = np.ndarray.tolist(bed_particles)
 
-    print('Bed and Model particles built. Beginning entrainments...')
-    for iteration in tqdm(range(parameters['n_iterations'])):
+    print(f'[{pid}] Bed and Model particles built. Beginning entrainments...')
+    for iteration in range(parameters['n_iterations']):
         snapshot_counter += 1
         # Calculate number of entrainment events iteration
         e_events = np.random.poisson(parameters['lambda_1'], None)
@@ -121,6 +122,11 @@ def main(run_id):
                                         np.ndarray.tolist(available_vertices),
                                         np.ndarray.tolist(event_particle_ids)]
             snapshot_counter = 0
+        percentage_complete = (100.0 * (iteration+1) / parameters['n_iterations'])
+        while len(milestones) > 0 and percentage_complete >= milestones[0]:
+            print(f'[{pid}] {milestones[0]}% complete')
+            #remove that milestone from the list
+            milestones = milestones[1:]
     # Store final list of flux information
     # TODO: might restructure to add flux info per-teration like above; plot_snapshot[iteration]
     snapshot_shelve['flux'] = particle_flux_list
@@ -128,13 +134,13 @@ def main(run_id):
     snapshot_shelve['age_range'] = particle_range_list
     # TODO: close needs to go in a finally
     snapshot_shelve.close()
-    print('Model run complete...')
+    print(f'[{pid}] Model run complete...')
 
     #############################################################################
     # Time profiling
     #############################################################################
 
-    print(Timer.timers) 
+    # print(Timer.timers) 
 
     #############################################################################
 
@@ -151,17 +157,18 @@ def main(run_id):
 
     # print('Plotting flux information...')
     # plot.flux_info(particle_flux_list, parameters['n_iterations'], to_file=True)
-    print('Model execution complete.')
+    print(f'[{pid}] Model execution complete.')
 
     #############################################################################
 
 if __name__ == '__main__':
 
-    print(f'Process {os.getpid()} running 1 instance of BeRCM...')
+    pid = os.getpid()
+    print(f'Process [{pid}] running 1 instance of BeRCM...')
     run_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
-    print(f'Run\'s UUID: {run_id}')
+    print(f'[{pid}] Using UUID: {run_id}')
     # TODO: make sure UUID/filename has not already been used
-    main(run_id)
+    main(run_id, pid)
 
     
     

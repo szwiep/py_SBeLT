@@ -157,8 +157,10 @@ def main(run_id):
 
 if __name__ == '__main__':
 
+    print(f'Process {os.getpid()} running 1 instance of BeRCM...')
     run_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
-
+    print(f'Run\'s UUID: {run_id}')
+    # TODO: make sure UUID/filename has not already been used
     main(run_id)
 
     

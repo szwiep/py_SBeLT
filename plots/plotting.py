@@ -112,7 +112,7 @@ def flux_info(particle_flux_list, iterations, fp_out):
     fiCS_path = fp_out + filenameCS
     fig.savefig(fiCS_path, format='png', dpi=600)
         
-def flux_info2(particle_flux_list, particle_age_list, to_file):
+def flux_info2(particle_flux_list, particle_age_list, n_iterations, fp_out):
     plt.clf()
     fig = plt.figure(20)
     ax3 = fig.add_subplot(1, 1, 1)
@@ -132,12 +132,12 @@ def flux_info2(particle_flux_list, particle_age_list, to_file):
     ax4.tick_params('y', colors='black')
     
     fig.tight_layout()
-    if to_file:
-        fig.savefig('../plots/FluxDownstreamBoundary_Age.png', format='png', dpi=600)
-    else:
-        plt.show()
+    filename = 'FluxDownstreamBoundary_Age.png'
+    fi_path = fp_out + filename
+    fig.savefig(fi_path, format='png', dpi=600)
+
         
-def flux_info3(particle_flux_list, particle_age_list,particle_rage_list, to_file):
+def flux_info3(particle_flux_list, particle_age_list,particle_rage_list, n_iterations, fp_out):
     plt.clf()
     fig = plt.figure(10)
     #####
@@ -157,7 +157,6 @@ def flux_info3(particle_flux_list, particle_age_list,particle_rage_list, to_file
     plt.colorbar(orientation='horizontal',fraction=0.046, pad=0.2,label='Particle Age Range (max age - min age)')
     
     fig.tight_layout()
-    if to_file:
-        fig.savefig('../plots/FluxDownstreamBoundary_Rage.png', format='png', dpi=600)
-    else:
-        plt.show()
+    filename = 'FluxDownstreamBoundary_Rage.png'
+    fi_path = fp_out + filename
+    fig.savefig(fi_path, format='png', dpi=600)

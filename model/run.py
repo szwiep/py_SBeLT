@@ -7,6 +7,7 @@ import logging
 import logging.config
 from datetime import datetime
 from uuid import uuid4
+import shelve
 
 import logic
 import util
@@ -64,10 +65,13 @@ def main(run_id):
     subregions = logic.define_subregions(bed_length, parameters['num_subregions'])
 
     particle_flux_list = []
-    plot_snapshot = {}
-    plot_snapshot['param'] = parameters 
-    plot_snapshot['bed'] = np.ndarray.tolist(bed_particles)
+    particle_age_list = []
+    particle_range_list = []
     snapshot_counter = 0
+
+    snapshot_shelve = shelve.open(f"../plots/run-info-{run_id}.shelf")
+    snapshot_shelve['param'] = parameters 
+    snapshot_shelve['bed'] = np.ndarray.tolist(bed_particles)
 
     print('Bed and Model particles built. Beginning entrainments...')
     for iteration in tqdm(range(parameters['n_iterations'])):
@@ -99,21 +103,31 @@ def main(run_id):
         # Record number of particles to cross downstream boundary per-iteration                                                        
         particle_flux_list.append(particle_flux)
 
+        # Compute age range and average age, store in lists
+        age_range = np.max(model_particles[:,5]) - np.min(model_particles[:,5])
+        particle_range_list.append(age_range)
+
+        avg_age = np.average(model_particles[:,5]) 
+        particle_age_list.append(avg_age)
+
         # Record snapshot of relevant iteration information 
         # Currently recording iteration's: 
         #               1) model_particles array 
         #               2) available_vertices used for run_entrainments call
         #               3) event_particle_ids used for run_entrainments call
         if (snapshot_counter == parameters['snapshot_interval']):
-            plot_snapshot[iteration] = [ 
+            snapshot_shelve[str(iteration)] = [ 
                                         np.ndarray.tolist(model_particles), 
                                         np.ndarray.tolist(available_vertices),
                                         np.ndarray.tolist(event_particle_ids)]
             snapshot_counter = 0
-    
     # Store final list of flux information
     # TODO: might restructure to add flux info per-teration like above; plot_snapshot[iteration]
-    plot_snapshot['flux'] = particle_flux_list
+    snapshot_shelve['flux'] = particle_flux_list
+    snapshot_shelve['avg_age'] = particle_age_list
+    snapshot_shelve['age_range'] = particle_range_list
+    # TODO: close needs to go in a finally
+    snapshot_shelve.close()
     print('Model run complete...')
 
     #############################################################################
@@ -124,16 +138,16 @@ def main(run_id):
 
     #############################################################################
 
-    print('Writing iteration snapshots to file...')
-    plot_snapshot_jsn = json.dumps(plot_snapshot)
+    # print('Writing iteration snapshots to file...')
+    # plot_snapshot_jsn = json.dumps(plot_snapshot)
 
-    print("Estimated size: " + str(sys.getsizeof(plot_snapshot_jsn) / 1024) + "KB")
+    # print("Estimated size: " + str(sys.getsizeof(plot_snapshot_jsn) / 1024) + "KB")
 
-    outfilename = "../plots/run-info-" + run_id + ".json"
-    with open(outfilename, 'w') as outfile:
-        outfile.write(plot_snapshot_jsn)
+    # outfilename = "../plots/run-info-" + run_id + ".json"
+    # with open(outfilename, 'w') as outfile:
+    #     outfile.write(plot_snapshot_jsn)
   
-    print("Actual size: " + str(os.path.getsize(outfilename) / 1024) + "KB")
+    # print("Actual size: " + str(os.path.getsize(outfilename) / 1024) + "KB")
 
     # print('Plotting flux information...')
     # plot.flux_info(particle_flux_list, parameters['n_iterations'], to_file=True)

@@ -1,24 +1,24 @@
 import numpy as np
-import json 
+import shelve
 
 import plotting
 
 
 # Path to run-info file
-fp_in = 'run-info-202106-0417-1051-db2284e0-493b-471a-b4c3-204a40598853.json'
+fp_in = 'run-info-202106-0722-2950-b6e9764f-67fa-4ddf-9e1f-4d370202553d.shelf'
 # Path to output directory
-fp_out = './hd_test2/'
+fp_out = './shelf_test/'
 # Range to plot
-iteration_range = [99000, 99010] 
+iteration_range = [900, 920] 
 # Plot height
 y_limit = 10
 
-with open(fp_in, 'r') as fp:
-    run_info = json.load(fp)
-
-for iter in range(iteration_range[0], iteration_range[1]+1):
-    plotting.stream(iter, np.array(run_info["bed"]), np.array(run_info[str(iter)][0]), 
-                                run_info["param"]["x_max"], y_limit, np.array(run_info[str(iter)][1]), fp_out)
-
-
-plotting.flux_info(np.array(run_info["flux"]), run_info["param"]["n_iterations"], fp_out)
+with shelve.open(fp_in, 'r') as shelf:
+    for iter in range(iteration_range[0], iteration_range[1]+1):
+        plotting.stream(iter, np.array(shelf["bed"]), np.array(shelf[str(iter)][0]), 
+                        shelf["param"]["x_max"], y_limit, np.array(shelf[str(iter)][1]), fp_out)
+    plotting.flux_info(np.array(shelf["flux"]), shelf["param"]["n_iterations"], fp_out)
+    plotting.flux_info2(np.array(shelf["flux"]), np.array(shelf["avg_age"]), shelf["param"]["n_iterations"], fp_out)
+    plotting.flux_info3(np.array(shelf["flux"]), np.array(shelf["avg_age"]), shelf["param"]["n_iterations"],  
+                        np.array(shelf["age_range"]), fp_out)
+    print(len(shelf["avg_age"]), len(shelf["age_range"]))

@@ -140,7 +140,8 @@ cython_debug/
 
 # Ignore run results
 .model/logs/*.log
-.plots/*.dir
-.plots/*.bak
-.plots/*.dat
+plots/*.dir
+plots/*.bak
+plots/*.dat
+plots/*/
 

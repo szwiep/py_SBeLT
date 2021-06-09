@@ -141,7 +141,7 @@ def main(run_id, pid):
             print(f'[{pid}] Writing chunk of dictionary to shelf...')
             snapshot_shelve.update(snapshot_dict)
             snapshot_dict.clear()
-            print(f'[{pid}] Writing of chunk complete. Continuing with entrainments...')
+            print(f'[{pid}] Finished writing chunk. Continuing with entrainments...')
 
         # Display run progress for users using milestones list
         percentage_complete = (100.0 * (iteration+1) / parameters['n_iterations'])
@@ -158,13 +158,13 @@ def main(run_id, pid):
     # TODO: might restructure to add flux info per-teration like above; plot_snapshot[iteration]
     print(f'[{pid}] Writing dictionary to shelf...')
     snapshot_shelve.update(snapshot_dict)
-    print(f'[{pid}] Writting of dictionary complete...')
+    print(f'[{pid}] Finished writing dictionary.')
     
     print(f'[{pid}] Writting flux and age information to shelf...')
     snapshot_shelve['flux'] = particle_flux_list
     snapshot_shelve['avg_age'] = particle_age_list
     snapshot_shelve['age_range'] = particle_range_list
-    print(f'[{pid}] Writting of flux and age information complete...')
+    print(f'[{pid}] Finished writing flux and age information.')
 
     # TODO: close needs to go in a finally
     snapshot_shelve.close()

@@ -199,7 +199,7 @@ def build_streambed(x_max, set_diam):
     """
 
     max_particles = int(math.ceil( x_max / set_diam ))
-    bed_particles = np.zeros([max_particles, 6],dtype=float)
+    bed_particles = np.zeros([max_particles, 7],dtype=float)
     
     running_id = 0
     running_pack_idx = 0
@@ -460,7 +460,7 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
     # determine the number of model particles that should be introduced into the stream bed
     num_particles = determine_num_particles(pack_fraction, num_placement_loc)
     # create an empty n-6 array to store model particle information
-    model_particles = np.zeros([num_particles, 6], dtype='float')
+    model_particles = np.zeros([num_particles, 7], dtype='float')
   
     for particle in range(num_particles):  
         

@@ -44,6 +44,8 @@ def main(run_id, pid):
     # util.validate_parameters(parameters)   
 
     #############################################################################
+    #  Create model data and data structures
+    #############################################################################
 
     # Pre-compute d and h values for particle elevation placement
     # see d and h here: https://math.stackexchange.com/questions/2293201/
@@ -64,22 +66,32 @@ def main(run_id, pid):
     # Define stream's subregions
     subregions = logic.define_subregions(bed_length, parameters['num_subregions'])
 
+    #############################################################################
+    #  Create data structures for entrainment iteration information
+    #############################################################################
+
     particle_flux_list = []
     particle_age_list = []
     particle_range_list = []
+    snapshot_dict = {}
     snapshot_counter = 0
-    milestones = [15, 30, 45, 60, 75, 90, 100]
+    milestones = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
     snapshot_shelve = shelve.open(f"../plots/run-info-{run_id}")
+    # Write parameters and bed (All are static values) to shelf
     snapshot_shelve['param'] = parameters 
     snapshot_shelve['bed'] = np.ndarray.tolist(bed_particles)
+
+    #############################################################################
+    #  Entrainment iterations
+    #############################################################################
 
     print(f'[{pid}] Bed and Model particles built. Beginning entrainments...')
     for iteration in range(parameters['n_iterations']):
         snapshot_counter += 1
         # Calculate number of entrainment events iteration
         e_events = np.random.poisson(parameters['lambda_1'], None)
-        # Randomly select n (= e_events) particles, per-subregion, to be entrained
+        # Select n (= e_events) particles, per-subregion, to be entrained
         event_particle_ids = logic.get_event_particles(e_events, subregions,
                                                     model_particles, 
                                                     parameters['level_limit'], 
@@ -115,49 +127,48 @@ def main(run_id, pid):
         # Currently recording iteration's: 
         #               1) model_particles array 
         #               2) available_vertices used for run_entrainments call
-        #               3) event_particle_ids used for run_entrainments call
+        #               3) event_particle_ids used for run_entrainments cal
+        # snapshot_interval determines how often snapshots are stored
         if (snapshot_counter == parameters['snapshot_interval']):
-            snapshot_shelve[str(iteration)] = [ 
+            snapshot_dict[str(iteration)] = [ 
                                         np.ndarray.tolist(model_particles), 
                                         np.ndarray.tolist(available_vertices),
                                         np.ndarray.tolist(event_particle_ids)]
             snapshot_counter = 0
+
+        # Incrementally write snapshot dictionary to file to avoid overwhelming memory
+        if(iteration != 0 and iteration % 100000 == 0):
+            print(f'[{pid}] Writing chunk of dictionary to shelf...')
+            snapshot_shelve.update(snapshot_dict)
+            snapshot_dict.clear()
+            print(f'[{pid}] Writing of chunk complete. Continuing with entrainments...')
+
+        # Display run progress for users using milestones list
         percentage_complete = (100.0 * (iteration+1) / parameters['n_iterations'])
         while len(milestones) > 0 and percentage_complete >= milestones[0]:
             print(f'[{pid}] {milestones[0]}% complete')
             #remove that milestone from the list
             milestones = milestones[1:]
-    # Store final list of flux information
+    
+    #############################################################################
+    # Store entrainment iteration information
+    #############################################################################
+
+    # Once all entrainment events complete, store relevant information to shelf
     # TODO: might restructure to add flux info per-teration like above; plot_snapshot[iteration]
+    print(f'[{pid}] Writing dictionary to shelf...')
+    snapshot_shelve.update(snapshot_dict)
+    print(f'[{pid}] Writting of dictionary complete...')
+    
+    print(f'[{pid}] Writting flux and age information to shelf...')
     snapshot_shelve['flux'] = particle_flux_list
     snapshot_shelve['avg_age'] = particle_age_list
     snapshot_shelve['age_range'] = particle_range_list
+    print(f'[{pid}] Writting of flux and age information complete...')
+
     # TODO: close needs to go in a finally
     snapshot_shelve.close()
-    print(f'[{pid}] Model run complete...')
-
-    #############################################################################
-    # Time profiling
-    #############################################################################
-
-    # print(Timer.timers) 
-
-    #############################################################################
-
-    # print('Writing iteration snapshots to file...')
-    # plot_snapshot_jsn = json.dumps(plot_snapshot)
-
-    # print("Estimated size: " + str(sys.getsizeof(plot_snapshot_jsn) / 1024) + "KB")
-
-    # outfilename = "../plots/run-info-" + run_id + ".json"
-    # with open(outfilename, 'w') as outfile:
-    #     outfile.write(plot_snapshot_jsn)
-  
-    # print("Actual size: " + str(os.path.getsize(outfilename) / 1024) + "KB")
-
-    # print('Plotting flux information...')
-    # plot.flux_info(particle_flux_list, parameters['n_iterations'], to_file=True)
-    print(f'[{pid}] Model execution complete.')
+    print(f'[{pid}] Model run complete.')
 
     #############################################################################
 

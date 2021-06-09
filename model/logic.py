@@ -156,6 +156,7 @@ def add_bed_particle(diam, bed_particles, particle_id, pack_idx):
         [3] = pack_idx,
         [4] = active (boolean)
         [5] = age counter
+        [6] = loop age counter
     
     Keyword arguments:
     diam -- diameter of the pa
@@ -167,9 +168,10 @@ def add_bed_particle(diam, bed_particles, particle_id, pack_idx):
     center = pack_idx + (diam/2)
     state = 0
     age = 0
+    loop_age = 0
     elevation = 0
     
-    bed_particles[particle_id] = [center, diam, elevation, pack_idx, state, age]
+    bed_particles[particle_id] = [center, diam, elevation, pack_idx, state, age, loop_age]
   
     # update build parameters
     pack_idx += diam
@@ -446,6 +448,7 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
         [3] = uid,
         [4] = active (boolean)
         [5] = age counter
+        [6] = loop age counter
     
     
     Keyword arguments:
@@ -484,6 +487,8 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
         model_particles[particle][0] = p_x
         model_particles[particle][2] = p_y
         model_particles[particle][5] = 0
+        model_particles[particle][6] = 0
+
 
     # update particle states so that supporting particles are inactive
     model_particles = update_particle_states(model_particles, bed_particles)
@@ -685,6 +690,7 @@ def move_model_particles(event_particles, model_particles, bed_particles, availa
                 f'sending to -1 axis'
             )
             logging.info(exceed_msg) 
+            particle[6] = particle[6] + 1
             particle[0] = verified_hop
         else:
             hop_msg = (

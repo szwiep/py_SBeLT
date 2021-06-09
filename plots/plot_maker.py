@@ -5,11 +5,11 @@ import plotting
 
 
 # Path to run-info file
-fp_in = 'run-info-202106-0722-2950-b6e9764f-67fa-4ddf-9e1f-4d370202553d.shelf'
+fp_in = 'run-info-202106-0813-3348-8007ecf6-0470-4273-8a67-a6dd841beefc.shelf'
 # Path to output directory
 fp_out = './shelf_test/'
 # Range to plot
-iteration_range = [900, 920] 
+iteration_range = [1000, 1020] 
 # Plot height
 y_limit = 10
 

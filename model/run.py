@@ -1,8 +1,5 @@
 import numpy as np
-from tqdm import tqdm
-from codetiming import Timer
 import yaml
-import json
 import logging
 import logging.config
 from datetime import datetime
@@ -23,7 +20,7 @@ ITERATION_TEMPLATE = ("""\n
     Particles to be entrained: {particles}\n                          
                       """)
 
-def main(run_id, pid):
+def main(run_id, pid, param_path):
     
     #############################################################################
     # Set up logging
@@ -37,8 +34,7 @@ def main(run_id, pid):
     #############################################################################
     # Get and validate parameters
     #############################################################################
-
-    with open('param.yaml', 'r') as p:
+    with open(param_path, 'r') as p:
         parameters = yaml.safe_load(p.read())
     # TODO: update validation to take dictionary of the parameters
     # util.validate_parameters(parameters)   
@@ -88,6 +84,7 @@ def main(run_id, pid):
 
     print(f'[{pid}] Bed and Model particles built. Beginning entrainments...')
     for iteration in range(parameters['n_iterations']):
+        logging.info(ITERATION_HEADER.format(iteration=iteration))
         snapshot_counter += 1
         # Calculate number of entrainment events iteration
         e_events = np.random.poisson(parameters['lambda_1'], None)
@@ -176,8 +173,9 @@ if __name__ == '__main__':
 
     pid = os.getpid()
     run_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
+    
     print(f'Process [{pid}] using UUID: {run_id}')
-    main(run_id, pid)
+    main(run_id, pid, sys.argv[1])
 
     
     

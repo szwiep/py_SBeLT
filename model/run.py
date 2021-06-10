@@ -34,6 +34,7 @@ def main(run_id, pid, param_path):
     #############################################################################
     # Get and validate parameters
     #############################################################################
+    
     with open(param_path, 'r') as p:
         parameters = yaml.safe_load(p.read())
     # TODO: update validation to take dictionary of the parameters
@@ -51,7 +52,7 @@ def main(run_id, pid, param_path):
     h = np.sqrt(np.square(parameters['set_diam']) - np.square(d))
 
 
-    print(f'[{pid}] Building Bed and  Model particle arrays...')
+    print(f'[{pid}] Building Bed and Model particle arrays...')
     # Create bed particle array and compute corresponding available vertices
     bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])   
     available_vertices = logic.compute_available_vertices([], bed_particles, parameters['set_diam'],
@@ -63,7 +64,7 @@ def main(run_id, pid, param_path):
     subregions = logic.define_subregions(bed_length, parameters['num_subregions'])
 
     #############################################################################
-    #  Create data structures for entrainment iteration information
+    #  Create entrainment data and data structures
     #############################################################################
 
     particle_flux_list = []
@@ -74,7 +75,8 @@ def main(run_id, pid, param_path):
     milestones = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
     snapshot_shelve = shelve.open(f"../plots/run-info-{run_id}")
-    try: # Write parameters and bed (All are static values) to shelf
+    try: 
+        # Write static data to shelf
         snapshot_shelve['param'] = parameters 
         snapshot_shelve['bed'] = np.ndarray.tolist(bed_particles)
 
@@ -148,11 +150,10 @@ def main(run_id, pid, param_path):
                 milestones = milestones[1:]
         
         #############################################################################
-        # Store entrainment iteration information
+        # Store final entrainment iteration information
         #############################################################################
 
         # Once all entrainment events complete, store relevant information to shelf
-        # TODO: might restructure to add flux info per-teration like above; plot_snapshot[iteration]
         print(f'[{pid}] Writing dictionary to shelf...')
         snapshot_shelve.update(snapshot_dict)
         print(f'[{pid}] Finished writing dictionary.')
@@ -172,8 +173,8 @@ if __name__ == '__main__':
 
     pid = os.getpid()
     run_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
-    
     print(f'Process [{pid}] using UUID: {run_id}')
+    
     main(run_id, pid, sys.argv[1])
 
     

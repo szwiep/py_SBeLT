@@ -17,15 +17,13 @@ def main(n_processes, param_path):
     # From https://stackoverflow.com/questions/19156467/
     procs = []
     print(f'Running {n_processes} processes of BeRCM in parallel...')
-    proc_ids = []
     for i in range(n_processes):
         if sys.platform.startswith('win32'):
             proc = subprocess.Popen([sys.executable, 'run.py', param_path[i]], creationflags=subprocess.CREATE_NEW_CONSOLE)
         else:
             proc = subprocess.Popen([sys.executable, 'run.py', param_path[i]])
         procs.append(proc)
-        proc_ids.append(proc.pid)
-    print(f'Process ID list: {proc_ids}')
+        print(f'Process [{proc.pid}] using {param_path[i]}')
 
     # TODO: add communication/timeout errors with process
     # TODO: add stream for sterror
@@ -39,7 +37,7 @@ def parse_arguments():
     parser.add_argument("pcount", help="Number of processes to run")
     parser.add_argument("param", default='param.yaml', nargs='*', help="Test variable")
     args = parser.parse_args()
-    return args.pcount, args.param
+    return int(args.pcount), args.param
 
 if __name__ == '__main__':
     n_processes, param_path = parse_arguments()

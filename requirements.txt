@@ -1,8 +1,8 @@
 sympy==1.7.1
-scipy==1.6.0
-tqdm==4.56.0
 matplotlib==3.3.4
+scipy==1.6.0
 numpy==1.19.5
+mock==4.0.3
 codetiming==1.3.0
 Pillow==8.2.0
 PyYAML==5.4.1

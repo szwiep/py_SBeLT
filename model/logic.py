@@ -8,7 +8,7 @@ import copy
 
 #TODO: Refactor functions so that they don't reach into the paramters file
 from collections import defaultdict
-from codetiming import Timer
+# from codetiming import Timer
 
 import logging
 
@@ -351,7 +351,7 @@ def update_particle_states(model_particles, bed_particles):
     
     return model_particles
         
-@Timer("# find_supports", text="find_supports call: {:.5f} seconds", logger=None)
+# @Timer("# find_supports", text="find_supports call: {:.5f} seconds", logger=None)
 def find_supports(particle, model_particles, bed_particles, already_placed):
     """ Find the 2 supporting particles for a given particle.
     

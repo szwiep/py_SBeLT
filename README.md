@@ -18,14 +18,14 @@ Installing Python requirements:
 
 ### Parameters
 
-The model comes with a default parameters file, `parameters.yaml`, which users can edit. The file is located in the **`model`** directory:
+The model comes with a default parameters file, `param.yaml`, which users can edit. The file is located in the **`model`** directory:
 
 ```
 project
 │   README.md
 │   requirements.txt
 └───model
-│   │   parameters.py
+│   │   param.yaml
 │   │   run.py
 │   │   ...
 ```
@@ -60,7 +60,7 @@ BeRCM
     ```bash
     python3 run.py PARAM_FILE
     ```
-    Where `PARAM_FILE` is the path to the desired parameters file. To use the default parameters file set `PARAM_FILE=`**`parameters.yaml`**. 
+    Where `PARAM_FILE` is the path to the desired parameters file. To use the default parameters file set `PARAM_FILE=`**`param.yaml`**. 
 
     b. Run _multiple_ instances of the model:
 

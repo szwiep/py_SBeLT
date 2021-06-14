@@ -46,7 +46,7 @@ BeRCM
 │   │   ...
 ```
 
-### Running from command line
+### Running from Command Line
 
 1. Set current directory to **`BeRCM/model`**:
 
@@ -128,7 +128,7 @@ with shelve.open(beRCM_shelf, 'r') as shelf:
 ```
 
 ## Plotting
-### Plotting Shelf Information
+### Plotting from Shelf
 The project currently contains logic for plotting a visual of the streambed, the particle flux distribution, and particle age-related information.
 
 Navigate to the **`plots/`** directory. Choose a desired run-info shelf file to plot, create or choose a location for the plots to save, and decide what range of iterations to plot for the streambed. Then run the following command:

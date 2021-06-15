@@ -1,0 +1,51 @@
+\begin{thebibliography}{5}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{DOI: #1}\else
+  \providecommand{\doi}{DOI: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Ancey et~al.(2008)Ancey, Davison, B{\"{o}}hm, Jodeau, and
+  Frey]{Ancey_et_al_2008}
+Ancey, C., Davison, A.~C., B{\"{o}}hm, T., Jodeau, M., and Frey, P.
+\newblock 2008.
+\newblock {Entrainment and motion of coarse particles in a shallow water stream
+  down a steep slope}.
+\newblock Journal of Fluid Mechanics. 595:\penalty0 83--114.
+\newblock \doi{10.1017/S0022112007008774}.
+
+\bibitem[Ancey(2010)]{Ancey2010JGR}
+Ancey, C.
+\newblock 2010.
+\newblock {Stochastic modeling in sediment dynamics: Exner equation for planar
+  bed incipient bed load transport conditions}.
+\newblock Journal of Geophysical Research: Earth Surface. 115\penalty0 (F2).
+\newblock \doi{10.1029/2009JF001260}.
+
+\bibitem[Fathel et~al.(2015)Fathel, Furbish, and Schmeeckle]{Fathel2015}
+Fathel, S.~L., Furbish, D.~J., and Schmeeckle, M.~W.
+\newblock 2015.
+\newblock {Experimental evidence of statistical ensemble behavior in bed load
+  sediment transport}.
+\newblock Journal of Geophysical Research: Earth Surface. 120\penalty0
+  (11):\penalty0 2298--2317.
+\newblock \doi{10.1002/2015JF003552}.
+
+\bibitem[Furbish et~al.(2012)Furbish, Roseberry, and Schmeeckle]{Furbish2012a}
+Furbish, D.~J., Roseberry, J.~C., and Schmeeckle, M.~W.
+\newblock 2012.
+\newblock {A probabilistic description of the bed load sediment flux: 3. The
+  particle velocity distribution and the diffusive flux}.
+\newblock Journal of Geophysical Research: Earth Surface. 117\penalty0
+  (F3):\penalty0 n/a--n/a.
+\newblock \doi{10.1029/2012JF002355}.
+
+\bibitem[Furbish et~al.(2017)Furbish, Fathel, and Schmeeckle]{Furbish2017b}
+Furbish, D.~J., Fathel, S.~L., and Schmeeckle, M.~W.. 2017.
+\newblock {Particle Motions and Bedload Theory: The Entrainment Forms of the
+  Flux and the Exner Equation}. chapter~4, pages 97--120.
+\newblock Wiley-Blackwell.
+\newblock ISBN 9781118971437.
+\newblock \doi{10.1002/9781118971437.ch4}.
+
+\end{thebibliography}

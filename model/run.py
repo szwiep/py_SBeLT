@@ -79,6 +79,7 @@ def main(run_id, pid, param_path):
         # Write static data to shelf
         snapshot_shelve['param'] = parameters 
         snapshot_shelve['bed'] = np.ndarray.tolist(bed_particles)
+        snapshot_shelve['init_model'] = np.ndarray.tolist(model_particles)
 
         #############################################################################
         #  Entrainment iterations
@@ -131,8 +132,8 @@ def main(run_id, pid, param_path):
             if (snapshot_counter == parameters['snapshot_interval']):
                 snapshot_dict[str(iteration)] = [ 
                                             np.ndarray.tolist(model_particles), 
-                                            np.ndarray.tolist(available_vertices),
-                                            np.ndarray.tolist(event_particle_ids)]
+                                            np.ndarray.tolist(avail_vertices), # avail used during entrainment
+                                            np.ndarray.tolist(event_particle_ids)] # entrainment particles
                 snapshot_counter = 0
 
             # Incrementally write snapshot dictionary to file to avoid overwhelming memory

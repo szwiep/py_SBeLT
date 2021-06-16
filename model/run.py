@@ -3,7 +3,7 @@ import yaml
 import logging
 import logging.config
 from datetime import datetime
-from uuid import uuid4
+from shortuuid import uuid
 import shelve
 
 import logic
@@ -173,8 +173,9 @@ def main(run_id, pid, param_path):
 if __name__ == '__main__':
 
     pid = os.getpid()
-    run_id = datetime.now().strftime('%Y%m-%d%H-%M%S-') + str(uuid4())
-    print(f'Process [{pid}] using UUID: {run_id}')
+    uu_id =  str(uuid())
+    run_id = datetime.now().strftime('%y%m-%d%H-') + uu_id
+    print(f'Process [{pid}] run ID: {run_id}')
     
     main(run_id, pid, sys.argv[1])
 

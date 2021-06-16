@@ -60,14 +60,21 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
     
     event_particles = []
     for subregion in subregions:
-        # Filter array for only active, in-stream particles per subregion
+        # Filter:
+        # Take only particles in current subregion
         subregion_particles = model_particles[
                 (model_particles[:,0] >= subregion.leftBoundary())
               & (model_particles[:,0] <= subregion.rightBoundary())]
+        # Take only particles in-stream
         in_stream_particles = subregion_particles[
                                                 subregion_particles[:,0] != -1]
+        # Take only particles set as 'Active'
         active_particles =  in_stream_particles[
                                                 in_stream_particles[:,4] != 0]
+        # Do not take any particles that have been selected for entrainment
+        active_event, active_idx, event_idx = np.intersect1d(active_particles[:,3], event_particles, return_indices=True)
+        active_particles = np.delete(active_particles, active_idx, axis=0)
+
         subregion_event_ids = []  
         if height_dependant:
             # TODO: better approach to identify the level/elevation relationship. This is messy 
@@ -87,6 +94,7 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
         else:
             random_sample = random.sample(range(len(active_particles)), 
                                         e_events)
+        # TODO: change so that we don't rely on loop index to grab particle
         for index in random_sample:
             #NOTE: this only works because index=id in the model_particle array
             subregion_event_ids.append(int(active_particles[index][3])  )

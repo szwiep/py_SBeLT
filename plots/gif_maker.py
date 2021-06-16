@@ -11,14 +11,21 @@ Created on Mon Jan  4 21:49:03 2021
 from PIL import Image
 
 # filepaths
-fp_in = '../plots/iter{i}.png'
-fp_out = '../plots/simulation_snapshot.gif'
+in_dir = '../plots/shelf_test/'
+in_filename = 'iter{i}.png'
 
-length = 500
+out_dir = '../plots/shelf_test/'
+out_filename = 'simulation_snapshot.gif'
+
+fp_in = in_dir + in_filename
+fp_out = out_dir + out_filename
+
+start = 0
+stop = 99
 step = 1
 images = []
 
-for i in range(0, length, step):
+for i in range(start, stop, step):
     im = Image.open(fp_in.format(i=i))
     images.append(im)
 

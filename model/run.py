@@ -6,6 +6,8 @@ from datetime import datetime
 from shortuuid import uuid
 import shelve
 
+from codetiming import Timer
+
 import logic
 import util
 import sys
@@ -21,7 +23,6 @@ ITERATION_TEMPLATE = ("""\n
                       """)
 
 def main(run_id, pid, param_path):
-    
     #############################################################################
     # Set up logging
     #############################################################################
@@ -74,7 +75,13 @@ def main(run_id, pid, param_path):
     snapshot_counter = 0
     milestones = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
-    snapshot_shelve = shelve.open(f"../plots/run-info-{run_id}")
+    if not float(parameters["sigma"]).is_integer():
+        sigma = str(parameters["sigma"]).replace(".", "")
+    else:
+        sigma = parameters["sigma"]
+
+    filename = f'sr{parameters["num_subregions"]}-ll{parameters["level_limit"]}-ld{parameters["lambda_1"]}-sig{sigma}-{run_id}'
+    snapshot_shelve = shelve.open(f"../plots/{filename}")
     try: 
         # Write static data to shelf
         snapshot_shelve['param'] = parameters 
@@ -137,7 +144,7 @@ def main(run_id, pid, param_path):
                 snapshot_counter = 0
 
             # Incrementally write snapshot dictionary to file to avoid overwhelming memory
-            if(iteration != 0 and iteration % 100000 == 0):
+            if(iteration != 0 and iteration % 1000 == 0):
                 print(f'[{pid}] Writing chunk of dictionary to shelf...')
                 snapshot_shelve.update(snapshot_dict)
                 snapshot_dict.clear()
@@ -169,12 +176,18 @@ def main(run_id, pid, param_path):
     print(f'[{pid}] Model run complete.')
 
     #############################################################################
+    # Time profiling
+    #############################################################################
+
+    # print(Timer.timers) 
+
+    #############################################################################
 
 if __name__ == '__main__':
 
+    uid = uuid()
     pid = os.getpid()
-    uu_id =  str(uuid())
-    run_id = datetime.now().strftime('%y%m-%d%H-') + uu_id
+    run_id = datetime.now().strftime('%y%m-%d%H-') + uid
     print(f'Process [{pid}] run ID: {run_id}')
     
     main(run_id, pid, sys.argv[1])

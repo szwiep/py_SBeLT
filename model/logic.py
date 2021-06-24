@@ -8,7 +8,8 @@ import copy
 
 #TODO: Refactor functions so that they don't reach into the paramters file
 from collections import defaultdict
-# from codetiming import Timer
+from codetiming import Timer
+from numba import jit, njit
 
 import logging
 
@@ -280,7 +281,6 @@ def place_particle(particle, model_particles, bed_particles, h):
     """
     left_support, right_support = find_supports(particle, model_particles, 
                                                 bed_particles, already_placed=False)
-
     # # # TODO: Make this more readable
     # x1 = left_support[0]
     # y1 = left_support[2]
@@ -309,6 +309,10 @@ def place_particle(particle, model_particles, bed_particles, h):
     
     return round(particle[0], 2), round(np.add(h, left_support[2]), 2)
 
+
+# TODO: Restructure find_support calls to allow update_ to work without apply_along_axis
+# Using apply_along_axis forces us to use jit with forceobj=True
+@jit(forceobj=True)
 # @Timer("update_states", text="update_particle_states call: {:.5f} seconds", logger=None)
 def update_particle_states(model_particles, bed_particles):
     """ Set each model particle's current 'active' state.
@@ -335,30 +339,48 @@ def update_particle_states(model_particles, bed_particles):
     # Set all model particles to active
     model_particles[:,4] = 1
     in_stream_particles = model_particles[model_particles[:,0] != -1]
-    for particle in in_stream_particles:     
-        left_neighbour, right_neighbour = find_supports(particle, 
-                                                        model_particles, 
-                                                        bed_particles,
-                                                        already_placed=True)
-        
-        # note: this method below could be improved if find_neighbours_of 
-        # would indicate if a neighbour belongs to the model or bed particles
-        if left_neighbour[2] > 0 and left_neighbour[2] < particle[2]:
-            lmodel_index = np.where(model_particles[:,3] == left_neighbour[3])
-            lsupport_id = lmodel_index[0][0]
-            model_particles[lsupport_id][4] = 0
-        else:
-            continue
-                 
-        if right_neighbour[2] > 0 and right_neighbour[2] < particle[2]:
-            rmodel_index = np.where(model_particles[:,3] == right_neighbour[3])
-            rsupport_id = rmodel_index[0][0]
-            model_particles[rsupport_id][4] = 0
-        else:
-            continue
+    result = np.apply_along_axis(find_supports, 1, in_stream_particles, model_particles, bed_particles, True)
+
+    left_neighbour_condition1 = (result[:,0][:,2] < in_stream_particles[:,2])
+    left_neighbour_condition2 = (result[:,0][:,2] > 0)
+    right_neighbour_condition1 = (result[:,1][:,2] < in_stream_particles[:,2])
+    right_neighbour_condition2 = (result[:,1][:,2] > 0)
     
-    return model_particles
+    inactive_left_idx = np.where(left_neighbour_condition1 & left_neighbour_condition2)
+    inactive_right_idx = np.where(right_neighbour_condition1 & right_neighbour_condition2)
+
+    inactive_left = result[inactive_left_idx][:,0][:,3].astype(int)
+    inactive_right = result[inactive_right_idx][:,1][:,3].astype(int)
+    # print(inactive_left, '\n')
+    if inactive_left.size != 0:
+        model_particles[inactive_left,4] = 0
+    if inactive_right.size != 0:
+        model_particles[inactive_right,4] = 0
         
+    # for particle in in_stream_particles:     
+    #     left_neighbour, right_neighbour = find_supports(particle, 
+    #                                                     model_particles, 
+    #                                                     bed_particles,
+    #                                                     already_placed = True)
+        
+    #     # note: this method below could be improved if find_neighbours_of 
+    #     # would indicate if a neighbour belongs to the model or bed particles
+    #     # if left_neighbour[2] > 0 and left_neighbour[2] < particle[2]:
+    #     #     lmodel_index = np.where(model_particles[:,3] == left_neighbour[3])
+    #     #     lsupport_id = lmodel_index[0][0]
+    #     #     model_particles[lsupport_id][4] = 0
+                 
+    #     if right_neighbour[2] > 0 and right_neighbour[2] < particle[2]:
+    #         rmodel_index = np.where(model_particles[:,3] == right_neighbour[3])
+    #         rsupport_id = rmodel_index[0][0]
+    #         print(model_particles[rsupport_id])
+    #         if model_particles[rsupport_id][4] != 0:
+    #             model_particles[rsupport_id][4] = 0
+    #             print("Did not set!")
+ 
+    return model_particles
+
+@njit
 # @Timer("# find_supports", text="find_supports call: {:.5f} seconds", logger=None)
 def find_supports(particle, model_particles, bed_particles, already_placed):
     """ Find the 2 supporting particles for a given particle.
@@ -409,29 +431,29 @@ def find_supports(particle, model_particles, bed_particles, already_placed):
      
        
     l_candidates = all_particles[all_particles[:,0] == left_center]
-    try:
-        left_support = l_candidates[l_candidates[:,2] 
+    # try:
+    left_support = l_candidates[l_candidates[:,2] 
                                     == np.max(l_candidates[:,2])]
-    except ValueError:
-        error_msg = (
-                     f'No left supporting particle found for'
-                     f'particle {particle[3]}, searched for support at'
-                     f'{left_center}'
-        )
-        logging.error(error_msg)
-        raise   
+    # except ValueError:
+    #     error_msg = (
+    #                  f'No left supporting particle found for'
+    #                  f'particle {particle[3]}, searched for support at'
+    #                  f'{left_center}'
+    #     )
+    #     logging.error(error_msg)
+    #     raise   
         
     r_candidates = all_particles[all_particles[:,0] == right_center] 
-    try:
-        right_support = r_candidates[r_candidates[:,2] == np.max(r_candidates[:,2])]
-    except ValueError:
-        error_msg = (
-                     f'No right supporting particle found for'
-                     f'particle {particle[3]}, searched for support at'
-                     f'{right_center}'
-        )
-        logging.error(error_msg)
-        raise
+    # try:
+    right_support = r_candidates[r_candidates[:,2] == np.max(r_candidates[:,2])]
+    # except ValueError:
+    #     error_msg = (
+    #                  f'No right supporting particle found for'
+    #                  f'particle {particle[3]}, searched for support at'
+    #                  f'{right_center}'
+    #     )
+    #     logging.error(error_msg)
+    #     raise
 
     return left_support[0], right_support[0]
 
@@ -503,7 +525,7 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
     
     return model_particles
 
-# @Timer("compute_available_vertices", text="compute_avail_vertices call: {:.5f} seconds", logger=None)
+@Timer("compute_available_vertices", text="compute_avail_vertices call: {:.5f} seconds", logger=None)
 def compute_available_vertices(model_particles, bed_particles, set_diam, level_limit,
                                lifted_particles=None, just_bed=False):
     """ Compute the avaliable vertices in the model 

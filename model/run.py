@@ -91,7 +91,8 @@ def main(run_id, pid, param_path):
         #############################################################################
         #  Entrainment iterations
         #############################################################################
-
+        timer = Timer()
+        timer.start()
         print(f'[{pid}] Bed and Model particles built. Beginning entrainments...')
         for iteration in range(parameters['n_iterations']):
             logging.info(ITERATION_HEADER.format(iteration=iteration))
@@ -156,7 +157,7 @@ def main(run_id, pid, param_path):
                 print(f'[{pid}] {milestones[0]}% complete')
                 #remove that milestone from the list
                 milestones = milestones[1:]
-        
+        timer.stop()
         #############################################################################
         # Store final entrainment iteration information
         #############################################################################

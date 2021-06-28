@@ -25,10 +25,11 @@ class Subregion():
     instantiation and can be retrieved
     afterwards using helper methods.
     """
-    def __init__(self, name, left_boundary, right_boundary):
+    def __init__(self, name, left_boundary, right_boundary, iterations):
         self.name = name
         self.left_boundary = left_boundary
         self.right_boundary = right_boundary
+        self.flux_list = np.zeros(iterations, dtype=np.int64)
         
     def leftBoundary(self):
         return self.left_boundary
@@ -38,6 +39,13 @@ class Subregion():
     
     def getName(self):
         return self.name
+
+    def incrementFlux(self, iteration):
+        self.flux_list[iteration] += 1
+    
+    def getFluxList(self):
+        return self.flux_list
+
         
 #%% Bed-related functionss
 # TODO: consider if Bed (and Model) functions should be refactored into classes
@@ -119,7 +127,7 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
     return event_particles
 
 # @Timer("define_subregions", text="define_subregions call: {:.3f} seconds", logger=None)
-def define_subregions(bed_length, num_subregions):
+def define_subregions(bed_length, num_subregions, iterations):
     """ Define subregion list for model stream.
     
 
@@ -139,7 +147,7 @@ def define_subregions(bed_length, num_subregions):
     subregions_arr = []
     for region in range(num_subregions):       
         right_boundary = left_boundary + subregion_length
-        subregion = Subregion(f'subregion_{region}', left_boundary, right_boundary)
+        subregion = Subregion(f'subregion_{region}', left_boundary, right_boundary, iterations)
         left_boundary = right_boundary
         
         subregions_arr.append(subregion)
@@ -608,9 +616,8 @@ def elevation_list(elevations, desc=True):
            ue = ue[::-1]
     return ue
     
-#TODO: Parametrize uniqueness method. User should be able to play 
-# with whether unique entrainments are forced pre- or post-event
-def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_vertices, unverified_e, h):
+# So, so many parameters.
+def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_vertices, unverified_e, subregions, iteration, h):
     """ This function mimics an 'entrainment event' through
     calls to the entrainment-related functions. 
     
@@ -629,11 +636,12 @@ def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_v
                             passed the downstream boundary
     """
     
+    initial_x = model_particles[event_particle_ids][:,0]
     e_dict, p_flux_1, model_particles, avail_vertices = move_model_particles(
                                                 unverified_e, 
                                                 model_particles, 
                                                 bed_particles, 
-                                                avail_vertices, 
+                                                avail_vertices,
                                                 h)
     unique_entrainments, redo_ids = check_unique_entrainments(e_dict)
      
@@ -651,11 +659,16 @@ def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_v
         p_flux_2 += tmp_p_flux
 
     particle_flux = p_flux_1 + p_flux_2
+
+    final_x = model_particles[event_particle_ids][:,0]
+    print(initial_x, final_x)
+    subregions = update_flux(initial_x, final_x, iteration, subregions)
+    print(iteration, subregions[0].getFluxList())
     model_particles = update_particle_states(model_particles, bed_particles)
     # Increment age at the end of each entrainment
     model_particles = increment_age(model_particles, event_particle_ids)
     
-    return model_particles, particle_flux
+    return model_particles, particle_flux, subregions
   
         
 def fathel_furbish_hops(event_particle_ids, model_particles, mu, sigma, normal=False):
@@ -722,6 +735,8 @@ def move_model_particles(event_particles, model_particles, bed_particles, availa
             logging.info(exceed_msg) 
             particle[6] = particle[6] + 1
             particle[0] = verified_hop
+            # check which subregion boundaries it crossed
+            # crossed the final subregion boundary
         else:
             hop_msg = (
                 f'Particle {int(particle[3])} entrained from {orig_x} '
@@ -732,6 +747,7 @@ def move_model_particles(event_particles, model_particles, bed_particles, availa
             placed_x, placed_y = place_particle(particle, model_particles, bed_particles, h)
             particle[0] = placed_x
             particle[2] = placed_y
+            # crossed 0 or 1 of the n-1 subregion boundaries
             
         entrainment_dict[particle[3]] = verified_hop
         model_particles[model_particles[:,3] == particle[3]] = particle
@@ -739,6 +755,23 @@ def move_model_particles(event_particles, model_particles, bed_particles, availa
     updated_avail_vert = np.setdiff1d(available_vertices, list(entrainment_dict.values()))
     
     return entrainment_dict, particle_flux, model_particles, updated_avail_vert
+
+
+def update_flux(initial_positions, final_positions, iteration, subregions):
+    # This can _most definitely_ be made quicker but for now, it works
+    for position in range(0, len(initial_positions)):
+        initial_pos = initial_positions[position]
+        final_pos = final_positions[position]
+        for idx, subregion in enumerate(subregions):
+            if (initial_pos >= subregion.leftBoundary()) and (subregion.rightBoundary() >= initial_pos):
+                start_idx = idx
+
+        for subregion_idx in range(start_idx, len(subregions)):
+            subregion = subregions[subregion_idx]
+            if final_pos > subregion.rightBoundary():
+                subregion.incrementFlux(iteration)
+    return subregions
+
     
 def find_closest_vertex(desired_hop, available_vertices):
     """ Find the closest downstream (greater than or equal) vertex

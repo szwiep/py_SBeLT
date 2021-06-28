@@ -62,7 +62,7 @@ def main(run_id, pid, param_path):
     model_particles = logic.set_model_particles(bed_particles, available_vertices, parameters['set_diam'], 
                                                         parameters['pack_density'],  h)
     # Define stream's subregions
-    subregions = logic.define_subregions(bed_length, parameters['num_subregions'])
+    subregions = logic.define_subregions(bed_length, parameters['num_subregions'], parameters['n_iterations'])
 
     #############################################################################
     #  Create entrainment data and data structures
@@ -115,11 +115,13 @@ def main(run_id, pid, param_path):
                                                         just_bed=False, 
                                                         lifted_particles=event_particle_ids)
             # Run entrainment event                    
-            model_particles, particle_flux = logic.run_entrainments(model_particles, 
+            model_particles, particle_flux, subregions = logic.run_entrainments(model_particles, 
                                                                     bed_particles, 
                                                                     event_particle_ids,
                                                                     avail_vertices, 
-                                                                    unverified_e, 
+                                                                    unverified_e,
+                                                                    subregions,
+                                                                    iteration,  
                                                                     h)
             # Record number of particles to cross downstream boundary per-iteration                                                        
             particle_flux_list.append(particle_flux)
@@ -161,7 +163,6 @@ def main(run_id, pid, param_path):
         #############################################################################
         # Store final entrainment iteration information
         #############################################################################
-
         # Once all entrainment events complete, store relevant information to shelf
         print(f'[{pid}] Writing dictionary to shelf...')
         snapshot_shelve.update(snapshot_dict)

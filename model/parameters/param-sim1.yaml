@@ -1,0 +1,25 @@
+
+# See default param.yaml file for descriptions
+pack_density: 0.78
+
+x_max: 200
+    
+set_diam: 0.5
+
+num_subregions: 1
+
+level_limit: 1
+
+n_iterations: 1000000
+
+lambda_1: 5
+
+normal_dist: False
+
+mu: 1
+
+sigma: 0.25
+
+snapshot_interval: 1
+
+height_dependancy: False

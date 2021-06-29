@@ -637,6 +637,7 @@ def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_v
     """
     
     initial_x = model_particles[event_particle_ids][:,0]
+
     e_dict, model_particles, avail_vertices = move_model_particles(
                                                 unverified_e, 
                                                 model_particles, 

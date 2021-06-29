@@ -115,7 +115,7 @@ def main(run_id, pid, param_path):
                                                         just_bed=False, 
                                                         lifted_particles=event_particle_ids)
             # Run entrainment event                    
-            model_particles, particle_flux, subregions = logic.run_entrainments(model_particles, 
+            model_particles, subregions = logic.run_entrainments(model_particles, 
                                                                     bed_particles, 
                                                                     event_particle_ids,
                                                                     avail_vertices, 
@@ -124,7 +124,7 @@ def main(run_id, pid, param_path):
                                                                     iteration,  
                                                                     h)
             # Record number of particles to cross downstream boundary per-iteration                                                        
-            particle_flux_list.append(particle_flux)
+            # particle_flux_list.append(particle_flux)
 
             # Compute age range and average age, store in lists
             age_range = np.max(model_particles[:,5]) - np.min(model_particles[:,5])
@@ -163,13 +163,16 @@ def main(run_id, pid, param_path):
         #############################################################################
         # Store final entrainment iteration information
         #############################################################################
+
         # Once all entrainment events complete, store relevant information to shelf
         print(f'[{pid}] Writing dictionary to shelf...')
         snapshot_shelve.update(snapshot_dict)
         print(f'[{pid}] Finished writing dictionary.')
         
         print(f'[{pid}] Writting flux and age information to shelf...')
-        snapshot_shelve['flux'] = particle_flux_list
+        for subregion in subregions:
+            name = f'{subregion.getName()}-flux'
+            snapshot_shelve[name] = subregion.getFluxList()
         snapshot_shelve['avg_age'] = particle_age_list
         snapshot_shelve['age_range'] = particle_range_list
         print(f'[{pid}] Finished writing flux and age information.')

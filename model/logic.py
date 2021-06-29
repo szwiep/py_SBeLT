@@ -661,9 +661,8 @@ def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_v
     particle_flux = p_flux_1 + p_flux_2
 
     final_x = model_particles[event_particle_ids][:,0]
-    print(initial_x, final_x)
+    # print(initial_x, final_x)
     subregions = update_flux(initial_x, final_x, iteration, subregions)
-    print(iteration, subregions[0].getFluxList())
     model_particles = update_particle_states(model_particles, bed_particles)
     # Increment age at the end of each entrainment
     model_particles = increment_age(model_particles, event_particle_ids)
@@ -760,16 +759,21 @@ def move_model_particles(event_particles, model_particles, bed_particles, availa
 def update_flux(initial_positions, final_positions, iteration, subregions):
     # This can _most definitely_ be made quicker but for now, it works
     for position in range(0, len(initial_positions)):
+
         initial_pos = initial_positions[position]
         final_pos = final_positions[position]
+
         for idx, subregion in enumerate(subregions):
             if (initial_pos >= subregion.leftBoundary()) and (subregion.rightBoundary() >= initial_pos):
                 start_idx = idx
 
         for subregion_idx in range(start_idx, len(subregions)):
-            subregion = subregions[subregion_idx]
-            if final_pos > subregion.rightBoundary():
-                subregion.incrementFlux(iteration)
+            if final_pos > subregions[subregion_idx].rightBoundary():
+                print(f"With {start_idx} found crossing")
+                subregions[subregion_idx].incrementFlux(iteration)
+            elif final_pos == -1 and subregion_idx == len(subregions)-1:
+                subregions[subregion_idx].incrementFlux(iteration)
+
     return subregions
 
     

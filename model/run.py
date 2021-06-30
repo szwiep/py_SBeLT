@@ -156,7 +156,7 @@ def main(run_id, pid, param_path):
                 print(f'[{pid}] {milestones[0]}% complete')
                 #remove that milestone from the list
                 milestones = milestones[1:]
-                
+
         #############################################################################
         # Store final entrainment iteration information
         #############################################################################
@@ -178,6 +178,7 @@ def main(run_id, pid, param_path):
         print(f'[{pid}] Finished writing flux and age information.')
 
     finally:
+        print('Closing shelf file...')
         snapshot_shelve.close()
     print(f'[{pid}] Model run complete.')
 

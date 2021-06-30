@@ -765,11 +765,11 @@ def update_flux(initial_positions, final_positions, iteration, subregions):
         final_pos = final_positions[position]
 
         for idx, subregion in enumerate(subregions):
-            if (initial_pos >= subregion.leftBoundary()) and (subregion.rightBoundary() >= initial_pos):
+            if (initial_pos >= subregion.leftBoundary()) and (subregion.rightBoundary() > initial_pos):
                 start_idx = idx
 
         for subregion_idx in range(start_idx, len(subregions)):
-            if final_pos > subregions[subregion_idx].rightBoundary():
+            if final_pos >= subregions[subregion_idx].rightBoundary():
                 subregions[subregion_idx].incrementFlux(iteration)
             elif final_pos == -1 and subregion_idx == len(subregions)-1:
                 subregions[subregion_idx].incrementFlux(iteration)

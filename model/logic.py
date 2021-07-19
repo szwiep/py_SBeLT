@@ -287,33 +287,9 @@ def place_particle(particle, model_particles, bed_particles, h):
     bed_particles -- bed particle list
     
     """
+    # TODO: It would be ideal to avoid a call to find_supports here
     left_support, right_support = find_supports(particle, model_particles, 
                                                 bed_particles, already_placed=False)
-    # # # TODO: Make this more readable
-    # x1 = left_support[0]
-    # y1 = left_support[2]
-    # r1 = left_support[1] / 2
-    
-    # x2 = right_support[0]
-    # y2 = right_support[2]
-    # r2 = right_support[1] / 2
-    
-    # rp = particle_diam / 2 
-
-    # define symbols for symbolic system solution using SymPy
-    # x3, y3 = sy.symbols('x3 y3')
-    
-    # # create the symbolic system equations
-    # eq1 = sy.Eq(sy.sqrt((x1-x3)**2 + (y1-y3)**2)-r1-rp, 0)
-    # eq2 = sy.Eq(sy.sqrt((x2-x3)**2 + (y2-y3)**2)-r2-rp, 0)
-    
-    # # solve the system of equations
-    # sol_dict = sy.solve((eq1, eq2), (x3, y3))
-        
-    # # Iterate into the solution dictionary to recieve new particle center (x,y)
-    # # Account for 'extra precision' differences by rounding to nearest 100th
-    # p_x = round((sol_dict[1][0]), 2)
-    # p_y = round((sol_dict[1][1]), 2)
     
     return round(particle[0], 2), round(np.add(h, left_support[2]), 2)
 
@@ -347,10 +323,12 @@ def update_particle_states(model_particles, bed_particles):
     # Set all model particles to active
     model_particles[:,4] = 1
     in_stream_particles = model_particles[model_particles[:,0] != -1]
+    # New method, same results as previous. Cannot fully vectorize due to find_supports()
     result = np.apply_along_axis(find_supports, 1, in_stream_particles, model_particles, bed_particles, True)
 
     left_neighbour_condition1 = (result[:,0][:,2] < in_stream_particles[:,2])
     left_neighbour_condition2 = (result[:,0][:,2] > 0)
+
     right_neighbour_condition1 = (result[:,1][:,2] < in_stream_particles[:,2])
     right_neighbour_condition2 = (result[:,1][:,2] > 0)
     
@@ -359,12 +337,13 @@ def update_particle_states(model_particles, bed_particles):
 
     inactive_left = result[inactive_left_idx][:,0][:,3].astype(int)
     inactive_right = result[inactive_right_idx][:,1][:,3].astype(int)
-    # print(inactive_left, '\n')
+
     if inactive_left.size != 0:
         model_particles[inactive_left,4] = 0
     if inactive_right.size != 0:
         model_particles[inactive_right,4] = 0
-        
+    
+    # TODO: previous method, same results. Cannot fully vectorize due to call to find_supports()
     # for particle in in_stream_particles:     
     #     left_neighbour, right_neighbour = find_supports(particle, 
     #                                                     model_particles, 

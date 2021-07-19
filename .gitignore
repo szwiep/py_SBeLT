@@ -146,3 +146,7 @@ model/output/*.dir
 model/output/*.bak
 model/output/*.dat
 
+
+.DS_Store
+model/.DS_Store
+

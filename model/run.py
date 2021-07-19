@@ -131,7 +131,7 @@ def main(run_id, pid, param_path):
                 snapshot_counter = 0
 
             # Incrementally write snapshot dictionary to file to avoid overwhelming memory
-            if(iteration != 0 and iteration % 1000 == 0):
+            if(iteration != 0 and iteration % 100000 == 0):
                 print(f'[{pid}] Writing chunk of dictionary to shelf...')
                 snapshot_shelve.update(snapshot_dict)
                 snapshot_dict.clear()

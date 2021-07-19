@@ -40,11 +40,14 @@ def main(filename, save_location, iter_min, iter_max):
             plotting.stream(iter, np.array(shelf['bed']), np.array(shelf[str(iter)][0]), 
                             shelf['param']['x_max'], y_limit, np.array(shelf[str(iter)][1]), fp_out)
        
-        # Plot flux and age information
+        # Flux and age information
+        # Plot flux at downstream boundary
         plotting.flux_info(shelf[ds_boundary_key], shelf['param']['n_iterations'], fp_out)
         plotting.flux_info2(shelf[ds_boundary_key], np.array(shelf['avg_age']), shelf['param']['n_iterations'], fp_out)
         plotting.flux_info3(shelf[ds_boundary_key], np.array(shelf['avg_age']), np.array(shelf['age_range']), 
                             shelf['param']['n_iterations'], fp_out)
+        
+        # Plot heatmap of all boundary crossings
         plt.clf()
         flux_list = []
         for i in range(shelf['param']['num_subregions']):
@@ -53,8 +56,6 @@ def main(filename, save_location, iter_min, iter_max):
         flux_heatmap = sns.heatmap(flux_list,cmap="viridis")
         fig = flux_heatmap.get_figure()
         fig.savefig('heatmap.png')
-
-
 
 
 def parse_arguments():

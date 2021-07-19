@@ -6,8 +6,6 @@ from datetime import datetime
 from shortuuid import uuid
 import shelve
 
-from codetiming import Timer
-
 import logic
 import util
 import sys
@@ -62,7 +60,7 @@ def main(run_id, pid, param_path):
     model_particles = logic.set_model_particles(bed_particles, available_vertices, parameters['set_diam'], 
                                                         parameters['pack_density'],  h)
     # Define stream's subregions
-    subregions = logic.define_subregions(bed_length, parameters['num_subregions'])
+    subregions = logic.define_subregions(bed_length, parameters['num_subregions'], parameters['n_iterations'])
 
     #############################################################################
     #  Create entrainment data and data structures
@@ -81,7 +79,7 @@ def main(run_id, pid, param_path):
         sigma = parameters["sigma"]
 
     filename = f'sr{parameters["num_subregions"]}-ll{parameters["level_limit"]}-ld{parameters["lambda_1"]}-sig{sigma}-{run_id}'
-    snapshot_shelve = shelve.open(f"../plots/{filename}")
+    snapshot_shelve = shelve.open(f"../output/{filename}")
     try: 
         # Write static data to shelf
         snapshot_shelve['param'] = parameters 
@@ -91,8 +89,7 @@ def main(run_id, pid, param_path):
         #############################################################################
         #  Entrainment iterations
         #############################################################################
-        timer = Timer()
-        timer.start()
+
         print(f'[{pid}] Bed and Model particles built. Beginning entrainments...')
         for iteration in range(parameters['n_iterations']):
             logging.info(ITERATION_HEADER.format(iteration=iteration))
@@ -115,14 +112,16 @@ def main(run_id, pid, param_path):
                                                         just_bed=False, 
                                                         lifted_particles=event_particle_ids)
             # Run entrainment event                    
-            model_particles, particle_flux = logic.run_entrainments(model_particles, 
+            model_particles, subregions = logic.run_entrainments(model_particles, 
                                                                     bed_particles, 
                                                                     event_particle_ids,
                                                                     avail_vertices, 
-                                                                    unverified_e, 
+                                                                    unverified_e,
+                                                                    subregions,
+                                                                    iteration,  
                                                                     h)
             # Record number of particles to cross downstream boundary per-iteration                                                        
-            particle_flux_list.append(particle_flux)
+            # particle_flux_list.append(particle_flux)
 
             # Compute age range and average age, store in lists
             age_range = np.max(model_particles[:,5]) - np.min(model_particles[:,5])
@@ -157,7 +156,7 @@ def main(run_id, pid, param_path):
                 print(f'[{pid}] {milestones[0]}% complete')
                 #remove that milestone from the list
                 milestones = milestones[1:]
-        timer.stop()
+
         #############################################################################
         # Store final entrainment iteration information
         #############################################################################
@@ -168,11 +167,18 @@ def main(run_id, pid, param_path):
         print(f'[{pid}] Finished writing dictionary.')
         
         print(f'[{pid}] Writting flux and age information to shelf...')
-        snapshot_shelve['flux'] = particle_flux_list
+
+        for subregion in subregions:
+            name = f'{subregion.getName()}-flux'
+            snapshot_shelve[name] = subregion.getFluxList()
+
+        # snapshot_shelve['flux'] = particle_flux_list
         snapshot_shelve['avg_age'] = particle_age_list
         snapshot_shelve['age_range'] = particle_range_list
         print(f'[{pid}] Finished writing flux and age information.')
+
     finally:
+        print('Closing shelf file...')
         snapshot_shelve.close()
     print(f'[{pid}] Model run complete.')
 

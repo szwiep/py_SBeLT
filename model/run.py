@@ -3,6 +3,7 @@ import yaml
 import logging
 import logging.config
 from datetime import datetime
+from pathlib import Path 
 from shortuuid import uuid
 import shelve
 
@@ -21,26 +22,27 @@ ITERATION_TEMPLATE = ("""\n
                       """)
 
 def main(run_id, pid, param_path):
+
+    logConf_path, log_path, output_path = get_relative_paths()
+
     #############################################################################
     # Set up logging
     #############################################################################
-
-    with open('logs/conf.yaml', 'r') as f:
-        config = yaml.safe_load(f.read())
-        config['handlers']['file']['filename'] = f'logs/{run_id}.log'
-        logging.config.dictConfig(config)
+    
+    configure_logging(run_id, logConf_path, log_path)
     
     #############################################################################
     # Get and validate parameters
+    # TODO: update validation to work with yaml
     #############################################################################
     
     with open(param_path, 'r') as p:
         parameters = yaml.safe_load(p.read())
-    # TODO: update validation to take dictionary of the parameters
     # util.validate_parameters(parameters)   
 
     #############################################################################
     #  Create model data and data structures
+    # TODO: Better names for d, h variables
     #############################################################################
 
     # Pre-compute d and h values for particle elevation placement
@@ -52,34 +54,19 @@ def main(run_id, pid, param_path):
 
 
     print(f'[{pid}] Building Bed and Model particle arrays...')
-    # Create bed particle array and compute corresponding available vertices
-    bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])   
-    available_vertices = logic.compute_available_vertices([], bed_particles, parameters['set_diam'],
-                                                        parameters['level_limit'], just_bed=True)    
-    # Create model particle array and set on top of bed particles
-    model_particles = logic.set_model_particles(bed_particles, available_vertices, parameters['set_diam'], 
-                                                        parameters['pack_density'],  h)
-    # Define stream's subregions
-    subregions = logic.define_subregions(bed_length, parameters['num_subregions'], parameters['n_iterations'])
+    bed_particles, model_particles, subregions = build_stream(parameters, h)
 
     #############################################################################
     #  Create entrainment data and data structures
     #############################################################################
 
-    particle_flux_list = []
     particle_age_list = []
     particle_range_list = []
     snapshot_dict = {}
     snapshot_counter = 0
     milestones = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
-    if not float(parameters["sigma"]).is_integer():
-        sigma = str(parameters["sigma"]).replace(".", "")
-    else:
-        sigma = parameters["sigma"]
-
-    filename = f'sr{parameters["num_subregions"]}-ll{parameters["level_limit"]}-ld{parameters["lambda_1"]}-sig{sigma}-{run_id}'
-    snapshot_shelve = shelve.open(f"../output/{filename}")
+    snapshot_shelve = prepare_output_shelve(run_id, output_path, param_path, parameters)
     try: 
         # Write static data to shelf
         snapshot_shelve['param'] = parameters 
@@ -144,7 +131,7 @@ def main(run_id, pid, param_path):
                 snapshot_counter = 0
 
             # Incrementally write snapshot dictionary to file to avoid overwhelming memory
-            if(iteration != 0 and iteration % 1000 == 0):
+            if(iteration != 0 and iteration % 100000 == 0):
                 print(f'[{pid}] Writing chunk of dictionary to shelf...')
                 snapshot_shelve.update(snapshot_dict)
                 snapshot_dict.clear()
@@ -182,13 +169,54 @@ def main(run_id, pid, param_path):
         snapshot_shelve.close()
     print(f'[{pid}] Model run complete.')
 
-    #############################################################################
-    # Time profiling
-    #############################################################################
 
-    # print(Timer.timers) 
+def build_stream(parameters, h):
+    bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])   
+    available_vertices = logic.compute_available_vertices([], bed_particles, parameters['set_diam'],
+                                                        parameters['level_limit'], just_bed=True)    
+    # Create model particle array and set on top of bed particles
+    model_particles = logic.set_model_particles(bed_particles, available_vertices, parameters['set_diam'], 
+                                                        parameters['pack_density'],  h)
+    # Define stream's subregions
+    subregions = logic.define_subregions(bed_length, parameters['num_subregions'], parameters['n_iterations'])
+    return bed_particles,model_particles,subregions
 
-    #############################################################################
+
+def prepare_output_shelve(run_id, output_path, param_path, parameters):
+    # Temporary logic to add 'simX' prefix to outputs
+    # Can be removed for changed after experimental runs
+    path = os.path.splitext(param_path)
+    filename = path[0].split('/')[1].split('-')
+    try:
+        prefix = filename[1] + '-'
+    except IndexError:
+        prefix = ''
+
+    if not float(parameters["sigma"]).is_integer():
+        sigma = str(parameters["sigma"]).replace(".", "")
+    else:
+        sigma = parameters["sigma"]
+
+    filename = f'{prefix}sr{parameters["num_subregions"]}-ll{parameters["level_limit"]}-ld{parameters["lambda_1"]}-sig{sigma}-{run_id}'
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    snapshot_shelve = shelve.open(f"{output_path}/{filename}")
+    return snapshot_shelve
+
+
+def configure_logging(run_id, logConf_path, log_path):
+    with open(logConf_path, 'r') as f:
+        config = yaml.safe_load(f.read())
+        config['handlers']['file']['filename'] = f'{log_path}/{run_id}.log'
+        logging.config.dictConfig(config)
+
+
+def get_relative_paths():
+    logConf_path = Path(__file__).parent / 'logs/conf.yaml'
+    log_path =  Path(__file__).parent / 'logs/'
+    output_path = Path(__file__).parent / 'output/'
+    return logConf_path,log_path,output_path
+
 
 if __name__ == '__main__':
 

@@ -1,8 +1,10 @@
 import sys
 import subprocess
 import argparse
+from pathlib import Path 
 
 def main(n_processes, param_path):
+    run_path = get_run_path()
     if n_processes != len(param_path) and len(param_path) != 1:
         print(
             f'Required {n_processes} or 1 parameter file(s) but {len(param_path)} '
@@ -19,9 +21,9 @@ def main(n_processes, param_path):
     print(f'Running {n_processes} processes of BeRCM in parallel...')
     for i in range(n_processes):
         if sys.platform.startswith('win32'):
-            proc = subprocess.Popen([sys.executable, 'run.py', param_path[i]], creationflags=subprocess.CREATE_NEW_CONSOLE)
+            proc = subprocess.Popen([sys.executable, run_path, param_path[i]], creationflags=subprocess.CREATE_NEW_CONSOLE)
         else:
-            proc = subprocess.Popen([sys.executable, 'run.py', param_path[i]])
+            proc = subprocess.Popen([sys.executable, run_path, param_path[i]])
         procs.append(proc)
         print(f'Process [{proc.pid}] using {param_path[i]}')
 
@@ -31,6 +33,10 @@ def main(n_processes, param_path):
         proc.wait()
     print(f'All processes complete.')
     return 
+
+def get_run_path():
+    run_path = Path(__file__).parent / "run.py"
+    return run_path
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='A test')

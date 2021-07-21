@@ -11,14 +11,16 @@ level_limit: 3
 
 n_iterations: 1000000
 
-lambda_1: 5
+lambda_1: 1
 
 normal_dist: False
 
 mu: 1
 
-sigma: 5
+sigma: 1
 
 snapshot_interval: 1
 
 height_dependancy: False
+
+filename_prefix: 33

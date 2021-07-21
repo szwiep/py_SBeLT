@@ -5,22 +5,22 @@ x_max: 200
     
 set_diam: 0.5
 
-num_subregions: 1
+num_subregions: 8
 
 level_limit: 3
 
 n_iterations: 1000000
 
-lambda_1: 1
+lambda_1: 5
 
 normal_dist: False
 
 mu: 1
 
-sigma: 0.25
+sigma: 1  
 
 snapshot_interval: 1
 
 height_dependancy: False
 
-filename_prefix: 34
+filename_prefix: 39

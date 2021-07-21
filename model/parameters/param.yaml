@@ -72,3 +72,5 @@ sigma: 0.25
 snapshot_interval: 1
 
 height_dependancy: False
+
+filename_prefix: "Default"

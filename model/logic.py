@@ -8,7 +8,7 @@ import copy
 
 #TODO: Refactor functions so that they don't reach into the paramters file
 from collections import defaultdict
-from codetiming import Timer
+# from codetiming import Timer
 from numba import jit, njit
 
 import logging
@@ -512,7 +512,7 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
     
     return model_particles
 
-@Timer("compute_available_vertices", text="compute_avail_vertices call: {:.5f} seconds", logger=None)
+# @Timer("compute_available_vertices", text="compute_avail_vertices call: {:.5f} seconds", logger=None)
 def compute_available_vertices(model_particles, bed_particles, set_diam, level_limit,
                                lifted_particles=None, just_bed=False):
     """ Compute the avaliable vertices in the model 

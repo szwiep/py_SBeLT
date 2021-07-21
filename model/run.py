@@ -167,8 +167,8 @@ def main(run_id, pid, param_path):
     finally:
         print('Closing shelf file...')
         snapshot_shelve.close()
-    print(f'[{pid}] Model run complete.')
-    return
+        print(f'[{pid}] Model run finished.')
+        return
 
 
 def build_stream(parameters, h):

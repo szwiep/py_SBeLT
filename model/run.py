@@ -168,6 +168,7 @@ def main(run_id, pid, param_path):
         print('Closing shelf file...')
         snapshot_shelve.close()
     print(f'[{pid}] Model run complete.')
+    return
 
 
 def build_stream(parameters, h):
@@ -184,20 +185,7 @@ def build_stream(parameters, h):
 
 def prepare_output_shelve(run_id, output_path, param_path, parameters):
     # Temporary logic to add 'simX' prefix to outputs
-    # Can be removed for changed after experimental runs
-    path = os.path.splitext(param_path)
-    filename = path[0].split('/')[1].split('-')
-    try:
-        prefix = filename[1] + '-'
-    except IndexError:
-        prefix = ''
-
-    if not float(parameters["sigma"]).is_integer():
-        sigma = str(parameters["sigma"]).replace(".", "")
-    else:
-        sigma = parameters["sigma"]
-
-    filename = f'{prefix}sr{parameters["num_subregions"]}-ll{parameters["level_limit"]}-ld{parameters["lambda_1"]}-sig{sigma}-{run_id}'
+    filename = f'sim{parameters["filename_prefix"]}-{run_id}'
     if not os.path.exists(output_path):
         os.makedirs(output_path)
     snapshot_shelve = shelve.open(f"{output_path}/{filename}")
@@ -219,6 +207,7 @@ def get_relative_paths():
 
 
 if __name__ == '__main__':
+
 
     uid = uuid()
     pid = os.getpid()

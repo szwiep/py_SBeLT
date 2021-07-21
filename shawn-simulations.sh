@@ -3,3 +3,4 @@ python3 model/parallel.py 2 model/parameters/param-sim3.yaml model/parameters/pa
 python3 model/parallel.py 2 model/parameters/param-sim5.yaml model/parameters/param-sim6.yaml
 python3 model/parallel.py 2 model/parameters/param-sim7.yaml model/parameters/param-sim8.yaml
 python3 model/parallel.py 2 model/parameters/param-sim9.yaml model/parameters/param-sim10.yaml
+python3 model/parallel.py 2 model/parameters/param-sim11.yaml model/parameters/param-sim12.yaml

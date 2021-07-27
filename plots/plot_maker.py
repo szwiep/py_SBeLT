@@ -4,7 +4,7 @@ import argparse
 import os
 
 import plotting
-import seaborn as sns
+
 from matplotlib import pyplot as plt
 
 
@@ -35,27 +35,19 @@ def main(filename, save_location, iter_min, iter_max):
         subregion_max = shelf['param']['num_subregions']
         ds_boundary_key = f'subregion-{subregion_max-1}-flux' 
 
-        # Plot streambed
-        for iter in range(iteration_range[0], iteration_range[1]+1):
-            plotting.stream(iter, np.array(shelf['bed']), np.array(shelf[str(iter)][0]), 
-                            shelf['param']['x_max'], y_limit, np.array(shelf[str(iter)][1]), fp_out)
+        # # # Plot streambed
+        # for iter in range(iteration_range[0], iteration_range[1]+1):
+        #     plotting.stream(iter, np.array(shelf['bed']), np.array(shelf[str(iter)][0]), 
+        #                     shelf['param']['x_max'], y_limit, np.array(shelf[str(iter)][1]), fp_out)
        
-        # Flux and age information
-        # Plot flux at downstream boundary
-        plotting.flux_info(shelf[ds_boundary_key], shelf['param']['n_iterations'], fp_out)
-        plotting.flux_info2(shelf[ds_boundary_key], np.array(shelf['avg_age']), shelf['param']['n_iterations'], fp_out)
-        plotting.flux_info3(shelf[ds_boundary_key], np.array(shelf['avg_age']), np.array(shelf['age_range']), 
-                            shelf['param']['n_iterations'], fp_out)
+        # # Flux and age information at Downstream boundary
+        # plotting.flux_info(shelf[ds_boundary_key], shelf['param']['n_iterations'], 1000, fp_out)
+        # plotting.flux_info2(shelf[ds_boundary_key], np.array(shelf['avg_age']), shelf['param']['n_iterations'], 1000, fp_out)
+        # plotting.flux_info3(shelf[ds_boundary_key], np.array(shelf['avg_age']), np.array(shelf['age_range']), 
+        #                     shelf['param']['n_iterations'], 1000, fp_out)
         
-        # Plot heatmap of all boundary crossings
-        plt.clf()
-        flux_list = []
-        for i in range(shelf['param']['num_subregions']):
-            key = f'subregion-{i}-flux' 
-            flux_list.append(shelf[key])
-        flux_heatmap = sns.heatmap(flux_list,cmap="viridis")
-        fig = flux_heatmap.get_figure()
-        fig.savefig('heatmap.png')
+        plotting.heat_map(shelf, shelf['param']['n_iterations'], 1000, fp_out)
+       
 
 
 def parse_arguments():

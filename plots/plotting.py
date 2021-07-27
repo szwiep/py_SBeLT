@@ -6,9 +6,11 @@ import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib.collections import PatchCollection
+from matplotlib.collections import LineCollection
 from matplotlib.patches import Circle
 from scipy.optimize import curve_fit
 from scipy.special import factorial
+import seaborn as sns
 
 def stream(iteration, bed_particles, model_particles, x_lim, y_lim,
                 available_vertices, fp_out):
@@ -62,8 +64,9 @@ def stream(iteration, bed_particles, model_particles, x_lim, y_lim,
         
     return
 
-def flux_info(particle_flux_list, iterations, fp_out):
-    fig = plt.figure(10)
+def flux_info(particle_flux_list, iterations, subsample, fp_out):
+    plt.clf()
+    fig = plt.figure(figsize=(8,7))
     ax = fig.add_subplot(1, 1, 1)
     bins = np.arange(-0.5, 11.5, 1) # fixed bin size
     plt.title('Histogram of Particle Flux, I = %i iterations' % iterations, fontsize=10, style='italic')
@@ -92,11 +95,16 @@ def flux_info(particle_flux_list, iterations, fp_out):
     fig.savefig(fi_path, format='png', dpi=600)
 
     #####
-    Flux_CS = np.cumsum(particle_flux_list)
-    Time = np.arange(1, iterations + 1, 1)
-    fig = plt.figure(20)
+    flux_list_avg = np.convolve(particle_flux_list, np.ones(subsample)/subsample, mode='valid')
+
+    flux_list = flux_list_avg[0::subsample]
+    Time = np.arange(1,  iterations + 1, subsample)
+    Flux_CS = np.cumsum(flux_list)
+    
+    plt.clf()
+    fig = plt.figure(figsize=(8,7))
     ax1 = fig.add_subplot(1,1,1)
-    ax1.plot(Time, particle_flux_list, 'lightgray')
+    ax1.plot(Time, flux_list, 'lightgray')
     plt.title('Timeseries of Particle Flux at Downstream Boundary')
     ax1.set_xlabel('Numerical Step')
     ax1.set_ylabel('Particle Flux')
@@ -112,22 +120,28 @@ def flux_info(particle_flux_list, iterations, fp_out):
     fiCS_path = fp_out + filenameCS
     fig.savefig(fiCS_path, format='png', dpi=600)
         
-def flux_info2(particle_flux_list, particle_age_list, n_iterations, fp_out):
+def flux_info2(particle_flux_list, particle_age_list, n_iterations, subsample, fp_out):
     plt.clf()
-    fig = plt.figure(20)
+    fig = plt.figure(figsize=(8,7))
     ax3 = fig.add_subplot(1, 1, 1)
     #####
-    Time = np.arange(1,  n_iterations + 1, 1)
-    fig = plt.figure(20)
+    flux_list_avg = np.convolve(particle_flux_list, np.ones(subsample)/subsample, mode='valid')
+    age_list_avg = np.convolve(particle_age_list, np.ones(subsample)/subsample, mode='valid')
+
+    flux_list = flux_list_avg[0::subsample]
+    age_list = age_list_avg[0::subsample]
+    Time = np.arange(1,  n_iterations + 1, subsample)
+
+    fig = plt.figure(figsize=(8,7))
     ax3 = fig.add_subplot(1,1,1)
-    ax3.plot(Time, particle_flux_list, 'lightgray')
+    ax3.plot(Time, flux_list, 'lightgray')
     plt.title('Timeseries of Particle Flux at Downstream Boundary')
     ax3.set_xlabel('Numerical Step')
     ax3.set_ylabel('Particle Flux')
     ax3.set_yticks([0, 1, 2, 3, 4, 5, 6, 7, 8])
     ax4 = ax3.twinx()
 
-    ax4.plot(Time, particle_age_list, 'black')
+    ax4.plot(Time, age_list, 'black')
     ax4.set_ylabel('Particle Age (# of iterations)', color='black', rotation=270, labelpad=15)
     ax4.tick_params('y', colors='black')
     
@@ -137,26 +151,96 @@ def flux_info2(particle_flux_list, particle_age_list, n_iterations, fp_out):
     fig.savefig(fi_path, format='png', dpi=600)
 
         
-def flux_info3(particle_flux_list, particle_age_list,particle_rage_list, n_iterations, fp_out):
+def flux_info3(particle_flux_list, particle_age_list,particle_rage_list, n_iterations, subsample, fp_out):
     plt.clf()
-    fig = plt.figure(10)
-    #####
-    Time = np.arange(1,  n_iterations + 1, 1)
-    fig = plt.figure(20)
-    ax5 = fig.add_subplot(1,1,1)
-    ax5.plot(Time, particle_flux_list, 'lightgray')
-    plt.title('Timeseries of Particle Flux at Downstream Boundary')
-    ax5.set_xlabel('Numerical Step')
-    ax5.set_ylabel('Particle Flux')
-    ax5.set_yticks([0, 1, 2, 3, 4, 5, 6, 7, 8])
-    ax6 = ax5.twinx()
+    fig = plt.figure(figsize=(8,7))
+    ####
+    flux_list_avg = np.convolve(particle_flux_list, np.ones(subsample)/subsample, mode='valid')
+    age_list_avg = np.convolve(particle_age_list, np.ones(subsample)/subsample, mode='valid')
+    age_range_list_avg = np.convolve(particle_rage_list, np.ones(subsample)/subsample, mode='valid')
 
-    plt.scatter(Time, particle_age_list, s = 15, c = particle_rage_list, cmap = 'RdGy' )
-    ax6.set_ylabel('Mean Particle Age (# of iterations)', color='black', rotation=270, labelpad=15)
-    ax6.tick_params('y', colors='black')
-    plt.colorbar(orientation='horizontal',fraction=0.046, pad=0.2,label='Particle Age Range (max age - min age)')
+    flux_list = flux_list_avg[0::subsample]
+    age_list = age_list_avg[0::subsample]
+    age_range_list = age_range_list_avg[0::subsample]
+
+    Time = np.arange(1,  n_iterations + 1, subsample)
+
+    # fig = plt.figure(figsize=(9,8))
+    # ax5 = fig.add_subplot(1,1,1)
+    # ax5.plot(Time, flux_list, 'lightgray')
+    # plt.title('Timeseries of Particle Flux at Downstream Boundary')
+    # ax5.set_xlabel('Numerical Step')
+    # ax5.set_ylabel('Particle Flux')
+    # ax5.set_yticks([0, 1, 2, 3, 4, 5, 6, 7, 8])
+    # ax6 = ax5.twinx()
+
+    # plt.plot(Time, age_list, linewidth='0.5', color='lightgray')
+    # plt.scatter(Time, age_list, s = 15, c = age_range_list, cmap = 'RdGy')
+    # ax6.set_ylabel('Mean Particle Age (# of iterations)', color='black', rotation=270, labelpad=15)
+    # ax6.tick_params('y', colors='black')
+    # plt.colorbar(orientation='horizontal',fraction=0.046, pad=0.2,label='Particle Age Range (max age - min age)')
     
-    fig.tight_layout()
+    # fig.tight_layout()
+    
+    x = np.linspace(1,  n_iterations + 1, subsample)
+    y = age_list
+    dydx = age_range_list 
+    flux_cumsum = np.cumsum(flux_list)
+
+    # Create a set of line segments so that we can color them individually
+    # This creates the points as a N x 1 x 2 array so that we can stack points
+    # together easily to get the segments. The segments array for line collection
+    # needs to be (numlines) x (points per line) x 2 (for x and y)
+    points = np.array([x, y]).T.reshape(-1, 1, 2)
+    segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+    fig, axs = plt.subplots(figsize=(8,5))
+
+    # Create a continuous norm to map from data points to colors
+    norm = plt.Normalize(dydx.min(), dydx.max())
+    lc = LineCollection(segments, cmap='RdGy', norm=norm)
+    # Set the values used for colormapping
+    lc.set_array(dydx)
+    lc.set_linewidth(1)
+    line = axs.add_collection(lc)
+
+    plt.title('Timeseries of Particle Flux at Downstream Boundary')
+    axs.autoscale(enable=True, axis='both')
+    axsTwin = axs.twinx()
+    axs.set_xlabel('Numerical Step')
+    axs.set_ylabel('Particle Flux')
+    axsTwin.set_ylabel('Mean Particle Age (# of iterations)', color='black', rotation=270, labelpad=15)
+    fig.colorbar(line, ax=axs, pad=0.13)
+
+    plt.plot(x, flux_cumsum, 'black')
+
+    # fig.tight_layout()
+    
+
     filename = 'FluxDownstreamBoundary_Rage.png'
     fi_path = fp_out + filename
     fig.savefig(fi_path, format='png', dpi=600)
+
+
+def heat_map(shelf, n_iterations, window_subsample, fp_out):
+     # Plot heatmap of all boundary crossings
+        plt.clf()
+        flux_list = []
+        for i in range(shelf['param']['num_subregions']):
+            key = f'subregion-{i}-flux' 
+            flux_full = shelf[key]
+            flux_list_avg = np.convolve(flux_full, np.ones(window_subsample), mode='valid') / window_subsample
+            flux_list_ss = flux_list_avg[0::window_subsample]
+
+            flux_list.append(flux_list_ss)
+
+        # the content of labels of these yticks
+        # print(flux_list)
+        flux_list = np.transpose(flux_list)
+        flux_heatmap = sns.heatmap(flux_list, cmap="coolwarm")
+        fig = flux_heatmap.get_figure()
+
+        
+        filename = 'FluxAllBoundaries_Heatmap.png'
+        fi_path = fp_out + filename
+        fig.savefig(fi_path, format='png', dpi=600)

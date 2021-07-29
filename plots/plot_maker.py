@@ -3,6 +3,7 @@ import shelve
 import argparse
 import os
 
+from matplotlib import pyplot as plt
 import plotting
 
 
@@ -45,7 +46,39 @@ def main(filename, save_location, iter_min, iter_max):
                             shelf['param']['n_iterations'], 1000, fp_out)
         
         plotting.heat_map(shelf, shelf['param']['n_iterations'], 1000, fp_out)
-       
+
+        ## Dynamic System Idea plotting below:
+        # total_flux = np.zeros(1000000)
+        # for subregion_id in range(0, subregion_max):
+        #     subregion_key = f'subregion-{subregion_id}-flux' 
+        #     total_flux = total_flux + shelf[subregion_key]
+        #     print(f'Sub {subregion_id}: {shelf[subregion_key]}')
+        # # Long term average
+        # total_flux_avg = np.average(total_flux)
+        # # Colvulve, subsample, get avg of subsample
+        # total_flux_conv = np.convolve(total_flux, np.ones(1000)/1000, mode='valid')
+        # ss_flux = total_flux_conv[0::1000]
+        # ss_flux_avg = np.average(ss_flux)
+        #  # Long term average - subsamples average
+        # ss_total_flux_avg =  total_flux_avg - ss_flux_avg
+
+        # # Convulve and subsample age as done to flux
+        # avg_age = np.array(shelf['avg_age'])
+        # avg_age_conv = np.convolve(avg_age, np.ones(1000)/1000, mode='valid')
+        # ss_avg_age = avg_age_conv[0::1000]
+
+        # # Subtract average from total flux
+        # zero_mean_flux = ss_flux - ss_total_flux_avg
+
+        # print(len(ss_avg_age), len(zero_mean_flux))
+        # num_iters = np.arange(0, 1000)
+        # plt.plot(zero_mean_flux, ss_avg_age,  alpha=0.7)
+        # plt.scatter(zero_mean_flux, ss_avg_age, c = num_iters, cmap='inferno')
+        # plt.colorbar(orientation='vertical',fraction=0.046,label='Iteration (Subsampled over window of 1000)')
+        # plt.xlabel('Mean Particle Age')
+        # plt.ylabel('Standardized Total Flux (Total Flux - Average Flux)')
+        # plt.savefig('dynam_sysScatter6Sim35Line.png', format='png')
+        # print(zero_mean_flux)
 
 
 def parse_arguments():

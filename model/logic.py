@@ -134,13 +134,16 @@ def define_subregions(bed_length, num_subregions, iterations):
     Keyword arguments:
     bed_length -- The length of the model bed.
     subregions -- The number of subregions to create.
+    iterations -- number of iterations for this simulation
 
     Returns:
     subregions_arr -- The np array of Subregions
 
     """
-    # TODO: Catch failure of assertion
-    assert(math.remainder(bed_length, num_subregions) == 0)
+    try:
+        assert(math.remainder(bed_length, num_subregions) == 0)
+    except AssertionError:
+        raise ValueError(f'Number of subregions needs to be a divisor of the bed length: {bed_length}%{num_subregions} != 0')
     
     subregion_length = bed_length/num_subregions
     left_boundary = 0

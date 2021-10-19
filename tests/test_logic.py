@@ -6,10 +6,15 @@ from mock import MagicMock
 
 from model import logic
 
-# TODO: attr_count seems like a really weak part of the design
-# But does using NumPy arrays require this sort of design?
 ATTR_COUNT = 7 # Number of attributes associated with a Particle
-
+# For reference:
+        # [0] = x-coord
+        # [1] = diameter,
+        # [2] = y-coord (elevation),
+        # [3] = uid,
+        # [4] = active (boolean)
+        # [5] = age counter
+        # [6] = loop age counter
   
 class TestGetEventParticlesWithOneSubregion(unittest.TestCase):
 
@@ -99,18 +104,18 @@ class TestGetEventParticlesWithOneSubregion(unittest.TestCase):
                                         self.level_limit )
         self.assertCountEqual(ghost_list, np_all_ghost[:,3])
 
-    # def test_some_ghost_particles_returns_ghost_and_regular(self):
+    def test_some_ghost_particles_returns_ghost_and_regular(self):
         
-        # np_all_ghost = np.zeros((self.num_particles, ATTR_COUNT))
-        # np_all_ghost[:,3] = np.arange(self.num_particles) 
-        # np_all_ghost[:,0] = -1
+        np_all_ghost = np.zeros((self.num_particles, ATTR_COUNT))
+        np_all_ghost[:,3] = np.arange(self.num_particles) 
+        np_all_ghost[:,0] = -1
 
-        # ghost_list = logic.get_event_particles(
-        #                                 self.entrainment_events, 
-        #                                 self.mock_sub_list, 
-        #                                 np_all_ghost, 
-        #                                 self.level_limit )
-        # self.assertCountEqual(ghost_list, np_all_ghost[:,3])     
+        ghost_list = logic.get_event_particles(
+                                        self.entrainment_events, 
+                                        self.mock_sub_list, 
+                                        np_all_ghost, 
+                                        self.level_limit )
+        self.assertCountEqual(ghost_list, np_all_ghost[:,3])     
 
     # Do we need a tear down method?
 
@@ -141,15 +146,15 @@ class TestGetEventParticlesWithNSubregions(unittest.TestCase):
         model_particles = np.zeros((self.num_particles, ATTR_COUNT))
         model_particles[:,3] = np.arange(self.num_particles) # unique ids
         model_particles[:,4] = np.ones(self.num_particles) # all active
-        # Place first three in Subregion 1 
-        # Place last three in Subregion 2
+        # Randomly place first three particles in Subregion 1 
         model_particles[0:3, 0] = np.random.randint(
                                                 10, 
                                                 size=3 )
+        # Randomly place last three particles in Subregion 2
         model_particles[3:6, 0] = np.random.randint(
                                                 10,
                                                 self.test_length, 
-                                                size=3 ) # random placement
+                                                size=3 )
 
         list = logic.get_event_particles(
                                         self.entrainment_events, 
@@ -204,6 +209,90 @@ class TestGetEventParticlesWithNSubregions(unittest.TestCase):
                                         one_particle_on_boundary, 
                                         self.level_limit )
         self.assertEqual(len(list), 1)
+
+# Test Define Subregions
+class TestDefineSubregions(unittest.TestCase):
+
+    def setUp(self):
+        self.bed_length = 10
+        self.iterations = 10
+    
+    def test_bad_subregion_count_returns_value_error(self):
+        subregion_count = 3
+        with self.assertRaises(ValueError):
+            subregion_list = logic.define_subregions(self.bed_length, 
+                                                    subregion_count, 
+                                                    self.iterations)
+
+        subregion_zero = 0
+        with self.assertRaises(ValueError):
+            subregion_list = logic.define_subregions(self.bed_length, 
+                                                    subregion_zero, 
+                                                    self.iterations)
+
+    def test_good_parameters_return_good_subregion_list(self):
+        subregion_count_even = 2
+        left_boundary = 0
+        middle_boundary = self.bed_length / 2
+        right_boundary = self.bed_length
+
+        subregion_list = logic.define_subregions(self.bed_length, 
+                                                subregion_count_even, 
+                                                self.iterations)
+        # Check number of subregions
+        self.assertEqual(len(subregion_list), 2) 
+        # Check boundary definitions
+        self.assertEqual(subregion_list[0].leftBoundary(), left_boundary)
+        self.assertEqual(subregion_list[0].rightBoundary(), middle_boundary)
+        self.assertEqual(subregion_list[1].leftBoundary(), middle_boundary)
+        self.assertEqual(subregion_list[1].rightBoundary(), right_boundary)
+
+        subregion_count_odd = 5
+        sub_length = self.bed_length / subregion_count_odd
+
+        left_boundary = 0
+        middle_boundary_1 = left_boundary + sub_length*1
+        middle_boundary_2 = left_boundary + sub_length*2
+        middle_boundary_3 = left_boundary + sub_length*3
+        middle_boundary_4 = left_boundary + sub_length*4
+        right_boundary = self.bed_length
+
+        subregion_list_odd = logic.define_subregions(self.bed_length, 
+                                                subregion_count_odd, 
+                                                self.iterations)
+        # Check number of subregions
+        self.assertEqual(len(subregion_list_odd), 5) 
+        # Check boundary definitions
+        self.assertEqual(subregion_list_odd[0].leftBoundary(), left_boundary)
+        self.assertEqual(subregion_list_odd[0].rightBoundary(), middle_boundary_1)
+        self.assertEqual(subregion_list_odd[1].leftBoundary(), middle_boundary_1)
+        self.assertEqual(subregion_list_odd[1].rightBoundary(), middle_boundary_2)
+        self.assertEqual(subregion_list_odd[2].leftBoundary(), middle_boundary_2)
+        self.assertEqual(subregion_list_odd[2].rightBoundary(), middle_boundary_3)
+        self.assertEqual(subregion_list_odd[3].leftBoundary(), middle_boundary_3)
+        self.assertEqual(subregion_list_odd[3].rightBoundary(), middle_boundary_4)
+        self.assertEqual(subregion_list_odd[4].leftBoundary(), middle_boundary_4)
+        self.assertEqual(subregion_list_odd[4].rightBoundary(), right_boundary)
+    
+    def test_all_subregion_flux_are_init_0(self):
+        subregion_count_even = 2
+        empty_list = np.zeros(self.iterations, dtype=np.int64)
+        subregion_list = logic.define_subregions(self.bed_length, 
+                                                subregion_count_even, 
+                                                self.iterations)
+        
+        for subregion in subregion_list:
+            self.assertEqual(len(subregion.getFluxList()), self.iterations)
+            self.assertCountEqual(subregion.getFluxList(), empty_list)
+
+
+# # Test Add Bed Particle
+# class TestAddBedParticle():
+
+
+# # Test Build Streambed
+# class TestBuildStreambed():
+
 
 
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
 import unittest
 import random
+import math 
 import numpy as np
 from mock import MagicMock
 
@@ -277,21 +278,103 @@ class TestDefineSubregions(unittest.TestCase):
     def test_all_subregion_flux_are_init_0(self):
         subregion_count_even = 2
         empty_list = np.zeros(self.iterations, dtype=np.int64)
-        subregion_list = logic.define_subregions(self.bed_length, 
+        subregion_list_even = logic.define_subregions(self.bed_length, 
                                                 subregion_count_even, 
                                                 self.iterations)
         
-        for subregion in subregion_list:
+        for subregion in subregion_list_even:
             self.assertEqual(len(subregion.getFluxList()), self.iterations)
             self.assertCountEqual(subregion.getFluxList(), empty_list)
 
+# Test Build Streambed
+class TestBuildStreambed(unittest.TestCase):
 
-# # Test Add Bed Particle
-# class TestAddBedParticle():
+    def test_incompat_diam_updates_length(self):
+        # TODO: does this testing logic hold up for length != 100
+        stream_length = 100
+        diameter = 0.7
+        stream_length_ceiling = math.ceil((stream_length+diameter)/diameter)
+        expected_stream_length = math.ceil(stream_length_ceiling*diameter)
+        bed_particles, new_length = logic.build_streambed(stream_length, diameter)
+
+        self.assertNotEquals(new_length, stream_length)
+        self.assertEqual(new_length, expected_stream_length)
+
+        # This (below) is only a valid check for compatible diametets. x_max could != right extent
+        # for in compatible diameters. See notes for suggestion to change this behaviour
+
+        # final_particle_right_extent = bed_particles[len(bed_particles)-1][0] + diameter/2
+        # self.assertEqual(new_length, final_particle_right_extent)
+    
+    def test_incompat_diam_returns_good_bed_particles(self):
+        stream_length = 100
+        diameter = 0.7
+        stream_length_ceiling = math.ceil((stream_length+diameter)/diameter)
+        expected_num_of_particles = stream_length_ceiling - 1
+
+        bed_particles, _ = logic.build_streambed(stream_length, diameter)
+
+        self.assertEqual(len(bed_particles), expected_num_of_particles)
+        for particle in bed_particles:
+
+            if 'previous_centre' in locals():
+                self.assertAlmostEqual(particle[0], previous_centre + diameter)
+                self.assertGreaterEqual(particle[0] - diameter/2, previous_centre)
+            else:
+                self.assertAlmostEqual(particle[0], diameter/2)
+                self.assertGreaterEqual(particle[0] - diameter/2, 0)
+
+            self.assertEqual(particle[1], diameter)
+            self.assertEqual(particle[2], 0)
+            self.assertEqual(particle[4], 0)
+            self.assertEqual(particle[5], 0)
+            self.assertEqual(particle[6], 0)
+
+            previous_centre = particle[0]
+
+    def test_compat_diam_returns_same_length(self):
+        stream_length = 100
+        diameter = 0.5
+
+        _, new_length = logic.build_streambed(stream_length, diameter)
+        self.assertEqual(new_length, stream_length)
+
+    def test_compat_diam_returns_good_particles(self):
+        stream_length = 100
+        diameter = 0.5
+        expected_number_particles = stream_length / diameter
+
+        bed_particles, _ = logic.build_streambed(stream_length, diameter)
+
+        self.assertEqual(len(bed_particles), expected_number_particles)
+        for particle in bed_particles:
+            if 'previous_centre' in locals():
+                self.assertAlmostEqual(particle[0], previous_centre + diameter)
+                self.assertGreaterEqual(particle[0] - diameter/2, previous_centre)
+            else:
+                self.assertAlmostEqual(particle[0], diameter/2)
+                self.assertGreaterEqual(particle[0] - diameter/2, 0)
+
+            self.assertEqual(particle[1], diameter)
+            self.assertEqual(particle[2], 0)
+            self.assertEqual(particle[4], 0)
+            self.assertEqual(particle[5], 0)
+            self.assertEqual(particle[6], 0)
+
+            previous_centre = particle[0]
+        
+        final_particle_extent = bed_particles[len(bed_particles)-1][0] + diameter/2
+        self.assertEqual(final_particle_extent, stream_length)
+        
 
 
-# # Test Build Streambed
-# class TestBuildStreambed():
+# test case with bed packing matching x_max
+    # Check x_max = right most particle boundary
+    # Check bed_particles array correct
+        # correct init
+        # correct number and boundaries
+
+
 
 
 

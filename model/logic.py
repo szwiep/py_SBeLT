@@ -223,15 +223,12 @@ def build_streambed(x_max, set_diam):
     
     running_id = 0
     running_pack_idx = 0
-    # This probably doesn't need to be a loop. NumPy! 
-    while True:
+    # TODO: This probably doesn't need to be a loop. NumPy! 
+    while not bed_complete(running_pack_idx, x_max):
         running_id, running_pack_idx = add_bed_particle(set_diam, 
                                                         bed_particles, 
                                                         running_id, 
                                                         running_pack_idx)
-        if bed_complete(running_pack_idx, x_max):
-            break
-        else: continue
     
     # Bed packing does not always match x_max. Adjust if off
     bed_max = int(math.ceil(bed_particles[running_id-1][1] 

@@ -156,49 +156,7 @@ def define_subregions(bed_length, num_subregions, iterations):
         subregions_arr.append(subregion)
     
     return subregions_arr
-     
-# TODO: This does not need to be an independant function 
-# Should merge model and bed particle array builders into one. 
-# This could aid maintainace/change of the array structure.
-def add_bed_particle(diam, bed_particles, particle_id, pack_idx):
-    """ Add 'particle' to the bed particle list.
     
-    
-    
-    Calculates center and elevation of particle 
-    from input. Maintains pack_idx and particle_id 
-    for next particle iteration.
-    
-    Builds particle of the following structure:
-        [0] = center coordinate,
-        [1] = diameter,
-        [2] = elevation,
-        [3] = pack_idx,
-        [4] = active (boolean)
-        [5] = age counter
-        [6] = loop age counter
-    
-    Keyword arguments:
-    diam -- diameter of the pa
-    bed_particles -- current list of bed particles
-    particle_id -- index into bed_particles list
-    pack_idx -- left-most extent of particle
-    """
-    
-    center = pack_idx + (diam/2)
-    state = 0
-    age = 0
-    loop_age = 0
-    elevation = 0
-    
-    bed_particles[particle_id] = [center, diam, elevation, pack_idx, state, age, loop_age]
-  
-    # update build parameters
-    pack_idx += diam
-    particle_id += 1
- 
-    return particle_id, pack_idx
-
 # @Timer("build_streambed", text="build_streambed call: {:.5f} seconds", logger=None)
 def build_streambed(x_max, set_diam):
     """ Build the bed particle list.
@@ -221,18 +179,28 @@ def build_streambed(x_max, set_diam):
     max_particles = int(math.ceil( x_max / set_diam ))
     bed_particles = np.zeros([max_particles, 7],dtype=float)
     
-    running_id = 0
-    running_pack_idx = 0
-    # TODO: This probably doesn't need to be a loop. NumPy! 
-    while not bed_complete(running_pack_idx, x_max):
-        running_id, running_pack_idx = add_bed_particle(set_diam, 
-                                                        bed_particles, 
-                                                        running_id, 
-                                                        running_pack_idx)
+    particle_id = 0
+    packed_centre_loc = 0
+
+    # TODO: NumPy improvement: This probably doesn't need to be a while loop
+    while not bed_complete(packed_centre_loc, x_max):
+
+        center = packed_centre_loc + (set_diam/2)
+        state = 0
+        age = 0
+        loop_age = 0
+        elevation = 0
+        
+        bed_particles[particle_id] = [center, set_diam, elevation, packed_centre_loc, state, age, loop_age]
     
+        # update build parameters
+        packed_centre_loc += set_diam
+        particle_id += 1
+    
+    # TODO: This behaviour should be gotten rid of with a check for incompat diams.
     # Bed packing does not always match x_max. Adjust if off
-    bed_max = int(math.ceil(bed_particles[running_id-1][1] 
-                            + bed_particles[running_id-1][3]))
+    bed_max = int(math.ceil(bed_particles[particle_id-1][1] 
+                            + bed_particles[particle_id-1][3]))
     if x_max != bed_max:
         msg = (
             f'Bed packing could not match x_max parameter... Updating '

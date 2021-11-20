@@ -16,6 +16,9 @@ ATTR_COUNT = 7 # Number of attributes associated with a Particle
         # [4] = active (boolean)
         # [5] = age counter
         # [6] = loop age counter
+
+
+# TODO: create comment examples for the testing behavioiur
   
 class TestGetEventParticlesWithOneSubregion(unittest.TestCase):
 
@@ -125,7 +128,6 @@ class TestGetEventParticlesWithNSubregions(unittest.TestCase):
     def setUp(self):
         self.test_length = 20
         self.num_particles = 6
-
         mock_subregion_0 = MagicMock()
         mock_subregion_0.leftBoundary.return_value = 0
         mock_subregion_0.rightBoundary.return_value = self.test_length / 2
@@ -149,11 +151,11 @@ class TestGetEventParticlesWithNSubregions(unittest.TestCase):
         model_particles[:,4] = np.ones(self.num_particles) # all active
         # Randomly place first three particles in Subregion 1 
         model_particles[0:3, 0] = np.random.randint(
-                                                10, 
+                                                9, 
                                                 size=3 )
         # Randomly place last three particles in Subregion 2
         model_particles[3:6, 0] = np.random.randint(
-                                                10,
+                                                11,
                                                 self.test_length, 
                                                 size=3 )
 
@@ -162,6 +164,7 @@ class TestGetEventParticlesWithNSubregions(unittest.TestCase):
                                         self.mock_sub_list_2, 
                                         model_particles, 
                                         self.level_limit )
+
         self.assertCountEqual(list, model_particles[:,3])
         self.assertEqual(len(list), self.entrainment_events * 2)
 
@@ -297,16 +300,18 @@ class TestBuildStreambed(unittest.TestCase):
         expected_stream_length = math.ceil(stream_length_ceiling*diameter)
         bed_particles, new_length = logic.build_streambed(stream_length, diameter)
 
-        self.assertNotEquals(new_length, stream_length)
+        self.assertNotEqual(new_length, stream_length)
         self.assertEqual(new_length, expected_stream_length)
 
-        # This (below) is only a valid check for compatible diametets. x_max could != right extent
-        # for in compatible diameters. See notes for suggestion to change this behaviour
+    # This (below) is only a valid check for compatible diameters. x_max could != right extent
+    # for in compatible diameters. See Milestone 1 notes for suggestion to change this behaviour.
 
-        # final_particle_right_extent = bed_particles[len(bed_particles)-1][0] + diameter/2
-        # self.assertEqual(new_length, final_particle_right_extent)
+    # final_particle_right_extent = bed_particles[len(bed_particles)-1][0] + diameter/2
+    # self.assertEqual(new_length, final_particle_right_extent)
     
     def test_incompat_diam_returns_good_bed_particles(self):
+        
+ 
         stream_length = 100
         diameter = 0.7
         stream_length_ceiling = math.ceil((stream_length+diameter)/diameter)
@@ -365,17 +370,49 @@ class TestBuildStreambed(unittest.TestCase):
         
         final_particle_extent = bed_particles[len(bed_particles)-1][0] + diameter/2
         self.assertEqual(final_particle_extent, stream_length)
+
+class TestSetModelParticles(unittest.TestCase):
+
+    def setUp(self):
+        stream_length = 10
+        self.diam = 0.5
+        self.pack_fraction = 0.8
+        # Directly from https://math.stackexchange.com/questions/2293201/
+        # Variables used for geometric placement
+        d = np.divide(np.multiply(np.divide(self.diam, 2), 
+                                            self.diam), 
+                                            self.diam)
+        self.h = np.sqrt(np.square(self.diam) - np.square(d))
+
+        # Mock a full bed_particles array
+        num_bed_particles = int(stream_length/self.diam)
+        bed_particles = np.zeros([num_bed_particles, ATTR_COUNT], dtype=float)
+        bed_particles[:,0] = np.arange(self.diam/2, stream_length+(self.diam/2), step=self.diam)
+        bed_particles[:,3] = np.arange(num_bed_particles) # unique ids
+        self.bed_particles = bed_particles
+        # Make all vertices created by the touching bed particles available
+        # -----> 0.5, 1.0, 1.5, ... , 9.5 (with stream length 10)
+        self.available_vertices = np.arange(self.diam, stream_length, step=self.diam)
+
+    def test_model_particles_placed_at_valid_locations(self):
+        model_particles = logic.set_model_particles(self.bed_particles,   
+                                                    self.available_vertices, 
+                                                    self.diam, 
+                                                    self.pack_fraction, 
+                                                    self.h)
+        # Particles should only be able to be placed at available vertices
+        # NOTE: should we test what this does with stacking?
+        self.assertTrue(set(model_particles[:,0]).issubset(self.available_vertices))  
+        # Particles should not be placed in the same locations
+        self.assertTrue(len(model_particles[:,0]) == len(set(model_particles[:,0])))
+
+    def test_all_model_particles_have_valid_initial_attributes(self):
         
 
-
-# test case with bed packing matching x_max
-    # Check x_max = right most particle boundary
-    # Check bed_particles array correct
-        # correct init
-        # correct number and boundaries
-
-
-
+        # self.assertTrue(len(model_particles[:,3]) == len(set(model_particles[:,3])))
+    # Test no model particles placed at the same location 
+    # Test init models: unique id, active, no loops and 0 age
+    # Test all model particle placements are valid
 
 
 if __name__ == '__main__':

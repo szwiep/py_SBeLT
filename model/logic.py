@@ -5,8 +5,6 @@ import numpy as np
 import sympy as sy
 import copy
 
-
-#TODO: Refactor functions so that they don't reach into the paramters file
 from collections import defaultdict
 # from codetiming import Timer
 from numba import jit, njit
@@ -80,9 +78,12 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
         # Take only particles set as 'Active'
         active_particles =  in_stream_particles[
                                                 in_stream_particles[:,4] != 0]
-        # Do not take any particles that have been selected for entrainment
+
+        # Do not take any particles that have been selected for entrainment 
+        # This only happens when particles rest on the boundary. Perhaps make code more obviously directed to this behaviour
         active_event, active_idx, event_idx = np.intersect1d(active_particles[:,3], event_particles, return_indices=True)
         active_particles = np.delete(active_particles, active_idx, axis=0)
+
 
         subregion_event_ids = []  
         if height_dependant:
@@ -255,7 +256,7 @@ def place_particle(particle, model_particles, bed_particles, h):
     bed_particles -- bed particle list
     
     """
-    # TODO: It would be ideal to avoid a call to find_supports here
+    # TODO: It would be ideal to avoid a call to find_supports here.
     left_support, right_support = find_supports(particle, model_particles, 
                                                 bed_particles, already_placed=False)
     
@@ -311,7 +312,7 @@ def update_particle_states(model_particles, bed_particles):
     if inactive_right.size != 0:
         model_particles[inactive_right,4] = 0
     
-    # TODO: previous method, same results. Cannot fully vectorize due to call to find_supports()
+    # NOTE: below previous method, same results as above. Cannot fully vectorize due to call to find_supports()
     # for particle in in_stream_particles:     
     #     left_neighbour, right_neighbour = find_supports(particle, 
     #                                                     model_particles, 
@@ -456,7 +457,7 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
         available_vertices = available_vertices[available_vertices != vertex]
 
         # intialize the particle information
-        model_particles[particle][0] = vertex
+        model_particles[particle][0] = vertex 
         model_particles[particle][1] = set_diam
         
         model_particles[particle][3] = particle # id number for each particle
@@ -467,8 +468,7 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
                                   model_particles, 
                                   bed_particles, 
                                   h)
-        
-        
+            
         model_particles[particle][0] = p_x
         model_particles[particle][2] = p_y
         model_particles[particle][5] = 0
@@ -482,7 +482,7 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
 
 # @Timer("compute_available_vertices", text="compute_avail_vertices call: {:.5f} seconds", logger=None)
 def compute_available_vertices(model_particles, bed_particles, set_diam, level_limit,
-                               lifted_particles=None, just_bed=False):
+                               lifted_particles=None):
     """ Compute the avaliable vertices in the model 
     stream.
 
@@ -521,11 +521,9 @@ def compute_available_vertices(model_particles, bed_particles, set_diam, level_l
                                            lifted_particles, 0)
         all_particles = np.concatenate((model_particles_lifted, 
                                         bed_particles), axis=0)
-    elif just_bed == True:
-        all_particles = bed_particles;
-    else:    
-        all_particles = np.concatenate((model_particles, 
-                                        bed_particles), axis=0)
+
+    all_particles = np.concatenate((model_particles, 
+                                    bed_particles), axis=0)
     # Get unique model particle elevations in stream (descending)
     elevations = elevation_list(all_particles[:,2])
     
@@ -618,7 +616,7 @@ def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_v
     return model_particles, subregions
   
         
-def fathel_furbish_hops(event_particle_ids, model_particles, mu, sigma, normal=False):
+def compute_hops(event_particle_ids, model_particles, mu, sigma, normal=False):
     """ Given a list of (event) paritcles, this function will 
     add a 'hop' distance to all particles' current x-locations. 
     This value represents the desired hop location of the given 
@@ -659,12 +657,12 @@ def move_model_particles(event_particles, model_particles, bed_particles, availa
         available_particles -- ndarray of available vertices in the stream
     
     Returns:
-        entrainment_dict -- dictionary of the event particle movements using
-                            (particle_id, entrainment_location) key-value pair
-        model_particles -- updated model particle array 
-        updated_avail_vert -- updated list of available_vertices
-        particle_flux -- number of particles which passed the downstream 
-                         boundary during this event
+        entrainment_dict    -- dictionary of the event particle movements using
+                                    (particle_id, entrainment_location) key-value pair
+        model_particles     -- updated model particle array 
+        updated_avail_vert  -- updated list of available_vertices
+        particle_flux       -- number of particles which passed the downstream 
+                                    boundary during this event
 
     """
     entrainment_dict = {}

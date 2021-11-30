@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path 
 from shortuuid import uuid
 import shelve
+import cProfile
 
 import logic
 import util
@@ -89,14 +90,13 @@ def main(run_id, pid, param_path):
                                                         parameters['level_limit'], 
                                                         parameters['height_dependancy'])
             # Determine hop distances of all event particles
-            unverified_e = logic.fathel_furbish_hops(event_particle_ids, model_particles, parameters['mu'],
+            unverified_e = logic.compute_hops(event_particle_ids, model_particles, parameters['mu'],
                                                     parameters['sigma'], normal=parameters['normal_dist'])
             # Compute available vertices based on current model_particles state
             avail_vertices = logic.compute_available_vertices(model_particles, 
                                                         bed_particles,
                                                         parameters['set_diam'],
                                                         parameters['level_limit'],
-                                                        just_bed=False, 
                                                         lifted_particles=event_particle_ids)
             # Run entrainment event                    
             model_particles, subregions = logic.run_entrainments(model_particles, 
@@ -122,7 +122,6 @@ def main(run_id, pid, param_path):
             #               1) model_particles array 
             #               2) available_vertices used for run_entrainments call
             #               3) event_particle_ids used for run_entrainments cal
-            # snapshot_interval determines how often snapshots are stored
             if (snapshot_counter == parameters['snapshot_interval']):
                 snapshot_dict[str(iteration)] = [ 
                                             np.ndarray.tolist(model_particles), 
@@ -137,7 +136,7 @@ def main(run_id, pid, param_path):
                 snapshot_dict.clear()
                 print(f'[{pid}] Finished writing chunk. Continuing with entrainments...')
 
-            # Display run progress for users using milestones list
+            # Display run progress for users
             percentage_complete = (100.0 * (iteration+1) / parameters['n_iterations'])
             while len(milestones) > 0 and percentage_complete >= milestones[0]:
                 print(f'[{pid}] {milestones[0]}% complete')
@@ -163,18 +162,19 @@ def main(run_id, pid, param_path):
         snapshot_shelve['avg_age'] = particle_age_list
         snapshot_shelve['age_range'] = particle_range_list
         print(f'[{pid}] Finished writing flux and age information.')
-
+        print(f'[{pid}] Model run finished successfully.')
+    except Exception as e:
+        print(e)
     finally:
         print('Closing shelf file...')
         snapshot_shelve.close()
-        print(f'[{pid}] Model run finished.')
         return
 
 
 def build_stream(parameters, h):
     bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])   
     available_vertices = logic.compute_available_vertices([], bed_particles, parameters['set_diam'],
-                                                        parameters['level_limit'], just_bed=True)    
+                                                        parameters['level_limit'])    
     # Create model particle array and set on top of bed particles
     model_particles = logic.set_model_particles(bed_particles, available_vertices, parameters['set_diam'], 
                                                         parameters['pack_density'],  h)
@@ -208,13 +208,17 @@ def get_relative_paths():
 
 if __name__ == '__main__':
 
-
+    pr = cProfile.Profile()
+    pr.enable()
     uid = uuid()
     pid = os.getpid()
     run_id = datetime.now().strftime('%y%m-%d%H-') + uid
     print(f'Process [{pid}] run ID: {run_id}')
     
     main(run_id, pid, sys.argv[1])
+
+    pr.disable()
+    pr.dump_stats('profile_dump_nov_24')
 
     
     

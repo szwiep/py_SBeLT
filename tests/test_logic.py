@@ -1,6 +1,8 @@
 import unittest
 import random
-import math 
+import math
+from unittest.case import expectedFailure
+import model 
 import numpy as np
 from mock import MagicMock
 
@@ -36,8 +38,7 @@ class TestGetEventParticlesWithOneSubregion(unittest.TestCase):
         self.level_limit = random.randint(0, random.randint(2, 10))
 
 
-    def test_all_active_returns_valid_list(self):
-        
+    def test_all_active_returns_valid_list(self): 
         model_particles = np.zeros((self.num_particles, ATTR_COUNT))
         model_particles[:,3] = np.arange(self.num_particles) # unique ids
         model_particles[:,4] = np.ones(self.num_particles) # all active
@@ -269,12 +270,16 @@ class TestDefineSubregions(unittest.TestCase):
         # Check boundary definitions
         self.assertEqual(subregion_list_odd[0].leftBoundary(), left_boundary)
         self.assertEqual(subregion_list_odd[0].rightBoundary(), middle_boundary_1)
+
         self.assertEqual(subregion_list_odd[1].leftBoundary(), middle_boundary_1)
         self.assertEqual(subregion_list_odd[1].rightBoundary(), middle_boundary_2)
+
         self.assertEqual(subregion_list_odd[2].leftBoundary(), middle_boundary_2)
         self.assertEqual(subregion_list_odd[2].rightBoundary(), middle_boundary_3)
+
         self.assertEqual(subregion_list_odd[3].leftBoundary(), middle_boundary_3)
         self.assertEqual(subregion_list_odd[3].rightBoundary(), middle_boundary_4)
+
         self.assertEqual(subregion_list_odd[4].leftBoundary(), middle_boundary_4)
         self.assertEqual(subregion_list_odd[4].rightBoundary(), right_boundary)
     
@@ -400,19 +405,148 @@ class TestSetModelParticles(unittest.TestCase):
                                                     self.diam, 
                                                     self.pack_fraction, 
                                                     self.h)
-        # Particles should only be able to be placed at available vertices
+        # Particles should only be placed at available vertices
         # NOTE: should we test what this does with stacking?
         self.assertTrue(set(model_particles[:,0]).issubset(self.available_vertices))  
-        # Particles should not be placed in the same locations
+        # All placements should be unique
         self.assertTrue(len(model_particles[:,0]) == len(set(model_particles[:,0])))
+        # There should be no stacking
+        self.assertEqual(len(set(model_particles[:,2])), 1)
 
-    def test_all_model_particles_have_valid_initial_attributes(self):
         
 
-        # self.assertTrue(len(model_particles[:,3]) == len(set(model_particles[:,3])))
-    # Test no model particles placed at the same location 
-    # Test init models: unique id, active, no loops and 0 age
-    # Test all model particle placements are valid
+    def test_all_model_particles_have_valid_initial_attributes(self):
+        model_particles = logic.set_model_particles(self.bed_particles,   
+                                                    self.available_vertices, 
+                                                    self.diam, 
+                                                    self.pack_fraction, 
+                                                    self.h)
+        # all diam = self.diam
+        expected_diam = np.ones(len(model_particles)) * self.diam
+        self.assertCountEqual(model_particles[:,1], expected_diam)
+
+        # unique id's
+        self.assertTrue(len(model_particles[:,3]) == len(set(model_particles[:,3])))
+        
+        # all model are active
+        expected_activity = np.ones(len(model_particles)) 
+        self.assertCountEqual(model_particles[:,4], expected_activity)
+
+        # 0 age counter and loop age
+        expected_age_and_loop = np.zeros(len(model_particles))
+        self.assertCountEqual(model_particles[:,5], expected_age_and_loop)
+        self.assertCountEqual(model_particles[:,6], expected_age_and_loop)
+
+
+
+class TestComputeAvailableVerticesLifted(unittest.TestCase):
+    print("Not implemented")
+
+
+
+class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
+   
+    def setUp(self):
+        # make bed particles
+        self.stream_length = 5
+        self.diam = 0.5
+
+        # Mock a full bed_particles array
+        num_bed_particles = int(self.stream_length/self.diam) # 10 bed particles
+        bed_particles = np.zeros([num_bed_particles, ATTR_COUNT], dtype=float)
+        bed_particles[:,0] = np.arange(self.diam/2, self.stream_length+(self.diam/2), step=self.diam)
+        bed_particles[:,3] = np.arange(num_bed_particles) # unique ids
+        self.bed_particles = bed_particles
+
+        self.expected_bed_vertices = np.arange(self.diam, self.stream_length, step=self.diam)
+    
+    def test_just_bed_returns_all_available(self):
+        level_limit = 3 # Arbitrary level limit
+
+        # Bed of length n should return n-1 available vertices
+        available_vertices = logic.compute_available_vertices([], self.bed_particles, self.diam, 
+                                            level_limit=level_limit, just_bed=True)
+        
+        self.assertEqual(len(self.bed_particles)-1, len(available_vertices))
+        self.assertCountEqual(available_vertices, self.expected_bed_vertices)
+
+    def test_one_model_particle_returns_bed_available_minus_one(self):
+        level_limit = 3 # Arbitrary level limit
+        one_particle = np.array([[self.diam, 0, 0, 0, 0, 0, 0]]) # at first resting spot
+        available_vertices = logic.compute_available_vertices(one_particle, self.bed_particles, self.diam, 
+                                            level_limit=level_limit, just_bed=False)
+        
+        # Assert there is no available vertex at one_particle[0][0]
+        self.assertNotIn(one_particle[0][0], available_vertices)
+        self.assertEqual(len(self.bed_particles)-2, len(available_vertices))
+        
+        expected_vertices = np.delete(self.expected_bed_vertices, 0) # bed minus first available vertex
+        self.assertCountEqual(available_vertices, expected_vertices)
+
+    def test_m_model_particles_return_bed_available_minus_m(self):
+        level_limit = 3 # Arbitrary level limit
+        m_particles = 4
+        model_particles = np.zeros([m_particles, ATTR_COUNT], dtype=float)
+        # Place m model particles 2 resting spots away from each other
+        placement_idxs = [0, 2, 4, 6]
+        model_particles[0][0] = self.expected_bed_vertices[placement_idxs[0]]
+        model_particles[1][0] = self.expected_bed_vertices[placement_idxs[1]]
+        model_particles[2][0] = self.expected_bed_vertices[placement_idxs[2]]
+        model_particles[3][0] = self.expected_bed_vertices[placement_idxs[3]]
+
+        available_vertices = logic.compute_available_vertices(model_particles, self.bed_particles, self.diam, 
+                                            level_limit=level_limit, just_bed=False)
+        
+        self.assertEqual(len(self.bed_particles)-m_particles-1, len(available_vertices))
+        
+        expected_vertices = np.delete(self.expected_bed_vertices, placement_idxs)
+        self.assertCountEqual(available_vertices, expected_vertices)
+
+    def test_no_available_vertices_returns_empty_array(self):
+        level_limit = 3 # Arbitrary level limit
+        m_particles = 4
+        model_particles = np.zeros([len(self.bed_particles)-1, ATTR_COUNT], dtype=float)
+        model_particles[:,0] = self.expected_bed_vertices
+
+        available_vertices = logic.compute_available_vertices(model_particles, self.bed_particles, self.diam, 
+                                            level_limit=level_limit, just_bed=False)
+        self.assertEqual(0, len(available_vertices))
+
+
+
+
+class TestFindSupports(unittest.TestCase):
+    print("Not implemented")
+
+class TestUpdatedParticleStates(unittest.TestCase):
+    print("Not Implemented")
+
+class TestPlaceParticle(unittest.TestCase):
+    print("Not Implemented")
+
+class TestElevationList(unittest.TestCase):
+    print("Not implemented")
+
+class TestRunEntrainments(unittest.TestCase):
+    print("Not implemented")
+
+class TestComputeHops(unittest.TestCase):
+    print("Not implemented")
+
+class TestMoveModelParticles(unittest.TestCase):
+    print("Not implemented")
+
+class TestUpdateFlux(unittest.TestCase):
+    print("Not implemented")
+
+class TestFindClosestVertex(unittest.TestCase):
+    print("Not implemented")
+
+class TestCheckUniqueEntrainments(unittest.TestCase):
+    print("Not implemented")
+
+class TestIncrementAge(unittest.TestCase):
+    print("Not implemented")
 
 
 if __name__ == '__main__':

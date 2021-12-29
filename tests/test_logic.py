@@ -440,9 +440,62 @@ class TestSetModelParticles(unittest.TestCase):
 
 
 class TestComputeAvailableVerticesLifted(unittest.TestCase):
-    print("Not implemented")
+    def setUp(self):
+        # make bed particles
+        self.stream_length = 5
+        self.diam = 0.5
 
+        # Mock a full bed_particles array
+        num_bed_particles = int(self.stream_length/self.diam) # 10 bed particles
+        bed_particles = np.zeros([num_bed_particles, ATTR_COUNT], dtype=float)
+        bed_particles[:,0] = np.arange(self.diam/2, self.stream_length+(self.diam/2), step=self.diam)
+        bed_particles[:,3] = np.arange(num_bed_particles) # unique ids
+        self.bed_particles = bed_particles
 
+        self.expected_bed_vertices = np.arange(self.diam, self.stream_length, step=self.diam)
+
+    def test_only_bed_and_empty_lifted_returns_expected_bed_vert(self):
+        level_limit = 3 # Arbitrary level limit
+        empty_model_particles = np.empty((0, ATTR_COUNT))
+
+        # Bed of length n should return n-1 available vertices
+        available_vertices = logic.compute_available_vertices(empty_model_particles, self.bed_particles, self.diam, 
+                                            level_limit=level_limit, lifted_particles=[])
+        self.assertEqual(len(self.bed_particles)-1, len(available_vertices))
+        self.assertCountEqual(available_vertices, self.expected_bed_vertices)
+    
+    def test_bed_and_all_model_lifted_returns_expected_bed_vertices(self):
+        level_limit = 3
+        num_model_particles = 3
+
+        model_particles = np.zeros([num_model_particles, ATTR_COUNT], dtype=float)
+        # Particles will be at the first 3 available vertices
+        model_particles[:,0] = self.expected_bed_vertices[0:3]
+        model_particles[:,3] = np.arange(num_model_particles) 
+        # Bed of length n should return n-1 available vertices
+        available_vertices = logic.compute_available_vertices(model_particles, self.bed_particles, self.diam, 
+                                            level_limit=level_limit, lifted_particles=model_particles[:,3].astype(int))
+        print(self.expected_bed_vertices, available_vertices)
+        self.assertEqual(len(available_vertices), len(self.bed_particles)-1)
+        self.assertCountEqual(available_vertices, self.expected_bed_vertices)
+
+    def test_not_touching_and_one_lifted_model_returns_valid_vertices(self):
+        level_limit = 3
+        num_model_particles = 3
+
+        model_particles = np.zeros([num_model_particles, ATTR_COUNT], dtype=float)
+        # Particles will be at the first 3 available vertices
+        model_particles[:,0] = self.expected_bed_vertices[0:3] 
+        model_particles[:,3] = np.arange(num_model_particles)
+
+        # Lift first particle, keep later 2 particles -- t/f locations of first particles should be be available
+        # and locations of second and third particle should not be avaliable
+        available_vertices = logic.compute_available_vertices(model_particles, self.bed_particles, self.diam, 
+                                        level_limit=level_limit, lifted_particles=model_particles[0][3].astype(int))
+
+        expected_vertices = np.delete(self.expected_bed_vertices, [1,2])
+        self.assertEqual(len(available_vertices), len(expected_vertices))
+        self.assertCountEqual(available_vertices, expected_vertices)
 
 class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
    
@@ -460,12 +513,13 @@ class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
 
         self.expected_bed_vertices = np.arange(self.diam, self.stream_length, step=self.diam)
     
-    def test_just_bed_returns_all_available(self):
+    def test_only_bed_returns_expected_bed_vertices(self):
         level_limit = 3 # Arbitrary level limit
+        empty_model_particles = np.empty((0, ATTR_COUNT))
 
         # Bed of length n should return n-1 available vertices
-        available_vertices = logic.compute_available_vertices([], self.bed_particles, self.diam, 
-                                            level_limit=level_limit, just_bed=True)
+        available_vertices = logic.compute_available_vertices(empty_model_particles, self.bed_particles, self.diam, 
+                                            level_limit=level_limit)
         
         self.assertEqual(len(self.bed_particles)-1, len(available_vertices))
         self.assertCountEqual(available_vertices, self.expected_bed_vertices)
@@ -474,7 +528,7 @@ class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
         level_limit = 3 # Arbitrary level limit
         one_particle = np.array([[self.diam, 0, 0, 0, 0, 0, 0]]) # at first resting spot
         available_vertices = logic.compute_available_vertices(one_particle, self.bed_particles, self.diam, 
-                                            level_limit=level_limit, just_bed=False)
+                                            level_limit=level_limit)
         
         # Assert there is no available vertex at one_particle[0][0]
         self.assertNotIn(one_particle[0][0], available_vertices)
@@ -495,7 +549,7 @@ class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
         model_particles[3][0] = self.expected_bed_vertices[placement_idxs[3]]
 
         available_vertices = logic.compute_available_vertices(model_particles, self.bed_particles, self.diam, 
-                                            level_limit=level_limit, just_bed=False)
+                                            level_limit=level_limit)
         
         self.assertEqual(len(self.bed_particles)-m_particles-1, len(available_vertices))
         
@@ -503,17 +557,72 @@ class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
         self.assertCountEqual(available_vertices, expected_vertices)
 
     def test_no_available_vertices_returns_empty_array(self):
+        # The bed resting spots are fully saturated with model particles 
+        # BUT none are touching so no new vertices are being made
+
         level_limit = 3 # Arbitrary level limit
-        m_particles = 4
         model_particles = np.zeros([len(self.bed_particles)-1, ATTR_COUNT], dtype=float)
         model_particles[:,0] = self.expected_bed_vertices
 
         available_vertices = logic.compute_available_vertices(model_particles, self.bed_particles, self.diam, 
-                                            level_limit=level_limit, just_bed=False)
+                                            level_limit=level_limit)
         self.assertEqual(0, len(available_vertices))
+    
+    def test_two_touching_model_and_empty_bed_return_valid_vertex(self):
+        # Test without the bed particles
+        level_limit = 3 # Arbitrary level limit
 
+        model_particles = np.zeros([2, ATTR_COUNT], dtype=float)
+        model_particles[:,0] = np.arange(0.5, 1.5, step=self.diam) # These particles will be touching
+        empty_bed = np.empty((0, ATTR_COUNT))
 
+        available_vertices = logic.compute_available_vertices(model_particles, empty_bed, self.diam, 
+                                            level_limit=level_limit)
+        
+        expected_new_vertex = 0.75
+        self.assertEqual(len(available_vertices), 1)
+        self.assertCountEqual(available_vertices, expected_new_vertex)
 
+    def test_3triangle_and_empty_bed_returns_empty_array(self):
+        level_limit = 3 # Level limit > 2
+        model_particles = np.zeros([3, ATTR_COUNT], dtype=float)
+        # 3 triangle: 2 particles touching, 1 particle resting above/between 
+        model_particles[0:2][:,0] = np.arange(0.5, 1.5, step=self.diam) 
+        model_particles[2:][:,0] = np.add(0.5, np.divide(0.5, 2))
+
+        d = np.divide(np.multiply(np.divide(self.diam, 2), 
+                                        self.diam), 
+                                        self.diam)
+        h = np.sqrt(np.square(self.diam) - np.square(d))
+        elevation = round(np.add(h, 0), 2)
+        model_particles[2:][:,2] = elevation
+
+        empty_bed = np.empty((0, ATTR_COUNT))
+
+        available_vertices = logic.compute_available_vertices(model_particles, empty_bed, self.diam, 
+                                            level_limit=level_limit)
+
+        self.assertEqual(0, len(available_vertices))                    
+
+    def test_above_level_limit_returns_empty_array(self):
+        level_limit = 1 # Only one level of stacking allowed
+        model_particles = np.zeros([5, ATTR_COUNT], dtype=float)
+        # 3 triangle: 2 particles touching, 1 particle resting above/between 
+        model_particles[0:3][:,0] = np.arange(0.5, 2.0, step=self.diam) 
+        model_particles[3:][:,0] = np.arange(0.75, 1.5, step=self.diam)
+        
+        d = np.divide(np.multiply(np.divide(self.diam, 2), 
+                                        self.diam), 
+                                        self.diam)
+        h = np.sqrt(np.square(self.diam) - np.square(d))
+        elevation = round(np.add(h, 0), 2)
+        model_particles[3:][:,2] = elevation
+
+        empty_bed = np.empty((0, ATTR_COUNT))
+
+        available_vertices = logic.compute_available_vertices(model_particles, empty_bed, self.diam, 
+                                            level_limit=level_limit)
+        self.assertEqual(0, len(available_vertices))
 
 class TestFindSupports(unittest.TestCase):
     print("Not implemented")
@@ -521,7 +630,7 @@ class TestFindSupports(unittest.TestCase):
 class TestUpdatedParticleStates(unittest.TestCase):
     print("Not Implemented")
 
-class TestPlaceParticle(unittest.TestCase):
+class TestPlaceParticle(unittest.TestCase): # Easy
     print("Not Implemented")
 
 class TestElevationList(unittest.TestCase):
@@ -530,22 +639,22 @@ class TestElevationList(unittest.TestCase):
 class TestRunEntrainments(unittest.TestCase):
     print("Not implemented")
 
-class TestComputeHops(unittest.TestCase):
+class TestComputeHops(unittest.TestCase): # Easy
     print("Not implemented")
 
 class TestMoveModelParticles(unittest.TestCase):
     print("Not implemented")
 
-class TestUpdateFlux(unittest.TestCase):
+class TestUpdateFlux(unittest.TestCase): # Easy
     print("Not implemented")
 
 class TestFindClosestVertex(unittest.TestCase):
     print("Not implemented")
 
-class TestCheckUniqueEntrainments(unittest.TestCase):
+class TestCheckUniqueEntrainments(unittest.TestCase): # Easy 
     print("Not implemented")
 
-class TestIncrementAge(unittest.TestCase):
+class TestIncrementAge(unittest.TestCase): # Easy 
     print("Not implemented")
 
 

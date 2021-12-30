@@ -475,7 +475,7 @@ class TestComputeAvailableVerticesLifted(unittest.TestCase):
         # Bed of length n should return n-1 available vertices
         available_vertices = logic.compute_available_vertices(model_particles, self.bed_particles, self.diam, 
                                             level_limit=level_limit, lifted_particles=model_particles[:,3].astype(int))
-        print(self.expected_bed_vertices, available_vertices)
+        
         self.assertEqual(len(available_vertices), len(self.bed_particles)-1)
         self.assertCountEqual(available_vertices, self.expected_bed_vertices)
 
@@ -568,7 +568,7 @@ class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
                                             level_limit=level_limit)
         self.assertEqual(0, len(available_vertices))
     
-    def test_two_touching_model_and_empty_bed_return_valid_vertex(self):
+    def test_two_touching_model_and_empty_bed_return_one_valid_vertex(self):
         # Test without the bed particles
         level_limit = 3 # Arbitrary level limit
 
@@ -578,10 +578,9 @@ class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
 
         available_vertices = logic.compute_available_vertices(model_particles, empty_bed, self.diam, 
                                             level_limit=level_limit)
-        
         expected_new_vertex = 0.75
         self.assertEqual(len(available_vertices), 1)
-        self.assertCountEqual(available_vertices, expected_new_vertex)
+        self.assertEqual(available_vertices, expected_new_vertex)
 
     def test_3triangle_and_empty_bed_returns_empty_array(self):
         level_limit = 3 # Level limit > 2
@@ -630,8 +629,82 @@ class TestFindSupports(unittest.TestCase):
 class TestUpdatedParticleStates(unittest.TestCase):
     print("Not Implemented")
 
-class TestPlaceParticle(unittest.TestCase): # Easy
-    print("Not Implemented")
+class TestPlaceParticle(unittest.TestCase): 
+
+    def setUp(self):
+        self.diam = 0.5
+        d = np.divide(np.multiply(np.divide(self.diam, 2), 
+                                        self.diam), 
+                                        self.diam)
+        self.h = np.sqrt(np.square(self.diam) - np.square(d))
+
+    def test_bad_placement_raises_value_error(self):
+        # A bad placement is any placement where a particle does
+        # not have a particle beneath it on the left and/or right. 
+        # in other words, a particle is not supported
+
+        # Particle (arbitrary placement) with empty model and bed particles arrays
+        bad_particle = np.zeros([1, ATTR_COUNT], dtype=float)
+        bad_particle[:,1] = self.diam
+        empty_bed = np.empty((0, ATTR_COUNT))
+        empty_model = np.empty((0, ATTR_COUNT))
+        
+        # print(bad_particle, bad_particle[0])
+        with self.assertRaises(ValueError):
+            placed_x, placed_y = logic.place_particle(bad_particle[0], empty_model, empty_bed, self.h)
+
+        # Particle placed at invalid (unsupported) location
+        unsupported_particle = np.zeros([1, ATTR_COUNT], dtype=float)
+        unsupported_particle[:,0] = 0.9
+        unsupported_particle[:,1] = self.diam
+
+        unsupported_model = np.zeros((2, ATTR_COUNT))
+        unsupported_model[:,0] = np.arange(0.5, 1.5, step=self.diam) 
+
+        with self.assertRaises(ValueError):
+            _, _ = logic.place_particle(unsupported_particle[0], unsupported_model, empty_bed, self.h)
+
+        # Particle placed at location where all model particles' centres have the same location
+        # (i.e placed on a tall single stack/tower of particles)
+        stacked_unsupported_particle = np.zeros([1, ATTR_COUNT], dtype=float)
+        stacked_unsupported_particle[:,0] = 0.5
+        stacked_unsupported_particle[:,1] = self.diam
+
+        single_stack_model = np.zeros((2, ATTR_COUNT))
+        single_stack_model[:,0] = 0.5
+        single_stack_model[:,2] = np.arange(0, 1.0, step=self.diam)
+
+        with self.assertRaises(ValueError):
+            _, _ = logic.place_particle(stacked_unsupported_particle[0], single_stack_model, empty_bed, self.h)
+
+        # Particle and model particle array are identicle
+        particle = np.zeros([1, ATTR_COUNT], dtype=float)
+        particle[:,1] = self.diam
+
+        empty_bed = np.empty((0, ATTR_COUNT))
+        model = np.empty((1, ATTR_COUNT)) 
+        model[0] = particle
+
+        with self.assertRaises(ValueError):
+            _, _ = logic.place_particle(particle[0], model, empty_bed, self.h)
+        
+    def test_good_placement_returns_valid_xy(self):
+        base_elevation = 0
+        expected_elevation = round(np.add(self.h, base_elevation), 2)
+
+        placement = 0.75
+        particle = np.zeros([1, ATTR_COUNT], dtype=float)
+        particle[:,0] = placement
+
+        model_particles = np.zeros([3, ATTR_COUNT], dtype=float)
+        model_particles[0] = particle
+        model_particles[1:][:,0] = np.arange(0.5, 1.5, step=self.diam) 
+        empty_bed = np.empty((0, ATTR_COUNT))
+
+        placed_x, placed_y = logic.place_particle(particle[0], model_particles, empty_bed, self.h)
+
+        self.assertEqual(expected_elevation, placed_y)
+        self.assertEqual(placement, placed_x)
 
 class TestElevationList(unittest.TestCase):
     print("Not implemented")

@@ -712,8 +712,45 @@ class TestElevationList(unittest.TestCase):
 class TestRunEntrainments(unittest.TestCase):
     print("Not implemented")
 
-class TestComputeHops(unittest.TestCase): # Easy
-    print("Not implemented")
+class TestComputeHops(unittest.TestCase): 
+
+    def test_empty_event_particles_raises_index_error(self):
+        mu = 0 
+        sigma = 1
+        model_particles = np.zeros((4,ATTR_COUNT), dtype=float)
+        empty_event_particles = np.empty((0, ATTR_COUNT))
+
+        with self.assertRaises(IndexError):
+            event_particles = logic.compute_hops(empty_event_particles, model_particles, mu, sigma)
+    
+    def test_normal_updates_event_locations(self):
+        # Testable values: 
+        #   >> np.random.seed(0)
+        #   >> np.random.normal(0, 1, 3)
+        #   array([1.76405235, 0.40015721, 0.97873798])
+        mu = 0
+        sigma = 1
+        model_particles = np.zeros((4, ATTR_COUNT), dtype=float)
+        event_particles_idx = [0, 2, 3]
+
+        np.random.seed(0)
+        event_particles = logic.compute_hops(event_particles_idx, model_particles, mu, sigma, normal=True)
+        self.assertCountEqual(np.round([1.76405235, 0.40015721, 0.97873798], 1), event_particles[:,0])
+
+    def test_lognormal_updates_event_locations(self):
+        # Testable values: 
+        #   >>> np.random.seed(0)
+        #   >>> np.random.lognormal(0, 0.25, 3)
+        #   array([1.55428104, 1.10521435, 1.27721828])
+        mu = 0
+        sigma = 0.25
+        model_particles = np.zeros((4, ATTR_COUNT), dtype=float)
+        event_particles_idx = [0, 2, 3]
+
+        np.random.seed(0)
+        event_particles = logic.compute_hops(event_particles_idx, model_particles, mu, sigma, normal=False)
+        self.assertCountEqual(np.round([1.55428104, 1.10521435, 1.27721828], 1), event_particles[:,0])
+
 
 class TestMoveModelParticles(unittest.TestCase):
     print("Not implemented")

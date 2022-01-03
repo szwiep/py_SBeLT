@@ -6,7 +6,6 @@ import model
 import numpy as np
 from mock import MagicMock
 
-
 from model import logic
 
 ATTR_COUNT = 7 # Number of attributes associated with a Particle
@@ -753,7 +752,65 @@ class TestComputeHops(unittest.TestCase):
 
 
 class TestMoveModelParticles(unittest.TestCase):
-    print("Not implemented")
+
+    def setUp(self):
+        self.diam = 0.5
+        d = np.divide(np.multiply(np.divide(self.diam, 2), 
+                                        self.diam), 
+                                        self.diam)
+        self.h = np.sqrt(np.square(self.diam) - np.square(d))
+
+    def test_empty_event_particles_returns_empty_dict_and_no_changes(self):
+        
+        empty_event_particles = np.empty((0, ATTR_COUNT))
+        model_particles = np.zeros((1, ATTR_COUNT), dtype=float)
+        empty_bed = np.empty((0, ATTR_COUNT))
+        available_vertices = np.empty((0))
+
+        entrainment_dict, moved_model, avail_vert = logic.move_model_particles(empty_event_particles, model_particles, empty_bed, available_vertices, self.h)
+
+        self.assertDictEqual({}, entrainment_dict)
+        self.assertEqual(0, len(avail_vert))
+        self.assertIsNone(np.testing.assert_array_equal(moved_model, model_particles))
+
+    def test_event_particle_on_vertices_returns_dict_and_no_changes(self):
+        
+        placement = 5
+
+        model_particles = np.zeros((1, ATTR_COUNT), dtype=float)
+        model_particles[:,0] = placement
+
+        one_event = model_particles[[0]]
+
+        two_bed = np.zeros((2, ATTR_COUNT))
+        two_bed[0][0] = placement - (self.diam/2)
+        two_bed[1][0] = placement + (self.diam/2)
+
+        available_vertices = np.array([placement])
+
+        ent_dict, moved_model, avail_vert = logic.move_model_particles(one_event, model_particles, two_bed, available_vertices, self.h)
+        
+        self.assertDictEqual({model_particles[0][3]: placement}, ent_dict)
+        self.assertEqual(0, len(avail_vert)) # The available vertex (placement) should be removed
+        self.assertIsNone(np.testing.assert_array_equal(moved_model, model_particles))
+
+    # TODO: Leave as failing for now until it's decided what the expected behaviour of atlering model_particles should be
+    def test_looped_particle_returns_dict_and_incremented_counter(self):
+        
+        empty_bed = np.empty((0, ATTR_COUNT))
+        available_vertices = np.arange((3)) 
+
+        model_particles = np.zeros((1, ATTR_COUNT), dtype=float)
+        placement = np.max(available_vertices) + 1 # assure that the particle is being placed beyond the largest vertex
+        model_particles[:,0] = placement
+        ghost_event = model_particles[[0]]
+        print(model_particles)
+        ent_dict, moved_model, avail_vert = logic.move_model_particles(ghost_event, model_particles, empty_bed, available_vertices, self.h)
+        print(model_particles, moved_model)
+
+        self.assertDictEqual({model_particles[0][3]: -1}, ent_dict) # NOTE: This is the assertion that fails -- model_particles is altered by move_model_particles
+        self.assertCountEqual(avail_vert, available_vertices)
+        self.assertEqual(model_particles[0][6] + 1, moved_model[0][6])
 
 class TestUpdateFlux(unittest.TestCase): # Easy
     print("Not implemented")

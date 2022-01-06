@@ -621,7 +621,7 @@ class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
 class TestFindSupports(unittest.TestCase):
     print("Not implemented")
 
-class TestUpdatedParticleStates(unittest.TestCase):
+class TestUpdateParticleStates(unittest.TestCase):
     print("Not Implemented")
 
 class TestPlaceParticle(unittest.TestCase): 
@@ -869,7 +869,6 @@ class TestUpdateFlux(unittest.TestCase): # Easy
         subregion = logic.update_flux(init_pos, final_pos, iteration, self.one_mock_subregion)
         self.mock_subregion.incrementFlux.assert_not_called()
 
-
     def test_n_crossings_call_increment_n_times(self):
         
         # Over one subregion
@@ -917,9 +916,43 @@ class TestUpdateFlux(unittest.TestCase): # Easy
         self.mock_subregion_2.reset_mock()
 
 class TestFindClosestVertex(unittest.TestCase): # Easy 
-    print("Not implemented")
+    
+    def test_empty_available_vertices_returns_value_error(self):
+        hop = 12.3
+        empty_vertices = np.empty(0, dtype=float)
+        with self.assertRaises(ValueError):
+            _ = logic.find_closest_vertex(hop, empty_vertices)
 
-class TestCheckUniqueEntrainments(unittest.TestCase): 
+    def test_negative_desired_hop_returns_value_error(self):
+        neg_hop = -4.0
+        avail_vert = np.arange(5, dtype=float)
+        with self.assertRaises(ValueError):
+            _ = logic.find_closest_vertex(neg_hop, avail_vert)
+
+    def test_particle_exceeding_vertices_returns_negative_1(self):
+        hop = 5.2
+        avail_vert = np.arange(5, dtype=float)
+        closest_vertex = logic.find_closest_vertex(hop, avail_vert)
+        self.assertEqual(-1, closest_vertex)
+        
+    def test_valid_hop_to_vertex_returns_vertex(self):
+        hop = 3.0
+        avail_vert = np.arange(6, dtype=float)
+        closest_vertex = logic.find_closest_vertex(hop, avail_vert)
+        self.assertEqual(3.0, closest_vertex)
+
+        last_valid_hop = 5.0
+        closest_vertex = logic.find_closest_vertex(last_valid_hop, avail_vert)
+        self.assertEqual(5.0, closest_vertex)
+
+    def test_valid_hop_to_nonvertex_returns_next_vertex(self):
+        hop = 3.1
+        avail_vert = np.arange(6, dtype=float)
+        closest_vertex = logic.find_closest_vertex(hop, avail_vert)
+        self.assertEqual(4.0, closest_vertex)
+        
+
+class TestCheckUniqueEntrainments(unittest.TestCase): # Easy
     print("Not implemented")
 
 class TestIncrementAge(unittest.TestCase): # Easy 

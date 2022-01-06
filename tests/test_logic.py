@@ -4,7 +4,7 @@ import math
 from unittest.case import expectedFailure
 import model 
 import numpy as np
-from mock import MagicMock
+from unittest.mock import Mock
 
 from model import logic
 
@@ -17,9 +17,6 @@ ATTR_COUNT = 7 # Number of attributes associated with a Particle
         # [4] = active (boolean)
         # [5] = age counter
         # [6] = loop age counter
-
-
-# TODO: create comment examples for the testing behavioiur
   
 class TestGetEventParticlesWithOneSubregion(unittest.TestCase):
 
@@ -27,14 +24,14 @@ class TestGetEventParticlesWithOneSubregion(unittest.TestCase):
         self.test_length = 10
         self.num_particles = 3
 
-        mock_subregion = MagicMock()
+        mock_subregion = Mock()
         mock_subregion.leftBoundary.return_value = 0
         mock_subregion.rightBoundary.return_value = self.test_length
         mock_subregion.getName.return_value = 'Mock_Subregion'
         self.mock_sub_list = [mock_subregion]
 
         self.entrainment_events = 3
-        self.level_limit = random.randint(0, random.randint(2, 10))
+        self.level_limit = np.random.randint(0, np.random.randint(2, 10))
 
 
     def test_all_active_returns_valid_list(self): 
@@ -128,12 +125,12 @@ class TestGetEventParticlesWithNSubregions(unittest.TestCase):
     def setUp(self):
         self.test_length = 20
         self.num_particles = 6
-        mock_subregion_0 = MagicMock()
+        mock_subregion_0 = Mock()
         mock_subregion_0.leftBoundary.return_value = 0
         mock_subregion_0.rightBoundary.return_value = self.test_length / 2
         mock_subregion_0.getName.return_value = 'Mock_Subregion_0'
 
-        mock_subregion_1 = MagicMock()
+        mock_subregion_1 = Mock()
         mock_subregion_1.leftBoundary.return_value = self.test_length / 2
         mock_subregion_1.rightBoundary.return_value = self.test_length
         mock_subregion_1.getName.return_value = 'Mock_Subregion_1'
@@ -141,7 +138,7 @@ class TestGetEventParticlesWithNSubregions(unittest.TestCase):
         self.mock_sub_list_2 = [mock_subregion_0, mock_subregion_1]
 
         self.entrainment_events = 3
-        self.level_limit = random.randint(0, random.randint(2, 10))
+        self.level_limit = np.random.randint(0, np.random.randint(2, 10))
 
 
     def test_all_active_returns_3_per_subregion(self):
@@ -293,6 +290,8 @@ class TestDefineSubregions(unittest.TestCase):
             self.assertEqual(len(subregion.getFluxList()), self.iterations)
             self.assertCountEqual(subregion.getFluxList(), empty_list)
 
+    # TODO: test that incrementFlux() works
+
 # Test Build Streambed
 class TestBuildStreambed(unittest.TestCase):
 
@@ -412,8 +411,6 @@ class TestSetModelParticles(unittest.TestCase):
         # There should be no stacking
         self.assertEqual(len(set(model_particles[:,2])), 1)
 
-        
-
     def test_all_model_particles_have_valid_initial_attributes(self):
         model_particles = logic.set_model_particles(self.bed_particles,   
                                                     self.available_vertices, 
@@ -435,7 +432,6 @@ class TestSetModelParticles(unittest.TestCase):
         expected_age_and_loop = np.zeros(len(model_particles))
         self.assertCountEqual(model_particles[:,5], expected_age_and_loop)
         self.assertCountEqual(model_particles[:,6], expected_age_and_loop)
-
 
 
 class TestComputeAvailableVerticesLifted(unittest.TestCase):
@@ -794,7 +790,7 @@ class TestMoveModelParticles(unittest.TestCase):
         self.assertEqual(0, len(avail_vert)) # The available vertex (placement) should be removed
         self.assertIsNone(np.testing.assert_array_equal(moved_model, model_particles))
 
-    # TODO: Leave as failing for now until it's decided what the expected behaviour of atlering model_particles should be
+    # TODO!!: Leave as failing for now until it's decided what the expected behaviour of atlering model_particles should be
     def test_looped_particle_returns_dict_and_incremented_counter(self):
         
         empty_bed = np.empty((0, ATTR_COUNT))
@@ -808,17 +804,122 @@ class TestMoveModelParticles(unittest.TestCase):
         ent_dict, moved_model, avail_vert = logic.move_model_particles(ghost_event, model_particles, empty_bed, available_vertices, self.h)
         print(model_particles, moved_model)
 
-        self.assertDictEqual({model_particles[0][3]: -1}, ent_dict) # NOTE: This is the assertion that fails -- model_particles is altered by move_model_particles
+        self.assertDictEqual({model_particles[0][3]: -1}, ent_dict) # NOTE: This is the assertion that fails - model_particles is altered by move_model_particles
         self.assertCountEqual(avail_vert, available_vertices)
         self.assertEqual(model_particles[0][6] + 1, moved_model[0][6])
 
+
 class TestUpdateFlux(unittest.TestCase): # Easy
+
+    def setUp(self):
+
+        self.test_length = 10
+
+        # mock one subregion
+        self.mock_subregion = Mock()
+        self.mock_subregion.leftBoundary.return_value = 0
+        self.mock_subregion.rightBoundary.return_value = self.test_length
+        self.one_mock_subregion = [self.mock_subregion]
+        # mock multiple (2) subregions    
+        self.mock_subregion_1 = Mock()
+        self.mock_subregion_1.leftBoundary.return_value = 0
+        self.mock_subregion_1.rightBoundary.return_value = self.test_length/2
+        self.mock_subregion_2 = Mock()
+        self.mock_subregion_2.leftBoundary.return_value = self.test_length/2
+        self.mock_subregion_2.rightBoundary.return_value = self.test_length
+        self.two_mock_subregion = [self.mock_subregion_1, self.mock_subregion_2]
+
+    def test_different_lengths_raise_value_error(self):
+
+        iteration = 0
+        init_pos = np.arange(2)
+        final_pos = np.arange(3)
+
+        with self.assertRaises(ValueError):
+            _ = logic.update_flux(init_pos, final_pos, iteration, self.mock_subregion)
+
+    def test_0_crossings_call_increment_0_times(self):
+
+        iteration = 0
+        # Over a single subregion (no internal crossings possible)
+        # -- Only 1 particle moving
+        init_pos = np.array([5])
+        final_pos = init_pos + 1
+        
+        subregion = logic.update_flux(init_pos, final_pos, iteration, self.one_mock_subregion)
+        self.mock_subregion.incrementFlux.assert_not_called()
+
+        # -- Multiple particles moving
+        init_pos = np.array([1, 3, 5, 7, 8])
+        final_pos = init_pos + 1 # No final positions >= 10
+        subregion = logic.update_flux(init_pos, final_pos, iteration, self.one_mock_subregion)
+        self.mock_subregion.incrementFlux.assert_not_called()
+
+        # Over multiple subregions (internal crossings possible)
+        # -- Only 1 particle moving
+        init_pos = np.array([7])
+        final_pos = init_pos + 1
+        
+        subregion = logic.update_flux(init_pos, final_pos, iteration, self.two_mock_subregion)
+        self.mock_subregion.incrementFlux.assert_not_called()
+
+        # -- Multiple particles moving
+        init_pos = np.array([1, 3, 6, 7, 8])
+        final_pos = init_pos + 1 # No final positions >= 10
+        subregion = logic.update_flux(init_pos, final_pos, iteration, self.one_mock_subregion)
+        self.mock_subregion.incrementFlux.assert_not_called()
+
+
+    def test_n_crossings_call_increment_n_times(self):
+        
+        # Over one subregion
+        # -- Over 1 iteration
+        iteration = 0
+        init_pos = np.array([5, 6, 7, 8])
+        final_pos = init_pos + 5 
+        subregion = logic.update_flux(init_pos, final_pos, iteration, self.one_mock_subregion)
+        self.assertEqual(4, self.mock_subregion.incrementFlux.call_count)
+        self.mock_subregion.incrementFlux.assert_called_with(0) # Only iteration 0
+    
+        # -- Over multiple subregions
+        iteration = 0
+        init_pos = np.array([1, 2, 3, 6, 7, 8])
+        final_pos = init_pos + 5 
+        subregion = logic.update_flux(init_pos, final_pos, iteration, self.two_mock_subregion)
+        
+        self.assertEqual(3, self.mock_subregion_1.incrementFlux.call_count)
+        self.assertEqual(3, self.mock_subregion_2.incrementFlux.call_count)
+        
+        self.mock_subregion_1.incrementFlux.assert_called_with(0)
+        self.mock_subregion_2.incrementFlux.assert_called_with(0) 
+
+    def test_particle_crossing_multiple_subregions_calls_increment_on_each(self):
+        
+        iteration = 0
+        init_pos = np.array([1])
+        final_pos = np.array([11]) # Will cross 5 and 10
+        subregion = logic.update_flux(init_pos, final_pos, iteration, self.two_mock_subregion)
+        self.mock_subregion_1.incrementFlux.assert_called_once_with(0)
+        self.mock_subregion_2.incrementFlux.assert_called_once_with(0) 
+
+    def test_ghost_particle_calls_increment_on_final_subregion(self):
+
+        iteration = 0
+        init_pos = np.array([1, 6])
+        final_pos = np.array([-1, -1])
+        subregion = logic.update_flux(init_pos, final_pos, iteration, self.one_mock_subregion)
+        self.assertEqual(2, self.mock_subregion.incrementFlux.call_count)
+        self.mock_subregion.incrementFlux.assert_called_with(0) 
+
+    def tearDown(self):
+        self.mock_subregion.reset_mock()
+        self.mock_subregion_1.reset_mock()
+        self.mock_subregion_2.reset_mock()
+
+class TestFindClosestVertex(unittest.TestCase): # Easy 
     print("Not implemented")
 
-class TestFindClosestVertex(unittest.TestCase):
-    print("Not implemented")
-
-class TestCheckUniqueEntrainments(unittest.TestCase): # Easy 
+class TestCheckUniqueEntrainments(unittest.TestCase): 
     print("Not implemented")
 
 class TestIncrementAge(unittest.TestCase): # Easy 

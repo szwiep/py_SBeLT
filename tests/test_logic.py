@@ -915,6 +915,7 @@ class TestUpdateFlux(unittest.TestCase): # Easy
         self.mock_subregion_1.reset_mock()
         self.mock_subregion_2.reset_mock()
 
+
 class TestFindClosestVertex(unittest.TestCase): # Easy 
     
     def test_empty_available_vertices_returns_value_error(self):
@@ -946,18 +947,61 @@ class TestFindClosestVertex(unittest.TestCase): # Easy
         self.assertEqual(5.0, closest_vertex)
 
     def test_valid_hop_to_nonvertex_returns_next_vertex(self):
-        hop = 3.1
+        hop = 3.001
         avail_vert = np.arange(6, dtype=float)
         closest_vertex = logic.find_closest_vertex(hop, avail_vert)
         self.assertEqual(4.0, closest_vertex)
-        
+
 
 class TestCheckUniqueEntrainments(unittest.TestCase): # Easy
-    print("Not implemented")
+    # Check unique entrainments takes an entrainment dictionary
+    # with the form: { particle_id: entrained location, }
+    def test_empty_dict_returns_true_and_empty_redo(self):
+        empty_dict = {}
+        flag, redo = logic.check_unique_entrainments(empty_dict)
+        self.assertTrue(flag)
+        self.assertEqual(0, len(redo))
 
-class TestIncrementAge(unittest.TestCase): # Easy 
-    print("Not implemented")
+    def test_all_unique_returns_true_and_empty_redo(self):
+        unique_dict = {1.0: 1.0, 2.0: 2.0, 3.0: 3.0}
+        flag, redo = logic.check_unique_entrainments(unique_dict)
+        self.assertTrue(flag)
+        self.assertEqual(0, len(redo))
+    
+    def test_n_nonunique_returns_false_and_nonempty_redo(self):
+        nonunqiue_dict = {1.0: 1.0, 2.0: 1.0, 3.0: 1.0, 4.0: 4.0}
+        # >>> random.seed(0)
+        # >>> random.sample([1.0, 2.0, 3.0], 1)[0]
+        # 2.0
+        random.seed(0)
+        flag, redo = logic.check_unique_entrainments(nonunqiue_dict)
+        self.assertFalse(flag)
+        # 1.0 , 2.0 and 3.0 have the same vertex
+        # The seed selects 2.0 meaning 1.0 and 3.0 should be returned
+        self.assertCountEqual([1.0, 3.0], redo) 
 
+
+class TestIncrementAge(unittest.TestCase): 
+    # NOTE: Leave as failing for now: model_particles being altered, doesn't need to be returned
+    def test_empty_event_increases_all_ages_by_1(self):
+        model_particles = np.zeros([3, ATTR_COUNT], dtype=float)
+        model_particles[:,3] = np.arange(3)
+        event_ids = []
+
+        aged_model = logic.increment_age(model_particles, event_ids)
+        self.assertCountEqual(model_particles[:,5] + 1, aged_model[:,5])
+
+    def test_event_set_to_0_and_nonevent_to_1(self):
+        starting_age = 2.0
+        model_particles = np.zeros([3, ATTR_COUNT], dtype=float)
+        model_particles[:,3] = np.arange(3)
+        model_particles[:,5] = starting_age
+        event_ids = np.array([0, 1])
+
+        aged_model = logic.increment_age(model_particles, event_ids)
+        self.assertEqual(starting_age + 1, aged_model[2,5])
+        self.assertCountEqual([0.0, 0.0], aged_model[event_ids][:,5])
+        
 
 if __name__ == '__main__':
     unittest.main()

@@ -704,28 +704,103 @@ class TestFindSupports(unittest.TestCase):
         # Both potential supporting particles outisde support threshold
         # Both already_placed=True and alread_placed=False should fail
         with self.assertRaises(ValueError):
-            left_support, right_support = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
+            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
         with self.assertRaises(ValueError):
-            left_support, right_support = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
+            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
         
         # Only 1 potential supporting particles outisde support threshold
         particles[0,0] = particle_placement + self.diam/2 # right support within threshold
 
         with self.assertRaises(ValueError):
-            left_support, right_support = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
+            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
         with self.assertRaises(ValueError):
-            left_support, right_support = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
+            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
 
         particles[0,0] = particle_placement + self.diam # right support outside threshold again
         particles[1,0] = particle_placement + self.diam/2 # left support within threshold
 
         with self.assertRaises(ValueError):
-            left_support, right_support = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
+            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
         with self.assertRaises(ValueError):
-            left_support, right_support = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
+            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
 
+# NOTE: This will probably also be subject to the whole pass model-particle-array-in thing
 class TestUpdateParticleStates(unittest.TestCase):
-    print("Not Implemented")
+
+    def setUp(self):
+        self.diam = 0.5 
+
+    def test_no_piles_returns_all_active(self): 
+        no_pile_particles = np.zeros((7, ATTR_COUNT))
+        no_pile_particles[:,1] = self.diam
+        no_pile_particles[:,2] = 1.0
+        no_pile_particles[:,0] = np.arange(self.diam, 3.5+(self.diam), step=self.diam)
+
+        bed = np.zeros([9, ATTR_COUNT], dtype=float)
+        bed[:,1] = self.diam
+        bed[:,0] = np.arange(self.diam/2, 4.5+(self.diam/2), step=self.diam)
+
+        returned_particles = logic.update_particle_states(no_pile_particles, bed)
+        expected_active = np.ones((7, ATTR_COUNT))
+        self.assertIsNone(np.testing.assert_array_equal(expected_active[:,4], returned_particles[:,4]))
+    
+    def test_2_layers_returns_top_layer_active(self):
+        two_layer_particles = np.zeros((13, ATTR_COUNT))
+        two_layer_particles[:,1] = self.diam
+        two_layer_particles[0:7,2] = 1.0
+        two_layer_particles[0:7,0] = np.arange(self.diam, 3.5+(self.diam), step=self.diam)
+        two_layer_particles[7:13,2] = 2.0
+        two_layer_particles[7:13,0] = np.arange(self.diam+self.diam/2, 3+(self.diam), step=self.diam)
+        two_layer_particles[:,3] = np.arange(13)
+
+        bed = np.zeros([9, ATTR_COUNT], dtype=float)
+        bed[:,1] = self.diam
+        bed[:,0] = np.arange(self.diam/2, 4.5+(self.diam/2), step=self.diam)
+
+        returned_particles = logic.update_particle_states(two_layer_particles, bed)
+        
+        expected_inactive = np.zeros(7)
+        expected_active = np.ones(6)
+        expected_active_state = np.concatenate((expected_inactive, expected_active))
+        self.assertIsNone(np.testing.assert_array_equal(expected_active_state, returned_particles[:,4]))
+
+    def test_some_piles_return_valid_active(self):
+        some_piles_particles = np.zeros((9, ATTR_COUNT))
+        some_piles_particles[:,1] = self.diam
+        some_piles_particles[0:7,2] = 1.0
+        some_piles_particles[0:7,0] = np.arange(self.diam, 3.5+(self.diam), step=self.diam)
+        some_piles_particles[7:9,2] = 2.0
+        some_piles_particles[7:9,0] = np.arange(self.diam+self.diam/2, 2+(self.diam), step=self.diam*3)
+        some_piles_particles[:,3] = np.arange(9)
+
+        bed = np.zeros([9, ATTR_COUNT], dtype=float)
+        bed[:,1] = self.diam
+        bed[:,0] = np.arange(self.diam/2, 4.5+(self.diam/2), step=self.diam)
+        
+        returned_particles = logic.update_particle_states(some_piles_particles, bed)
+        expected_active_state = np.zeros(9)
+        expected_active_state[[2, 5, 6, 7, 8]] = 1
+        self.assertIsNone(np.testing.assert_array_equal(expected_active_state, returned_particles[:,4]))
+
+    def test_triangle_returns_only_tip_active(self):
+        triangle_particles = np.zeros((3, ATTR_COUNT))
+        triangle_particles[:,1] = self.diam
+        triangle_particles[0:2,2] = 1.0
+        triangle_particles[0:2,0] = np.arange(self.diam, 1+(self.diam), step=self.diam)
+        triangle_particles[2,2] = 2.0
+        triangle_particles[2,0] = self.diam+self.diam/2
+        triangle_particles[:,3] = np.arange(3)
+
+        bed = np.zeros([3, ATTR_COUNT], dtype=float)
+        bed[:,1] = self.diam
+        bed[:,0] = np.arange(self.diam/2, 1.5+(self.diam/2), step=self.diam)
+
+        returned_particles = logic.update_particle_states(triangle_particles, bed)
+        expected_inactive = np.zeros(2)
+        expected_active = np.ones(1)
+        expected_active_state = np.concatenate((expected_inactive, expected_active))
+        self.assertIsNone(np.testing.assert_array_equal(expected_active_state, returned_particles[:,4]))
+
 
 class TestPlaceParticle(unittest.TestCase): 
 

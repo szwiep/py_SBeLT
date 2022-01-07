@@ -619,7 +619,110 @@ class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
         self.assertEqual(0, len(available_vertices))
 
 class TestFindSupports(unittest.TestCase):
-    print("Not implemented")
+    def setUp(self):
+        self.diam = 0.5
+    
+    def test_already_placed_returns_supports_in_bed(self):
+        particle_height = 1.0
+        bed = np.zeros([2, ATTR_COUNT], dtype=float)
+        bed[:,0] = np.arange(self.diam/2, 1+(self.diam/2), step=self.diam)
+        
+        placement = self.diam # between the two bed particles
+        particles = np.zeros((1, ATTR_COUNT), dtype=float)
+        particles[:,1] = self.diam
+        particles[0,0] = placement
+        particles[0,2] = particle_height
+        
+        left_support, right_support = logic.find_supports(particles[0], particles, bed, already_placed=True)
+        expected_left = bed[0]
+        expected_right = bed[1]
+        self.assertIsNone(np.testing.assert_array_equal(expected_left, left_support))
+        self.assertIsNone(np.testing.assert_array_equal(expected_right, right_support))
+
+        left_support, right_support = logic.find_supports(particles[0], particles, bed, already_placed=False)
+        expected_left = bed[0]
+        expected_right = bed[1]
+        self.assertIsNone(np.testing.assert_array_equal(expected_left, left_support))
+        self.assertIsNone(np.testing.assert_array_equal(expected_right, right_support))
+
+    def test_already_placed_returns_both_supports_below(self):
+        particle_placement = 1.0
+        particle_height = 1.0
+
+        particles = np.zeros((5, ATTR_COUNT), dtype=float)
+        particles[:,1] = self.diam
+        particles[4,0] = particle_placement
+        particles[4,2] = particle_height
+        particles[0:2,0] = particle_placement - self.diam/2
+        particles[2:4,0] = particle_placement + self.diam/2
+        particles[[0,2],2] = particle_height - 1.0
+        particles[[1,3],2] = particle_height + 1.0
+        empty_bed = np.empty((0, ATTR_COUNT))
+
+        left_support, right_support = logic.find_supports(particles[4], particles, empty_bed, already_placed=True)
+
+        expected_left = particles[0]
+        expected_right = particles[2]
+        self.assertIsNone(np.testing.assert_array_equal(expected_left, left_support))
+        self.assertIsNone(np.testing.assert_array_equal(expected_right, right_support))
+    
+    # Test not placed finds highest left and right 
+    def test_not_placed_returns_highest_elevation_supports(self):
+        particle_placement = 1.0
+        particle_height = 1.0
+
+        particles = np.zeros((5, ATTR_COUNT), dtype=float)
+        particles[:,1] = self.diam
+        particles[4,0] = particle_placement
+        particles[4,2] = particle_height
+        particles[0:2,0] = particle_placement - self.diam/2
+        particles[2:4,0] = particle_placement + self.diam/2
+        particles[[0,2],2] = particle_height - 1.0
+        particles[[1,3],2] = particle_height + 1.0
+        empty_bed = np.empty((0, ATTR_COUNT))
+
+        left_support, right_support = logic.find_supports(particles[4], particles, empty_bed, already_placed=False)
+
+        expected_left = particles[1]
+        expected_right = particles[3]
+        self.assertIsNone(np.testing.assert_array_equal(expected_left, left_support))
+        self.assertIsNone(np.testing.assert_array_equal(expected_right, right_support))
+    
+    def test_no_supports_available_returns_value_error(self):
+        particle_placement = 1.0
+        particle_height = 1.0
+
+        particles = np.zeros((3, ATTR_COUNT), dtype=float)
+        particles[:,1] = self.diam
+        particles[2,0] = particle_placement
+        particles[2,2] = particle_height
+        particles[0,0] = particle_placement + self.diam
+        particles[1,0] = particle_placement - self.diam # Centres lie outside threshold
+        particles[[0,1],2] = particle_height - 1.0
+        empty_bed = np.empty((0, ATTR_COUNT))
+
+        # Both potential supporting particles outisde support threshold
+        # Both already_placed=True and alread_placed=False should fail
+        with self.assertRaises(ValueError):
+            left_support, right_support = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
+        with self.assertRaises(ValueError):
+            left_support, right_support = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
+        
+        # Only 1 potential supporting particles outisde support threshold
+        particles[0,0] = particle_placement + self.diam/2 # right support within threshold
+
+        with self.assertRaises(ValueError):
+            left_support, right_support = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
+        with self.assertRaises(ValueError):
+            left_support, right_support = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
+
+        particles[0,0] = particle_placement + self.diam # right support outside threshold again
+        particles[1,0] = particle_placement + self.diam/2 # left support within threshold
+
+        with self.assertRaises(ValueError):
+            left_support, right_support = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
+        with self.assertRaises(ValueError):
+            left_support, right_support = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
 
 class TestUpdateParticleStates(unittest.TestCase):
     print("Not Implemented")
@@ -635,8 +738,8 @@ class TestPlaceParticle(unittest.TestCase):
 
     def test_bad_placement_raises_value_error(self):
         # A bad placement is any placement where a particle does
-        # not have a particle beneath it on the left and/or right. 
-        # in other words, a particle is not supported
+        # not have a particle directly beneath it on the left and/or right. 
+        # In other words, a particle is not physically supported
 
         # Particle (arbitrary placement) with empty model and bed particles arrays
         bad_particle = np.zeros([1, ATTR_COUNT], dtype=float)

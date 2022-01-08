@@ -880,7 +880,35 @@ class TestPlaceParticle(unittest.TestCase):
         self.assertEqual(placement, placed_x)
 
 class TestElevationList(unittest.TestCase):
-    print("Not implemented")
+    
+    def test_all_same_elev_returns_one_elev(self):
+        
+        same_elev = np.array((12.3, 12.3, 12.3, 12.3, 12.3))
+        elev_list = logic.elevation_list(same_elev)
+        asc_elev_list = logic.elevation_list(same_elev, desc=False)
+        
+        expected_list = np.array(12.3)
+        self.assertIsNone(np.testing.assert_array_equal(expected_list, elev_list))
+        self.assertIsNone(np.testing.assert_array_equal(expected_list, asc_elev_list))
+
+    def test_all_unique_returns_same_list(self):
+        unique_elev = np.arange(5, dtype=float)
+        elev_list = logic.elevation_list(unique_elev)
+        asc_elev_list = logic.elevation_list(unique_elev, desc=False)
+
+        self.assertIsNone(np.testing.assert_array_equal(unique_elev[::-1], elev_list))
+        self.assertIsNone(np.testing.assert_array_equal(unique_elev, asc_elev_list))
+    
+    def test_elevation_list_returns_unique_set(self):
+        elev = np.array((12.3, 5.0, 12.3, 5.0, 1.0, 3.0))
+        elev_list = logic.elevation_list(elev)
+        asc_elev_list = logic.elevation_list(elev, desc=False)
+
+        expected_desc_elev = np.array((12.3, 5.0, 3.0, 1.0))
+        expected_asc_elev = expected_desc_elev[::-1]
+        self.assertIsNone(np.testing.assert_array_equal(expected_desc_elev, elev_list))
+        self.assertIsNone(np.testing.assert_array_equal(expected_asc_elev, asc_elev_list))
+
 
 class TestRunEntrainments(unittest.TestCase):
     print("Not implemented")

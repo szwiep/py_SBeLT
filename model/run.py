@@ -99,7 +99,7 @@ def main(run_id, pid, param_path):
                                                         parameters['level_limit'],
                                                         lifted_particles=event_particle_ids)
             # Run entrainment event                    
-            model_particles, subregions = logic.run_entrainments(model_particles, 
+            model_particles, subregions = run_entrainments(model_particles, 
                                                                     bed_particles, 
                                                                     event_particle_ids,
                                                                     avail_vertices, 
@@ -170,6 +170,9 @@ def main(run_id, pid, param_path):
         snapshot_shelve.close()
         return
 
+#############################################################################
+# Helper functions
+#############################################################################
 
 def build_stream(parameters, h):
     bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])   
@@ -182,6 +185,55 @@ def build_stream(parameters, h):
     subregions = logic.define_subregions(bed_length, parameters['num_subregions'], parameters['n_iterations'])
     return bed_particles,model_particles,subregions
 
+# So, so many parameters.
+def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_vertices, unverified_e, subregions, iteration, h):
+    """ This function mimics an 'entrainment event' through
+    calls to the entrainment-related functions. 
+    
+    Uniqueness of entrainments is forced post-event. Particles
+    which select non-unique entrainments will be forced
+    to re-entrain at another vertex.
+    
+    Keyword arguments:
+        model_particles -- model's model particles np array
+        bed_particles -- model's bed particle np array
+        event_particle_ids -- list of ids of event particles
+        
+    Returns:
+        model_particles -- updated model_particles array
+        particle_flux -- number (int) of particles which 
+                            passed the downstream boundary
+    """
+    
+    initial_x = model_particles[event_particle_ids][:,0]
+
+    e_dict, model_particles, avail_vertices = logic.move_model_particles(
+                                                unverified_e, 
+                                                model_particles, 
+                                                bed_particles, 
+                                                avail_vertices,
+                                                h)
+    unique_entrainments, redo_ids = logic.check_unique_entrainments(e_dict)
+     
+    while not unique_entrainments:
+        redo_entrainments = model_particles[np.searchsorted(model_particles[:,3], 
+                                                            redo_ids)]
+        e_dict, model_particles, avail_vertices = logic.move_model_particles(
+                                                            redo_entrainments, 
+                                                            model_particles, 
+                                                            bed_particles, 
+                                                            avail_vertices,
+                                                            h)
+        unique_entrainments, redo_ids = logic.check_unique_entrainments(e_dict)
+
+    final_x = model_particles[event_particle_ids][:,0]
+
+    subregions = logic.update_flux(initial_x, final_x, iteration, subregions)
+    model_particles = logic.update_particle_states(model_particles, bed_particles)
+    # Increment age at the end of each entrainment
+    model_particles = logic.increment_age(model_particles, event_particle_ids)
+    
+    return model_particles, subregions
 
 def prepare_output_shelve(run_id, output_path, param_path, parameters):
     # Temporary logic to add 'simX' prefix to outputs

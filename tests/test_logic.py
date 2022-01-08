@@ -882,7 +882,6 @@ class TestPlaceParticle(unittest.TestCase):
 class TestElevationList(unittest.TestCase):
     
     def test_all_same_elev_returns_one_elev(self):
-        
         same_elev = np.array((12.3, 12.3, 12.3, 12.3, 12.3))
         elev_list = logic.elevation_list(same_elev)
         asc_elev_list = logic.elevation_list(same_elev, desc=False)
@@ -908,10 +907,6 @@ class TestElevationList(unittest.TestCase):
         expected_asc_elev = expected_desc_elev[::-1]
         self.assertIsNone(np.testing.assert_array_equal(expected_desc_elev, elev_list))
         self.assertIsNone(np.testing.assert_array_equal(expected_asc_elev, asc_elev_list))
-
-
-class TestRunEntrainments(unittest.TestCase):
-    print("Not implemented")
 
 class TestComputeHops(unittest.TestCase): 
 

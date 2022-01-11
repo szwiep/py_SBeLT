@@ -126,10 +126,10 @@ For a quick reference, the following citation commands can be used:
 
 # Figures
 
-<p>
-#![Figure 1](/figures/Figure 1.png)
+
+![Screenshot](/figures/Figure%201.png)
 <img src="/figures/Figure 1.png" alt="My cool logo"/>
-</p>
+
 
 # Acknowledgements
 

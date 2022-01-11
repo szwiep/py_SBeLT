@@ -127,7 +127,7 @@ For a quick reference, the following citation commands can be used:
 # Figures
 
 <p>
-![Figure 1](/figures/Figure 1.pdf){ width=50% }
+![Figure 1](/figures/Figure 1.pdf)
 </p>
 
 # Acknowledgements

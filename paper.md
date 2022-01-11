@@ -126,7 +126,9 @@ For a quick reference, the following citation commands can be used:
 
 # Figures
 
+<p>
 ![Figure 1: Example py_BeLT output of particle flux at downstream boundary and particle bed configuration at numerical step 100.\label{fig:fig1}](/figures/Figure 1.pdf){ width=50% }
+</p>
 
 # Acknowledgements
 

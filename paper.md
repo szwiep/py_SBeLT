@@ -127,7 +127,8 @@ For a quick reference, the following citation commands can be used:
 # Figures
 
 <p>
-![Figure 1](/figures/Figure 1.png)
+#![Figure 1](/figures/Figure 1.png)
+<img src="/figures/Figure 1.png" alt="My cool logo"/>
 </p>
 
 # Acknowledgements

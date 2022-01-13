@@ -100,8 +100,9 @@ For a quick reference, the following citation commands can be used:
 # Figures
 
 
-![Example py_BeLT output of particle flux at downstream boundary and particle bed configuration at numerical step 100.](/figures/Figure%201.png)
-
+|![Image](/figures/Figure%201.png)
+|:--:| 
+| *Example py_BeLT output of particle flux at downstream boundary and particle bed configuration at numerical step 100* |
 
 # Acknowledgements
 

@@ -28,7 +28,7 @@ link-citations: true
 Granular sediment of various sizes moves downstream along river beds when water flow is capable of entraining particles from 
 the bed surface. This process is known as bed load sediment transport because the particles travel close to the boundary. 
 It is common to treat the transport process as a predictive problem in which the mean transport rate past a stationary 
-observation point is a function of local water flow conditions \cite{@Parker2008; @Wainwright2014; @Ancey2020}. However, 
+observation point is a function of local water flow conditions [@Parker2008; @Wainwright2014; @Ancey2020]. However, 
 deterministic approaches to the problem neglect the stochastic nature of transport, which originates from the movements 
 of individual particles [@Einstein1937; @FurbDoane2021]. Here, we present an open-source Python model, pySBeLT, 
 which simulates the kinematics of rarefied particle transport (low rates) as a stochastic process along a riverbed profile. 

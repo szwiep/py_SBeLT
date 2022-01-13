@@ -82,11 +82,6 @@ to simulate kinematics using different probability distributions, or examining p
 for transport. py_BeLT can also be extended to 2-dimensions in the cross-stream. The relatively simple parameterization of pySBeLT execution 
 also makes it suitable for use as a teaching tool within advanced undergraduate and graduate courses emphasizing bedload transport.
 
-
-# Citations
-
-paper.bib
-
 # Figures
 
 
@@ -103,3 +98,5 @@ funding provided by Simon Fraser University. The model was inspired by discussio
 David Jon Furbish, who also provided useful input and critical feedback at various stages 
 of model development and testing. Kevin Pierce also provided helpful feedback during model 
 development. 
+
+# References

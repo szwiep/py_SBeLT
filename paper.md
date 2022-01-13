@@ -75,7 +75,7 @@ the randomly sampled number of entrainment events, the number of particles actua
 distance, the actual particle travel distance, the particle ‘age’, or the number of numerical steps since last entrainment for every 
 particle, and the number of particles which cross all boundaries, i.e. sub-region and downstream at x_max. All values are written to ____ files. 
 pyBeLT produces a time varying signal of particle flux counted at the downstream domain (as well as internal subregion domains), with a 
-particle bed that changes through particle stacking and pile removal, and downstream motions of travel distance \ref{fig1}. An implication 
+particle bed that changes through particle stacking and pile removal, and downstream motions of travel distance (Fig. 1). An implication 
 of particle stacking within the context of the pySBeLT stochastic framework is a time varying signal of the average “particle age”, as well 
 as the average “particle age range”, defined as the difference of the maximum and minimum particle ages. The software can be readily modified 
 to simulate kinematics using different probability distributions, or examining particle age dynamics for deeper beds of particles available 
@@ -100,7 +100,7 @@ For a quick reference, the following citation commands can be used:
 # Figures
 
 
-![Screenshot](/figures/Figure%201.png){#fig:fig1}
+![Example py_BeLT output of particle flux at downstream boundary and particle bed configuration at numerical step 100.](/figures/Figure%201.png)
 
 
 # Acknowledgements

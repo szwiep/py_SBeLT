@@ -1,5 +1,5 @@
 ---
-title: 'pyBeLT: A Python software for fluvial sediment transport under rarefied conditions'
+title: 'pyBeLT: A Python software for stochastic fluvial sediment transport under rarefied conditions'
 tags:
   - Python
   - geomorphology

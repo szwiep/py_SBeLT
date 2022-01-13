@@ -26,34 +26,34 @@ bibliography: paper.bib
 Granular sediment of various sizes moves downstream along river beds when water flow is capable of entraining particles from 
 the bed surface. This process is known as bed load sediment transport because the particles travel close to the boundary. 
 It is common to treat the transport process as a predictive problem in which the mean transport rate past a stationary 
-observation point is a function of local water flow conditions (Parker, 2008; Wainwright, 2014; Ancey, 2020). However, 
+observation point is a function of local water flow conditions [@Parker:2008; @Wainwright:2014; @Ancey:2020]. However, 
 deterministic approaches to the problem neglect the stochastic nature of transport, which originates from the movements 
-of individual particles (Einstein, 1937; Furbish and Doane, 2021). Here, we present an open-source Python software, pySBeLT, 
+of individual particles [@Einstein:1937; @FurbDoane:2021]. Here, we present an open-source Python model, pySBeLT, 
 which simulates the kinematics of rarefied particle transport (low rates) as a stochastic process along a riverbed profile. 
-This software is motivated by a need to better understand connections between individual particle motions and local transport 
+This model is motivated by a need to better understand connections between individual particle motions and local transport 
 rates, or the flux.
 
 # Statement of need
 
 Research at the intersection of geomorphology, geophysics and hydraulics is increasingly focused on building 
-a theoretical foundation for the treatment of bedload transport as a stochastic phenomenon (e.g. Ancey, 2020a; 
-Furbish and Doane, 2021). Associated theories are commonly tested against laboratory data from "rarefied" transport 
-conditions (Furbish et al., 2016), where transport rates are low to moderate, interactions between two or more 
+a theoretical foundation for the treatment of bedload transport as a stochastic phenomenon [@Ancey:2020; 
+@FurbDoane:2021]. Associated theories are commonly tested against laboratory data from "rarefied" transport 
+conditions [@Furb:2016], where transport rates are low to moderate, interactions between two or more 
 moving particles are rare, and a relatively small fraction of particles on the bed surface participate in transport 
-(e.g. Ancey, 2010; Roseberry et al., 2012; Fathel et al., 2015; Wu et al., 2019). For example, laboratory experiments 
+[@Ancey:2010; @Roseberry:2012; @Fathel:2015; @Wu:2019]. For example, laboratory experiments 
 using a downstream light table counting device and conducted at roughly twice the threshold for particle motion involve 
-the transport of less than approximately 12% of particles on the upstream bed surface (Chartrand, 2017). This result 
+the transport of less than approximately 12% of particles on the upstream bed surface [@Chartrand:2017]. This result 
 highlights that the flux measured across a boundary or within an area of bed surface is directly linked to the motions 
-of individual particles arriving from upstream locations (Furbish et al., 2012). 
+of individual particles arriving from upstream locations [@Furbish:2012]. 
 
 Because particle movements are controlled by fluid turbulence, the irregular bed surface, and collective movement effects 
-(Ancey et al., 2006; Ancey, 2008; Lee and Jerolmack, 2019), the connection between particle movements and the bedload 
-transport rate has been difficult to formulate mathematically. The pySBeLT software provides an extensible framework within 
+[@Ancey:2006; @Ancey:2008; @LeeJerol:2018], the connection between particle movements and the bedload 
+transport rate has been difficult to formulate mathematically. The pySBeLT model provides an extensible framework within 
 Python to numerically examine correlations between upstream particle entrainment rates and travel distances, with downstream 
-flux. The pySBeLT software was motivated by a birth-death, immigration-emigration Markov model for bedload transport. Here, 
+flux. The pySBeLT model was motivated by a birth-death, immigration-emigration Markov model for bedload transport. Here, 
 the movements of individual particles are represented by stochastic entrainment, motion, and deposition processes, and sediment 
 flux is represented as a counting phenomenon where the number of particles in motion above the bed surface is a random 
-variable (Ancey 2008). The pySBeLT software supports ensemble simulations so that repeat numerical experiments can be conducted,
+variable [@Ancey:2008]. The pySBeLT model supports ensemble simulations so that repeat numerical experiments can be conducted,
 or the problem can be efficiently probed across a range of input parameter values (discussed below).
 
 pyBeLT is run forward in time according to default or user specified parameter values in param.yaml (see the README.md for 
@@ -77,7 +77,7 @@ particle, and the number of particles which cross all boundaries, i.e. sub-regio
 pyBeLT produces a time varying signal of particle flux counted at the downstream domain (as well as internal subregion domains), with a 
 particle bed that changes through particle stacking and pile removal, and downstream motions of travel distance (Fig. 1). An implication 
 of particle stacking within the context of the pySBeLT stochastic framework is a time varying signal of the average “particle age”, as well 
-as the average “particle age range”, defined as the difference of the maximum and minimum particle ages. The software can be readily modified 
+as the average “particle age range”, defined as the difference of the maximum and minimum particle ages. The model can be readily modified 
 to simulate kinematics using different probability distributions, or examining particle age dynamics for deeper beds of particles available 
 for transport. py_BeLT can also be extended to 2-dimensions in the cross-stream. The relatively simple parameterization of pySBeLT execution 
 also makes it suitable for use as a teaching tool within advanced undergraduate and graduate courses emphasizing bedload transport.
@@ -85,17 +85,7 @@ also makes it suitable for use as a teaching tool within advanced undergraduate 
 
 # Citations
 
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
+paper.bib
 
 # Figures
 
@@ -113,6 +103,3 @@ funding provided by Simon Fraser University. The model was inspired by discussio
 David Jon Furbish, who also provided useful input and critical feedback at various stages 
 of model development and testing. Kevin Pierce also provided helpful feedback during model 
 development. 
-
-
-# References

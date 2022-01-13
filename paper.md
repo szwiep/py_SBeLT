@@ -1,4 +1,5 @@
 ---
+
 title: 'pyBeLT: A Python software for stochastic fluvial sediment transport under rarefied conditions'
 tags:
   - Python
@@ -82,6 +83,24 @@ as the average “particle age range”, defined as the difference of the maximu
 to simulate kinematics using different probability distributions, or examining particle age dynamics for deeper beds of particles available 
 for transport. py_BeLT can also be extended to 2-dimensions in the cross-stream. The relatively simple parameterization of pySBeLT execution 
 also makes it suitable for use as a teaching tool within advanced undergraduate and graduate courses emphasizing bedload transport.
+
+# Citations
+
+[@Ancey2006]
+[@Ancey2008]
+[@Ancey2010]
+[@Ancey2020]
+[@Chartrand2017]
+[@Einstein1937]
+[@Fathel2015]
+[@Furbish2012]
+[@Furb2016]
+[@FurbDoane2021]
+[@LeeJerol2018]
+[@Parker2008]
+[@Roseberry2012]
+[@Wainwright2015]
+[@Wu2020]
 
 # Figures
 

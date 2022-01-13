@@ -26,9 +26,9 @@ bibliography: paper.bib
 Granular sediment of various sizes moves downstream along river beds when water flow is capable of entraining particles from 
 the bed surface. This process is known as bed load sediment transport because the particles travel close to the boundary. 
 It is common to treat the transport process as a predictive problem in which the mean transport rate past a stationary 
-observation point is a function of local water flow conditions [@Parker:2008; @Wainwright:2014; @Ancey:2020]. However, 
+observation point is a function of local water flow conditions [@Parker2008; @Wainwright2014; @Ancey2020]. However, 
 deterministic approaches to the problem neglect the stochastic nature of transport, which originates from the movements 
-of individual particles [@Einstein:1937; @FurbDoane:2021]. Here, we present an open-source Python model, pySBeLT, 
+of individual particles [@Einstein1937; @FurbDoane2021]. Here, we present an open-source Python model, pySBeLT, 
 which simulates the kinematics of rarefied particle transport (low rates) as a stochastic process along a riverbed profile. 
 This model is motivated by a need to better understand connections between individual particle motions and local transport 
 rates, or the flux.
@@ -36,24 +36,24 @@ rates, or the flux.
 # Statement of need
 
 Research at the intersection of geomorphology, geophysics and hydraulics is increasingly focused on building 
-a theoretical foundation for the treatment of bedload transport as a stochastic phenomenon [@Ancey:2020; 
-@FurbDoane:2021]. Associated theories are commonly tested against laboratory data from "rarefied" transport 
-conditions [@Furb:2016], where transport rates are low to moderate, interactions between two or more 
+a theoretical foundation for the treatment of bedload transport as a stochastic phenomenon [@Ancey2020; 
+@FurbDoane2021]. Associated theories are commonly tested against laboratory data from "rarefied" transport 
+conditions [@Furb2016], where transport rates are low to moderate, interactions between two or more 
 moving particles are rare, and a relatively small fraction of particles on the bed surface participate in transport 
-[@Ancey:2010; @Roseberry:2012; @Fathel:2015; @Wu:2019]. For example, laboratory experiments 
+[@Ancey2010; @Roseberry2012; @Fathel2015; @Wu2019]. For example, laboratory experiments 
 using a downstream light table counting device and conducted at roughly twice the threshold for particle motion involve 
-the transport of less than approximately 12% of particles on the upstream bed surface [@Chartrand:2017]. This result 
+the transport of less than approximately 12% of particles on the upstream bed surface [@Chartrand2017]. This result 
 highlights that the flux measured across a boundary or within an area of bed surface is directly linked to the motions 
-of individual particles arriving from upstream locations [@Furbish:2012]. 
+of individual particles arriving from upstream locations [@Furbish2012]. 
 
 Because particle movements are controlled by fluid turbulence, the irregular bed surface, and collective movement effects 
-[@Ancey:2006; @Ancey:2008; @LeeJerol:2018], the connection between particle movements and the bedload 
+[@Ancey2006; @Ancey2008; @LeeJerol2018], the connection between particle movements and the bedload 
 transport rate has been difficult to formulate mathematically. The pySBeLT model provides an extensible framework within 
 Python to numerically examine correlations between upstream particle entrainment rates and travel distances, with downstream 
 flux. The pySBeLT model was motivated by a birth-death, immigration-emigration Markov model for bedload transport. Here, 
 the movements of individual particles are represented by stochastic entrainment, motion, and deposition processes, and sediment 
 flux is represented as a counting phenomenon where the number of particles in motion above the bed surface is a random 
-variable [@Ancey:2008]. The pySBeLT model supports ensemble simulations so that repeat numerical experiments can be conducted,
+variable [@Ancey2008]. The pySBeLT model supports ensemble simulations so that repeat numerical experiments can be conducted,
 or the problem can be efficiently probed across a range of input parameter values (discussed below).
 
 pyBeLT is run forward in time according to default or user specified parameter values in param.yaml (see the README.md for 

@@ -17,7 +17,7 @@ affiliations:
  - name: School of Environmental Science, Simon Fraser University
    index: 1
 date: 12 January 2022
-bibliography: paper.bib
+bibliography: "paper.bib"
 
 ---
 

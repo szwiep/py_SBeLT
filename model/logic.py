@@ -254,10 +254,6 @@ def place_particle(particle, model_particles, bed_particles, h):
     
     return round(particle[0], 2), round(np.add(h, left_support[2]), 2), left_support[3], right_support[3]
 
-
-# TODO: Restructure find_support calls to allow update_ to work without apply_along_axis
-# Using apply_along_axis forces us to use jit with forceobj=True
-# @jit(forceobj=True)
 # @Timer("update_states", text="update_particle_states call: {:.5f} seconds", logger=None)
 def update_particle_states(model_particles, model_supports, bed_particles):
     """ Set each model particle's current 'active' state.
@@ -294,49 +290,6 @@ def update_particle_states(model_particles, model_supports, bed_particles):
     if inactive_right.size != 0:
         model_particles[inactive_right.astype(int), 4] = 0
 
-
-    # result = np.apply_along_axis(find_supports, 1, in_stream_particles, model_particles, bed_particles, True)
-
-    # left_neighbour_condition1 = (result[:,0][:,2] < in_stream_particles[:,2])
-    # left_neighbour_condition2 = (result[:,0][:,2] > 0)
-
-    # right_neighbour_condition1 = (result[:,1][:,2] < in_stream_particles[:,2])
-    # right_neighbour_condition2 = (result[:,1][:,2] > 0)
-    
-    # inactive_left_idx = np.where(left_neighbour_condition1 & left_neighbour_condition2)
-    # inactive_right_idx = np.where(right_neighbour_condition1 & right_neighbour_condition2)
-
-    # inactive_left = result[inactive_left_idx][:,0][:,3].astype(int)
-    # inactive_right = result[inactive_right_idx][:,1][:,3].astype(int)
-
-    # if inactive_left.size != 0:
-    #     model_particles[inactive_left,4] = 0
-    # if inactive_right.size != 0:
-    #     model_particles[inactive_right,4] = 0
-    
-    # NOTE: below previous method, same results as above. Cannot fully vectorize due to call to find_supports()
-    # for particle in in_stream_particles:     
-    #     left_neighbour, right_neighbour = find_supports(particle, 
-    #                                                     model_particles, 
-    #                                                     bed_particles,
-    #                                                     already_placed = True)
-        
-    #     # note: this method below could be improved if find_neighbours_of 
-    #     # would indicate if a neighbour belongs to the model or bed particles
-    #     # if left_neighbour[2] > 0 and left_neighbour[2] < particle[2]:
-    #     #     lmodel_index = np.where(model_particles[:,3] == left_neighbour[3])
-    #     #     lsupport_id = lmodel_index[0][0]
-    #     #     model_particles[lsupport_id][4] = 0
-                 
-    #     if right_neighbour[2] > 0 and right_neighbour[2] < particle[2]:
-    #         rmodel_index = np.where(model_particles[:,3] == right_neighbour[3])
-    #         rsupport_id = rmodel_index[0][0]
-    #         print(model_particles[rsupport_id])
-    #         if model_particles[rsupport_id][4] != 0:
-    #             model_particles[rsupport_id][4] = 0
-    #             print("Did not set!")
-    
-    # print(f"After update: {model_particles}")
     return model_particles
 
 @njit

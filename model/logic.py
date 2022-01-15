@@ -180,28 +180,23 @@ def build_streambed(x_max, set_diam):
     max_particles = int(math.ceil( x_max / set_diam ))
     bed_particles = np.zeros([max_particles, 7],dtype=float)
     
-    particle_id = 0
-    packed_centre_loc = 0
+    particle_id = -1
+    centre = (set_diam/2)  
+    state = 0
+    age = 0
+    loop_age = 0
+    elevation = 0
 
     # TODO: NumPy improvement: This probably doesn't need to be a while loop
-    while not bed_complete(packed_centre_loc, x_max):
-
-        center = packed_centre_loc + (set_diam/2)
-        state = 0
-        age = 0
-        loop_age = 0
-        elevation = 0
-        
-        bed_particles[particle_id] = [center, set_diam, elevation, packed_centre_loc, state, age, loop_age]
-    
-        # update build parameters
-        packed_centre_loc += set_diam
-        particle_id += 1
+    while not bed_complete(centre, x_max):  
+        bed_particles[particle_id] = [centre, set_diam, elevation, particle_id, state, age, loop_age]
+        centre += set_diam
+        particle_id += -1 # Bed particles get negative IDs
     
     # TODO: This behaviour should be gotten rid of with a check for incompat diams.
     # Bed packing does not always match x_max. Adjust if off
-    bed_max = int(math.ceil(bed_particles[particle_id-1][1] 
-                            + bed_particles[particle_id-1][3]))
+    bed_max = int(math.ceil(bed_particles[(-particle_id)-2][1] 
+                            + bed_particles[(-particle_id)-2][3]))
     if x_max != bed_max:
         msg = (
             f'Bed packing could not match x_max parameter... Updating '
@@ -385,7 +380,6 @@ def find_supports(particle, model_particles, bed_particles, already_placed):
     left_center = particle[0] - (particle[1] / 2)
     right_center = particle[0] + (particle[1] / 2)
      
-       
     l_candidates = all_particles[all_particles[:,0] == left_center]
     # try:
     left_support = l_candidates[l_candidates[:,2] 
@@ -410,7 +404,6 @@ def find_supports(particle, model_particles, bed_particles, already_placed):
     #     )
     #     logging.error(error_msg)
     #     raise
-
     return left_support[0], right_support[0]
 
 # @Timer("create_set_modelp", text="set_model_particles call: {:.5f} seconds", logger=None)
@@ -521,9 +514,12 @@ def compute_available_vertices(model_particles, bed_particles, set_diam, level_l
                                            lifted_particles, 0)
         all_particles = np.concatenate((model_particles_lifted, 
                                         bed_particles), axis=0)
+    else:    
+        all_particles = np.concatenate((model_particles, 
+                                        bed_particles), axis=0)
 
-    all_particles = np.concatenate((model_particles, 
-                                    bed_particles), axis=0)
+    # all_particles = np.concatenate((model_particles, 
+    #                                 bed_particles), axis=0)
     # Get unique model particle elevations in stream (descending)
     elevations = elevation_list(all_particles[:,2])
     

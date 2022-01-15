@@ -214,7 +214,7 @@ def build_streambed(x_max, set_diam):
     valid = ((bed_particles==0).all(axis=(1)))
     bed_particles = bed_particles[~valid]
 
-    return bed_particles, x_max
+    return bed_particles, len(bed_particles)*set_diam
 
 def bed_complete(pack_idx, x_max):
     """Check to see if bed is complete based on model params.""" 
@@ -521,9 +521,9 @@ def compute_available_vertices(model_particles, bed_particles, set_diam, level_l
                                            lifted_particles, 0)
         all_particles = np.concatenate((model_particles_lifted, 
                                         bed_particles), axis=0)
-
-    all_particles = np.concatenate((model_particles, 
-                                    bed_particles), axis=0)
+    else:
+        all_particles = np.concatenate((model_particles, 
+                                        bed_particles), axis=0)
     # Get unique model particle elevations in stream (descending)
     elevations = elevation_list(all_particles[:,2])
     

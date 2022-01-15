@@ -175,8 +175,9 @@ def main(run_id, pid, param_path):
 #############################################################################
 
 def build_stream(parameters, h):
-    bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])   
-    available_vertices = logic.compute_available_vertices([], bed_particles, parameters['set_diam'],
+    bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])
+    empty_model = np.empty((0, 7))      
+    available_vertices = logic.compute_available_vertices(empty_model, bed_particles, parameters['set_diam'],
                                                         parameters['level_limit'])    
     # Create model particle array and set on top of bed particles
     model_particles = logic.set_model_particles(bed_particles, available_vertices, parameters['set_diam'], 

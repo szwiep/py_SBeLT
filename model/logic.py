@@ -84,7 +84,6 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
         active_event, active_idx, event_idx = np.intersect1d(active_particles[:,3], event_particles, return_indices=True)
         active_particles = np.delete(active_particles, active_idx, axis=0)
 
-
         subregion_event_ids = []  
         if height_dependant:
             # TODO: better approach to identify the level/elevation relationship. This is messy 
@@ -120,10 +119,8 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
                      f'but {len(subregion_event_ids)} are occuring'
             )
             logging.warning(msg)
-
         event_particles = event_particles + subregion_event_ids
     event_particles = np.array(event_particles, dtype=np.intp)
-    # print(event_particles)
 
     return event_particles
 
@@ -141,16 +138,16 @@ def define_subregions(bed_length, num_subregions, iterations):
     subregions_arr -- The np array of Subregions
 
     """
-    try:
-        assert(math.remainder(bed_length, num_subregions) == 0)
-    except AssertionError:
-        raise ValueError(f'Number of subregions needs to be a divisor of the bed length: {bed_length}%{num_subregions} != 0')
+    # try:
+    assert(math.remainder(bed_length, num_subregions) == 0)
+    # except AssertionError:
+    #     raise ValueError(f'Number of subregions needs to be a divisor of the bed length: {bed_length}%{num_subregions} != 0')
     
     subregion_length = bed_length/num_subregions
-    left_boundary = 0
+    left_boundary = 0.0
     subregions_arr = []
-    for region in range(num_subregions):       
-        right_boundary = left_boundary + subregion_length
+    for region in range(num_subregions):  
+        right_boundary = left_boundary + subregion_length   
         subregion = Subregion(f'subregion-{region}', left_boundary, right_boundary, iterations)
         left_boundary = right_boundary
         
@@ -180,28 +177,23 @@ def build_streambed(x_max, set_diam):
     max_particles = int(math.ceil( x_max / set_diam ))
     bed_particles = np.zeros([max_particles, 7],dtype=float)
     
-    particle_id = 0
-    packed_centre_loc = 0
+    particle_id = -1
+    centre = (set_diam/2)  
+    state = 0
+    age = 0
+    loop_age = 0
+    elevation = 0
 
     # TODO: NumPy improvement: This probably doesn't need to be a while loop
-    while not bed_complete(packed_centre_loc, x_max):
-
-        center = packed_centre_loc + (set_diam/2)
-        state = 0
-        age = 0
-        loop_age = 0
-        elevation = 0
-        
-        bed_particles[particle_id] = [center, set_diam, elevation, packed_centre_loc, state, age, loop_age]
-    
-        # update build parameters
-        packed_centre_loc += set_diam
-        particle_id += 1
+    while not bed_complete(centre, x_max):  
+        bed_particles[particle_id] = [centre, set_diam, elevation, particle_id, state, age, loop_age]
+        centre += set_diam
+        particle_id += -1 # Bed particles get negative IDs
     
     # TODO: This behaviour should be gotten rid of with a check for incompat diams.
     # Bed packing does not always match x_max. Adjust if off
-    bed_max = int(math.ceil(bed_particles[particle_id-1][1] 
-                            + bed_particles[particle_id-1][3]))
+    bed_max = int(math.ceil(bed_particles[(-particle_id)-2][1] 
+                            + bed_particles[(-particle_id)-2][3]))
     if x_max != bed_max:
         msg = (
             f'Bed packing could not match x_max parameter... Updating '
@@ -214,7 +206,7 @@ def build_streambed(x_max, set_diam):
     valid = ((bed_particles==0).all(axis=(1)))
     bed_particles = bed_particles[~valid]
 
-    return bed_particles, x_max
+    return bed_particles, len(bed_particles)*set_diam
 
 def bed_complete(pack_idx, x_max):
     """Check to see if bed is complete based on model params.""" 
@@ -260,14 +252,10 @@ def place_particle(particle, model_particles, bed_particles, h):
     left_support, right_support = find_supports(particle, model_particles, 
                                                 bed_particles, already_placed=False)
     
-    return round(particle[0], 2), round(np.add(h, left_support[2]), 2)
+    return round(particle[0], 2), round(np.add(h, left_support[2]), 2), left_support[3], right_support[3]
 
-
-# TODO: Restructure find_support calls to allow update_ to work without apply_along_axis
-# Using apply_along_axis forces us to use jit with forceobj=True
-@jit(forceobj=True)
 # @Timer("update_states", text="update_particle_states call: {:.5f} seconds", logger=None)
-def update_particle_states(model_particles, bed_particles):
+def update_particle_states(model_particles, model_supports, bed_particles):
     """ Set each model particle's current 'active' state.
     
     
@@ -290,50 +278,18 @@ def update_particle_states(model_particles, bed_particles):
     
     """
     # Set all model particles to active
+
     model_particles[:,4] = 1
     in_stream_particles = model_particles[model_particles[:,0] != -1]
     # New method, same results as previous. Cannot fully vectorize due to find_supports()
-    result = np.apply_along_axis(find_supports, 1, in_stream_particles, model_particles, bed_particles, True)
-
-    left_neighbour_condition1 = (result[:,0][:,2] < in_stream_particles[:,2])
-    left_neighbour_condition2 = (result[:,0][:,2] > 0)
-
-    right_neighbour_condition1 = (result[:,1][:,2] < in_stream_particles[:,2])
-    right_neighbour_condition2 = (result[:,1][:,2] > 0)
-    
-    inactive_left_idx = np.where(left_neighbour_condition1 & left_neighbour_condition2)
-    inactive_right_idx = np.where(right_neighbour_condition1 & right_neighbour_condition2)
-
-    inactive_left = result[inactive_left_idx][:,0][:,3].astype(int)
-    inactive_right = result[inactive_right_idx][:,1][:,3].astype(int)
+    inactive_left = np.intersect1d(in_stream_particles[:,3], model_supports[:,0])
+    inactive_right = np.intersect1d(in_stream_particles[:,3], model_supports[:,1])
 
     if inactive_left.size != 0:
-        model_particles[inactive_left,4] = 0
+        model_particles[inactive_left.astype(int), 4] = 0
     if inactive_right.size != 0:
-        model_particles[inactive_right,4] = 0
-    
-    # NOTE: below previous method, same results as above. Cannot fully vectorize due to call to find_supports()
-    # for particle in in_stream_particles:     
-    #     left_neighbour, right_neighbour = find_supports(particle, 
-    #                                                     model_particles, 
-    #                                                     bed_particles,
-    #                                                     already_placed = True)
-        
-    #     # note: this method below could be improved if find_neighbours_of 
-    #     # would indicate if a neighbour belongs to the model or bed particles
-    #     # if left_neighbour[2] > 0 and left_neighbour[2] < particle[2]:
-    #     #     lmodel_index = np.where(model_particles[:,3] == left_neighbour[3])
-    #     #     lsupport_id = lmodel_index[0][0]
-    #     #     model_particles[lsupport_id][4] = 0
-                 
-    #     if right_neighbour[2] > 0 and right_neighbour[2] < particle[2]:
-    #         rmodel_index = np.where(model_particles[:,3] == right_neighbour[3])
-    #         rsupport_id = rmodel_index[0][0]
-    #         print(model_particles[rsupport_id])
-    #         if model_particles[rsupport_id][4] != 0:
-    #             model_particles[rsupport_id][4] = 0
-    #             print("Did not set!")
- 
+        model_particles[inactive_right.astype(int), 4] = 0
+
     return model_particles
 
 @njit
@@ -385,7 +341,6 @@ def find_supports(particle, model_particles, bed_particles, already_placed):
     left_center = particle[0] - (particle[1] / 2)
     right_center = particle[0] + (particle[1] / 2)
      
-       
     l_candidates = all_particles[all_particles[:,0] == left_center]
     # try:
     left_support = l_candidates[l_candidates[:,2] 
@@ -410,7 +365,6 @@ def find_supports(particle, model_particles, bed_particles, already_placed):
     #     )
     #     logging.error(error_msg)
     #     raise
-
     return left_support[0], right_support[0]
 
 # @Timer("create_set_modelp", text="set_model_particles call: {:.5f} seconds", logger=None)
@@ -447,6 +401,7 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
     num_particles = determine_num_particles(pack_fraction, num_placement_loc)
     # create an empty n-6 array to store model particle information
     model_particles = np.zeros([num_particles, 7], dtype='float')
+    model_supp = np.zeros([num_particles, 2], dtype='float')
   
     for particle in range(num_particles):  
         
@@ -464,21 +419,24 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
         model_particles[particle][4] = 1 # each particle begins as active
         
         # place particle at the chosen vertex
-        p_x, p_y = place_particle(model_particles[particle], 
-                                  model_particles, 
-                                  bed_particles, 
-                                  h)
+        p_x, p_y, left_supp, right_supp  = place_particle(model_particles[particle], 
+                                                            model_particles, 
+                                                            bed_particles, 
+                                                            h)
             
         model_particles[particle][0] = p_x
         model_particles[particle][2] = p_y
         model_particles[particle][5] = 0
         model_particles[particle][6] = 0
 
+        model_supp[particle][0] = left_supp
+        model_supp[particle][1] = right_supp
+
 
     # update particle states so that supporting particles are inactive
-    model_particles = update_particle_states(model_particles, bed_particles)
+    model_particles = update_particle_states(model_particles, model_supp, bed_particles)
     
-    return model_particles
+    return model_particles, model_supp
 
 # @Timer("compute_available_vertices", text="compute_avail_vertices call: {:.5f} seconds", logger=None)
 def compute_available_vertices(model_particles, bed_particles, set_diam, level_limit,
@@ -521,9 +479,12 @@ def compute_available_vertices(model_particles, bed_particles, set_diam, level_l
                                            lifted_particles, 0)
         all_particles = np.concatenate((model_particles_lifted, 
                                         bed_particles), axis=0)
+    else:    
+        all_particles = np.concatenate((model_particles, 
+                                        bed_particles), axis=0)
 
-    all_particles = np.concatenate((model_particles, 
-                                    bed_particles), axis=0)
+    # all_particles = np.concatenate((model_particles, 
+    #                                 bed_particles), axis=0)
     # Get unique model particle elevations in stream (descending)
     elevations = elevation_list(all_particles[:,2])
     
@@ -560,62 +521,7 @@ def elevation_list(elevations, desc=True):
     if desc:
            ue = ue[::-1]
     return ue
-    
-# So, so many parameters.
-def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_vertices, unverified_e, subregions, iteration, h):
-    """ This function mimics an 'entrainment event' through
-    calls to the entrainment-related functions. 
-    
-    Uniqueness of entrainments is forced post-event. Particles
-    which select non-unique entrainments will be forced
-    to re-entrain at another vertex.
-    
-    Keyword arguments:
-        model_particles -- model's model particles np array
-        bed_particles -- model's bed particle np array
-        event_particle_ids -- list of ids of event particles
-        
-    Returns:
-        model_particles -- updated model_particles array
-        particle_flux -- number (int) of particles which 
-                            passed the downstream boundary
-    """
-    
-    initial_x = model_particles[event_particle_ids][:,0]
-
-    e_dict, model_particles, avail_vertices = move_model_particles(
-                                                unverified_e, 
-                                                model_particles, 
-                                                bed_particles, 
-                                                avail_vertices,
-                                                h)
-    unique_entrainments, redo_ids = check_unique_entrainments(e_dict)
-     
-    # p_flux_2 = 0
-    while not unique_entrainments:
-        redo_entrainments = model_particles[np.searchsorted(model_particles[:,3], 
-                                                            redo_ids)]
-        e_dict, model_particles, avail_vertices = move_model_particles(
-                                                            redo_entrainments, 
-                                                            model_particles, 
-                                                            bed_particles, 
-                                                            avail_vertices,
-                                                            h)
-        unique_entrainments, redo_ids = check_unique_entrainments(e_dict)
-        # p_flux_2 += tmp_p_flux
-
-    # particle_flux = p_flux_1 + p_flux_2
-
-    final_x = model_particles[event_particle_ids][:,0]
-    # print(initial_x, final_x)
-    subregions = update_flux(initial_x, final_x, iteration, subregions)
-    model_particles = update_particle_states(model_particles, bed_particles)
-    # Increment age at the end of each entrainment
-    model_particles = increment_age(model_particles, event_particle_ids)
-    
-    return model_particles, subregions
   
-        
 def compute_hops(event_particle_ids, model_particles, mu, sigma, normal=False):
     """ Given a list of (event) paritcles, this function will 
     add a 'hop' distance to all particles' current x-locations. 
@@ -645,7 +551,7 @@ def compute_hops(event_particle_ids, model_particles, mu, sigma, normal=False):
     
     return event_particles
  
-def move_model_particles(event_particles, model_particles, bed_particles, available_vertices, h):
+def move_model_particles(event_particles, model_particles, model_supp, bed_particles, available_vertices, h):
     """ Given an array of event particles, move the event particles
     to next closest valid vertex within the model stream and update 
     model_particle array accordingly.
@@ -689,9 +595,13 @@ def move_model_particles(event_particles, model_particles, bed_particles, availa
             )
             logging.info(hop_msg)
             particle[0] = verified_hop
-            placed_x, placed_y = place_particle(particle, model_particles, bed_particles, h)
+            placed_x, placed_y, left_supp, right_supp = place_particle(particle, model_particles, bed_particles, h)
             particle[0] = placed_x
             particle[2] = placed_y
+
+            model_supp[int(particle[3])][0] = left_supp
+            model_supp[int(particle[3])][1] = right_supp
+
             # crossed 0 or 1 of the n-1 subregion boundaries
             
         entrainment_dict[particle[3]] = verified_hop
@@ -699,7 +609,7 @@ def move_model_particles(event_particles, model_particles, bed_particles, availa
         
     updated_avail_vert = np.setdiff1d(available_vertices, list(entrainment_dict.values()))
     
-    return entrainment_dict, model_particles, updated_avail_vert
+    return entrainment_dict, model_particles, model_supp, updated_avail_vert
 
 
 def update_flux(initial_positions, final_positions, iteration, subregions):

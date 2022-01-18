@@ -5,7 +5,7 @@ import logging.config
 from datetime import datetime
 from pathlib import Path 
 from shortuuid import uuid
-import shelve
+import h5py
 import cProfile
 import time
 
@@ -68,12 +68,16 @@ def main(run_id, pid, param_path):
     snapshot_counter = 0
     milestones = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
-    snapshot_shelve = prepare_output_shelve(run_id, output_path, param_path, parameters)
-    try: 
-        # Write static data to shelf
-        snapshot_shelve['param'] = parameters 
-        snapshot_shelve['bed'] = np.ndarray.tolist(bed_particles)
-        snapshot_shelve['init_model'] = np.ndarray.tolist(model_particles)
+    # snapshot_shelve = prepare_output_shelve(run_id, output_path, param_path, parameters)
+    h5py_filename = f'{parameters["filename_prefix"]}-{run_id}.hdf5'
+    hdf5_path = f'{output_path}/{h5py_filename}'
+    with h5py.File(hdf5_path, "a") as f: 
+        
+        grp_iv = f.create_group(f'initial_values')
+        for key, value in parameters.items():
+            grp_iv[key] = value
+        grp_iv.create_dataset('bed', data=bed_particles)
+        grp_iv.create_dataset('model', data=model_particles)
 
         #############################################################################
         #  Entrainment iterations
@@ -125,18 +129,19 @@ def main(run_id, pid, param_path):
             #               2) available_vertices used for run_entrainments call
             #               3) event_particle_ids used for run_entrainments cal
             if (snapshot_counter == parameters['snapshot_interval']):
-                snapshot_dict[str(iteration)] = [ 
-                                            np.ndarray.tolist(model_particles), 
-                                            np.ndarray.tolist(avail_vertices), # avail used during entrainment
-                                            np.ndarray.tolist(event_particle_ids)] # entrainment particles
+                # print(event_particle_ids)
+                grp_i = f.create_group(f'iteration_{iteration}')
+                grp_i.create_dataset("model", data=model_particles, compression="gzip")
+                # grp.create_dataset("vertices", data=vertices_array, compression="gzip")
+                grp_i.create_dataset("event_ids", data=event_particle_ids, compression="gzip")
                 snapshot_counter = 0
 
             # Incrementally write snapshot dictionary to file to avoid overwhelming memory
-            if(iteration != 0 and iteration % 100000 == 0):
-                print(f'[{pid}] Writing chunk of dictionary to shelf...')
-                snapshot_shelve.update(snapshot_dict)
-                snapshot_dict.clear()
-                print(f'[{pid}] Finished writing chunk. Continuing with entrainments...')
+            # if(iteration != 0 and iteration % 100000 == 0):
+            #     print(f'[{pid}] Writing chunk of dictionary to shelf...')
+            #     snapshot_shelve.update(snapshot_dict)
+            #     snapshot_dict.clear()
+            #     print(f'[{pid}] Finished writing chunk. Continuing with entrainments...')
 
             # Display run progress for users
             percentage_complete = (100.0 * (iteration+1) / parameters['n_iterations'])
@@ -148,29 +153,23 @@ def main(run_id, pid, param_path):
         #############################################################################
         # Store final entrainment iteration information
         #############################################################################
-
-        # Once all entrainment events complete, store relevant information to shelf
-        print(f'[{pid}] Writing dictionary to shelf...')
-        snapshot_shelve.update(snapshot_dict)
-        print(f'[{pid}] Finished writing dictionary.')
         
         print(f'[{pid}] Writting flux and age information to shelf...')
 
+        grp_final = f.create_group(f'final_metrics')
+        grp_sub = grp_final.create_group(f'subregions')
         for subregion in subregions:
             name = f'{subregion.getName()}-flux'
-            snapshot_shelve[name] = subregion.getFluxList()
+            flux_list = subregion.getFluxList()
+            grp_sub.create_dataset(name, data=flux_list, compression="gzip")
 
         # snapshot_shelve['flux'] = particle_flux_list
-        snapshot_shelve['avg_age'] = particle_age_list
-        snapshot_shelve['age_range'] = particle_range_list
+        grp_final.create_dataset('avg_age', data=particle_age_list, compression="gzip")
+        grp_final.create_dataset('age_range', data=particle_range_list, compression="gzip")
         print(f'[{pid}] Finished writing flux and age information.')
         print(f'[{pid}] Model run finished successfully.')
-    except Exception as e:
-        print(e)
-    finally:
-        print('Closing shelf file...')
-        snapshot_shelve.close()
-        return
+    
+    return
 
 #############################################################################
 # Helper functions
@@ -178,11 +177,7 @@ def main(run_id, pid, param_path):
 
 def build_stream(parameters, h):
     bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])
-<<<<<<< HEAD
     empty_model = np.empty((0, 7))      
-=======
-    empty_model = np.empty((0, 7))   
->>>>>>> cf1ca87dd37ec3afa5f04fd8831251f2e3a2e3a9
     available_vertices = logic.compute_available_vertices(empty_model, bed_particles, parameters['set_diam'],
                                                         parameters['level_limit'])    
     # Create model particle array and set on top of bed particles

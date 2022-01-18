@@ -7,6 +7,7 @@ from pathlib import Path
 from shortuuid import uuid
 import shelve
 import cProfile
+import time
 
 import logic
 import util
@@ -55,7 +56,7 @@ def main(run_id, pid, param_path):
 
 
     print(f'[{pid}] Building Bed and Model particle arrays...')
-    bed_particles, model_particles, subregions = build_stream(parameters, h)
+    bed_particles, model_particles, model_supp, subregions = build_stream(parameters, h)
 
     #############################################################################
     #  Create entrainment data and data structures
@@ -99,7 +100,8 @@ def main(run_id, pid, param_path):
                                                         parameters['level_limit'],
                                                         lifted_particles=event_particle_ids)
             # Run entrainment event                    
-            model_particles, subregions = run_entrainments(model_particles, 
+            model_particles, model_supp, subregions = run_entrainments(model_particles, 
+                                                                    model_supp,
                                                                     bed_particles, 
                                                                     event_particle_ids,
                                                                     avail_vertices, 
@@ -176,18 +178,22 @@ def main(run_id, pid, param_path):
 
 def build_stream(parameters, h):
     bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])
+<<<<<<< HEAD
     empty_model = np.empty((0, 7))      
+=======
+    empty_model = np.empty((0, 7))   
+>>>>>>> cf1ca87dd37ec3afa5f04fd8831251f2e3a2e3a9
     available_vertices = logic.compute_available_vertices(empty_model, bed_particles, parameters['set_diam'],
                                                         parameters['level_limit'])    
     # Create model particle array and set on top of bed particles
-    model_particles = logic.set_model_particles(bed_particles, available_vertices, parameters['set_diam'], 
+    model_particles, model_supp = logic.set_model_particles(bed_particles, available_vertices, parameters['set_diam'], 
                                                         parameters['pack_density'],  h)
     # Define stream's subregions
     subregions = logic.define_subregions(bed_length, parameters['num_subregions'], parameters['n_iterations'])
-    return bed_particles,model_particles,subregions
+    return bed_particles,model_particles, model_supp, subregions
 
 # So, so many parameters.
-def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_vertices, unverified_e, subregions, iteration, h):
+def run_entrainments(model_particles, model_supp, bed_particles, event_particle_ids, avail_vertices, unverified_e, subregions, iteration, h):
     """ This function mimics an 'entrainment event' through
     calls to the entrainment-related functions. 
     
@@ -205,12 +211,13 @@ def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_v
         particle_flux -- number (int) of particles which 
                             passed the downstream boundary
     """
-    
+
     initial_x = model_particles[event_particle_ids][:,0]
 
-    e_dict, model_particles, avail_vertices = logic.move_model_particles(
+    e_dict, model_particles, model_supp, avail_vertices = logic.move_model_particles(
                                                 unverified_e, 
-                                                model_particles, 
+                                                model_particles,
+                                                model_supp, 
                                                 bed_particles, 
                                                 avail_vertices,
                                                 h)
@@ -219,9 +226,10 @@ def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_v
     while not unique_entrainments:
         redo_entrainments = model_particles[np.searchsorted(model_particles[:,3], 
                                                             redo_ids)]
-        e_dict, model_particles, avail_vertices = logic.move_model_particles(
+        e_dict, model_particles, model_supp, avail_vertices = logic.move_model_particles(
                                                             redo_entrainments, 
                                                             model_particles, 
+                                                            model_supp,
                                                             bed_particles, 
                                                             avail_vertices,
                                                             h)
@@ -230,11 +238,11 @@ def run_entrainments(model_particles, bed_particles, event_particle_ids, avail_v
     final_x = model_particles[event_particle_ids][:,0]
 
     subregions = logic.update_flux(initial_x, final_x, iteration, subregions)
-    model_particles = logic.update_particle_states(model_particles, bed_particles)
+    model_particles = logic.update_particle_states(model_particles, model_supp, bed_particles)
     # Increment age at the end of each entrainment
     model_particles = logic.increment_age(model_particles, event_particle_ids)
-    
-    return model_particles, subregions
+
+    return model_particles, model_supp, subregions
 
 def prepare_output_shelve(run_id, output_path, param_path, parameters):
     # Temporary logic to add 'simX' prefix to outputs
@@ -261,17 +269,20 @@ def get_relative_paths():
 
 if __name__ == '__main__':
 
-    pr = cProfile.Profile()
-    pr.enable()
+    # pr = cProfile.Profile()
+    # pr.enable()
+    tic = time.perf_counter()
     uid = uuid()
     pid = os.getpid()
     run_id = datetime.now().strftime('%y%m-%d%H-') + uid
     print(f'Process [{pid}] run ID: {run_id}')
     
     main(run_id, pid, sys.argv[1])
+    toc = time.perf_counter()
+    print(f"Completed in {toc - tic:0.4f} seconds")
 
-    pr.disable()
-    pr.dump_stats('profile_dump_nov_24')
+    # pr.disable()
+    # pr.dump_stats('profile_dump_nov_24')
 
     
     

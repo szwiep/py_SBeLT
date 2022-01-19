@@ -566,9 +566,8 @@ def move_model_particles(event_particles, model_particles, model_supp, bed_parti
                                     boundary during this event
 
     """
-    entrainment_dict = {}
-    # particle_flux = 0
-    for particle in event_particles: 
+    # Randomly iterate over event particles
+    for particle in np.random.permutation(event_particles):
         orig_x = model_particles[model_particles[:,3] == particle[3]][0][0]
         verified_hop = find_closest_vertex(particle[0], available_vertices)
         
@@ -581,8 +580,6 @@ def move_model_particles(event_particles, model_particles, model_supp, bed_parti
             logging.info(exceed_msg) 
             particle[6] = particle[6] + 1
             particle[0] = verified_hop
-            # check which subregion boundaries it crossed
-            # crossed the final subregion boundary
         else:
             hop_msg = (
                 f'Particle {int(particle[3])} entrained from {orig_x} '
@@ -590,6 +587,8 @@ def move_model_particles(event_particles, model_particles, model_supp, bed_parti
             )
             logging.info(hop_msg)
             particle[0] = verified_hop
+            available_vertices = available_vertices[available_vertices != verified_hop]
+
             placed_x, placed_y, left_supp, right_supp = place_particle(particle, model_particles, bed_particles, h)
             particle[0] = placed_x
             particle[2] = placed_y
@@ -597,14 +596,9 @@ def move_model_particles(event_particles, model_particles, model_supp, bed_parti
             model_supp[int(particle[3])][0] = left_supp
             model_supp[int(particle[3])][1] = right_supp
 
-            # crossed 0 or 1 of the n-1 subregion boundaries
-            
-        entrainment_dict[particle[3]] = verified_hop
         model_particles[model_particles[:,3] == particle[3]] = particle
-        
-    updated_avail_vert = np.setdiff1d(available_vertices, list(entrainment_dict.values()))
-    
-    return entrainment_dict, model_particles, model_supp, updated_avail_vert
+
+    return model_particles, model_supp
 
 
 def update_flux(initial_positions, final_positions, iteration, subregions):

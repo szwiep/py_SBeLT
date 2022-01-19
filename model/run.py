@@ -180,30 +180,13 @@ def run_entrainments(model_particles, model_supp, bed_particles, event_particle_
     """
 
     initial_x = model_particles[event_particle_ids][:,0]
-
-    e_dict, model_particles, model_supp, avail_vertices = logic.move_model_particles(
-                                                                                    unverified_e, 
-                                                                                    model_particles,
-                                                                                    model_supp, 
-                                                                                    bed_particles, 
-                                                                                    avail_vertices,
-                                                                                    h)
-    unique_entrainments, redo_ids = logic.check_unique_entrainments(e_dict)
-     
-    while not unique_entrainments:
-        redo_entrainments = model_particles[np.searchsorted(model_particles[:,3], 
-                                                            redo_ids)]
-        e_dict, model_particles, model_supp, avail_vertices = logic.move_model_particles(
-                                                            redo_entrainments, 
-                                                            model_particles, 
-                                                            model_supp,
-                                                            bed_particles, 
-                                                            avail_vertices,
-                                                            h)
-        unique_entrainments, redo_ids = logic.check_unique_entrainments(e_dict)
-
+    model_particles, model_supp = logic.move_model_particles(unverified_e, 
+                                                                model_particles,
+                                                                model_supp, 
+                                                                bed_particles, 
+                                                                avail_vertices,
+                                                                h)
     final_x = model_particles[event_particle_ids][:,0]
-
     subregions = logic.update_flux(initial_x, final_x, iteration, subregions)
     model_particles = logic.update_particle_states(model_particles, model_supp, bed_particles)
     # Increment age at the end of each entrainment

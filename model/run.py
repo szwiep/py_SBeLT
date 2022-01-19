@@ -15,13 +15,8 @@ import util
 import sys
 import os
 
-ITERATION_HEADER = ("""
-    Beginning iteration {iteration}...
-    """)
-   
-ENTRAINMENT_HEADER = ("""
-    Entraining particles {event_particles}                        
-                      """)
+ITERATION_HEADER = ('Beginning iteration {iteration}...')
+ENTRAINMENT_HEADER = ('Entraining particles {event_particles}')
 
 def main(run_id, pid, param_path):
 
@@ -62,17 +57,19 @@ def main(run_id, pid, param_path):
     #  Create entrainment data and data structures
     #############################################################################
 
-    particle_age_list = []
-    particle_range_list = []
+    particle_age_array = np.ones(parameters['n_iterations'])*(-1)
+    particle_range_array = np.ones(parameters['n_iterations'])*(-1)
     snapshot_counter = 0
 
     h5py_filename = f'{parameters["filename_prefix"]}-{run_id}.hdf5'
     hdf5_path = f'{output_path}/{h5py_filename}'
+    # Open h5py file (where information will be saved) in append mode in a context manager
     with h5py.File(hdf5_path, "a") as f: 
         
         grp_p = f.create_group(f'params')
         for key, value in parameters.items():
             grp_p[key] = value
+
         grp_iv = f.create_group(f'initial_values')
         grp_iv.create_dataset('bed', data=bed_particles)
         grp_iv.create_dataset('model', data=model_particles)
@@ -113,19 +110,17 @@ def main(run_id, pid, param_path):
                                                                     subregions,
                                                                     iteration,  
                                                                     h)
-            # Compute age range and average age, store in lists
+            # Compute age range and average age, store in np arrays
             age_range = np.max(model_particles[:,5]) - np.min(model_particles[:,5])
-            particle_range_list.append(age_range)
+            particle_range_array[iteration] = age_range
 
             avg_age = np.average(model_particles[:,5]) 
-            particle_age_list.append(avg_age)
+            particle_age_array[iteration] = avg_age
 
             # Record per-iteration information 
             if (snapshot_counter == parameters['snapshot_interval']):
-                # print(event_particle_ids)
                 grp_i = f.create_group(f'iteration_{iteration}')
                 grp_i.create_dataset("model", data=model_particles, compression="gzip")
-                # grp.create_dataset("vertices", data=vertices_array, compression="gzip")
                 grp_i.create_dataset("event_ids", data=event_particle_ids, compression="gzip")
                 snapshot_counter = 0
 
@@ -141,8 +136,8 @@ def main(run_id, pid, param_path):
             flux_list = subregion.getFluxList()
             grp_sub.create_dataset(name, data=flux_list, compression="gzip")
 
-        grp_final.create_dataset('avg_age', data=particle_age_list, compression="gzip")
-        grp_final.create_dataset('age_range', data=particle_range_list, compression="gzip")
+        grp_final.create_dataset('avg_age', data=particle_age_array, compression="gzip")
+        grp_final.create_dataset('age_range', data=particle_range_array, compression="gzip")
         print(f'[{pid}] Finished writing flux and age information.')
 
         print(f'[{pid}] Model run finished successfully.')
@@ -215,14 +210,6 @@ def run_entrainments(model_particles, model_supp, bed_particles, event_particle_
     model_particles = logic.increment_age(model_particles, event_particle_ids)
 
     return model_particles, model_supp, subregions
-
-def prepare_output_shelve(run_id, output_path, param_path, parameters):
-    # Temporary logic to add 'simX' prefix to outputs
-    filename = f'sim{parameters["filename_prefix"]}-{run_id}'
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-    snapshot_shelve = shelve.open(f"{output_path}/{filename}")
-    return snapshot_shelve
 
 
 def configure_logging(run_id, logConf_path, log_path):

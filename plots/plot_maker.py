@@ -33,7 +33,6 @@ def main(filename, save_location, iter_min, iter_max):
     with h5py.File(fp_in, 'r') as f:
         subregion_max = f['params']['num_subregions'][()]
         ds_boundary_key = f'subregion-{subregion_max-1}-flux' 
-
         # Plot streambed
         for iter in range(iteration_range[0], iteration_range[1]+1):
             plotting.stream(iter,   np.array(f['initial_values']['bed']), 
@@ -44,6 +43,9 @@ def main(filename, save_location, iter_min, iter_max):
        
         # Plot downstream boundary crossing histogram
         plotting.crossing_info(f['final_metrics']['subregions'][ds_boundary_key][()], 
+                                f['params']['n_iterations'][()], 1, fp_out)
+        plotting.crossing_info2(f['final_metrics']['subregions'][ds_boundary_key][()], 
+                                np.array(f['final_metrics']['avg_age']),
                                 f['params']['n_iterations'][()], 1, fp_out)
 
 def parse_arguments():

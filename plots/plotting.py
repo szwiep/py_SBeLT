@@ -12,8 +12,7 @@ from scipy.optimize import curve_fit
 from scipy.special import factorial
 import seaborn as sns
 
-def stream(iteration, bed_particles, model_particles, x_lim, y_lim,
-                available_vertices, fp_out):
+def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out):
     """ Plot the complete stream from 0,0 to x_lim and y_lim. Bed particles 
     are plotted as light grey and model particles are dark blue. Allows
     for closer look at state of a subregion of the stream during simulation """
@@ -47,14 +46,7 @@ def stream(iteration, bed_particles, model_particles, x_lim, y_lim,
     p_m = PatchCollection(patches1, cmap=matplotlib.cm.RdGy, edgecolors='black')
     p_m.set_array(model_particles[:,5])
     ax.add_collection(p_m)
-    ### FOR TESTING: Plot various vertex types 
-    # for xc in vertex_idx:
-    #     plt.axvline(x=xc, color='b', linestyle='-')
-    # for xxc in available_vertices:
-    #     plt.axvline(x=xxc, color='b', linestyle='-', linewidth=0.25)
-    # for green in chosen_vertex:
-    #     plt.axvline(x=green, color='g', linestyle='-')
-    ### 
+
     plt.colorbar(p_m,orientation='horizontal',fraction=0.046, pad=0.1,label='Particle Age (iterations since last hop)')
     plt.title(f'Iteration {iteration}')
 

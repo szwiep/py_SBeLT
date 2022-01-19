@@ -292,7 +292,7 @@ def update_particle_states(model_particles, model_supports, bed_particles):
 
     return model_particles
 
-@njit
+# @njit
 # @Timer("# find_supports", text="find_supports call: {:.5f} seconds", logger=None)
 def find_supports(particle, model_particles, bed_particles, already_placed):
     """ Find the 2 supporting particles for a given particle.
@@ -342,29 +342,27 @@ def find_supports(particle, model_particles, bed_particles, already_placed):
     right_center = particle[0] + (particle[1] / 2)
      
     l_candidates = all_particles[all_particles[:,0] == left_center]
-    # try:
-    left_support = l_candidates[l_candidates[:,2] 
+    try:
+        left_support = l_candidates[l_candidates[:,2] 
                                     == np.max(l_candidates[:,2])]
-    # except ValueError:
-    #     error_msg = (
-    #                  f'No left supporting particle found for'
-    #                  f'particle {particle[3]}, searched for support at'
-    #                  f'{left_center}'
-    #     )
-    #     logging.error(error_msg)
-    #     raise   
+    except ValueError:
+        error_msg = (
+                     f'No left supporting particle at {left_center}' 
+                     f'for particle {particle[3]}'
+        )
+        logging.error(error_msg)
+        raise   
         
     r_candidates = all_particles[all_particles[:,0] == right_center] 
-    # try:
-    right_support = r_candidates[r_candidates[:,2] == np.max(r_candidates[:,2])]
-    # except ValueError:
-    #     error_msg = (
-    #                  f'No right supporting particle found for'
-    #                  f'particle {particle[3]}, searched for support at'
-    #                  f'{right_center}'
-    #     )
-    #     logging.error(error_msg)
-    #     raise
+    try:
+        right_support = r_candidates[r_candidates[:,2] == np.max(r_candidates[:,2])]
+    except ValueError:
+        error_msg = (
+                     f'No right supporting particle at {right_center}' 
+                     f'for particle {particle[3]}'
+        )
+        logging.error(error_msg)
+        raise
     return left_support[0], right_support[0]
 
 # @Timer("create_set_modelp", text="set_model_particles call: {:.5f} seconds", logger=None)
@@ -479,12 +477,9 @@ def compute_available_vertices(model_particles, bed_particles, set_diam, level_l
                                            lifted_particles, 0)
         all_particles = np.concatenate((model_particles_lifted, 
                                         bed_particles), axis=0)
-    else:    
+    else:
         all_particles = np.concatenate((model_particles, 
                                         bed_particles), axis=0)
-
-    # all_particles = np.concatenate((model_particles, 
-    #                                 bed_particles), axis=0)
     # Get unique model particle elevations in stream (descending)
     elevations = elevation_list(all_particles[:,2])
     

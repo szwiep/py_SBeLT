@@ -648,61 +648,6 @@ def find_closest_vertex(desired_hop, available_vertices):
     return vertex    
 
 
-# TODO: confirm the naming of function
-# @Timer("check_unique_entrainments", text="check_unique_entrainments call: {:.5f} seconds", logger=None)      
-def check_unique_entrainments(entrainment_dict):
-    """ Check that all entrainments in the dictionary are unqiue. 
-    
-    This function will flag any input with non-unique
-    entrainments. For a model with n entrainments, and k 
-    particles entraining at the same vertex, a list of k-1 particles 
-    will returned. The list represents those particles that 
-    should be re-entrained (forced to a different vertex).
-    
-    Keyword arguments:
-        entrainment_dict -- dictionary with key=id and value=vertex 
-                            particle (id) is being entrained at
-                            
-    Returns:
-        unique_flag -- boolean indicating if entrainment_dict had 
-                        only unique entrainments (true) or at 
-                        least one non-unique entrainemnt event (false)
-        redo_list -- list of particles to be re-entrained in order to
-                        achieve uniqueness. If unique_flag is True 
-                        then list will be returned empty
-    """
-    redo_list = []
-    unique_flag = True
-    # create defaultdict struct to avoid 'Missing Key' errors while grouping
-    entrainment_groups = defaultdict(list)
-    for p_id, vertex in entrainment_dict.items():
-        entrainment_groups[vertex].append(p_id)
-    
-    entrainment_groups = dict(entrainment_groups)
-    for vertex, p_id in entrainment_groups.items():
-        if vertex == -1:
-            pass
-        elif len(p_id) > 1:
-            unique_flag = False
-            nonunique_msg = (
-                f'Non-unique entrainment: The following particles attempted to '
-                f'entrain at vertex {vertex}: {p_id}.'
-            )
-            logging.info(nonunique_msg)
-            stay_particle = random.sample(p_id, 1)[0]
-            unique_flag = False
-            stay_select = (
-                f'Randomly selecting {stay_particle} to remain at {vertex}, all ' 
-                f'others will be forced to the next available vertex.'
-            )
-            logging.info(stay_select)
-            for particle in p_id:
-                if particle != stay_particle:
-                    redo_list.append(int(particle))
-        
-    return unique_flag, redo_list     
-
-
 def increment_age(model_particles, e_event_ids):
     """"Increment model particles' age, set event particles to age 0"""
     

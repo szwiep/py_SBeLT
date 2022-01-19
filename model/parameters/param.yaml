@@ -26,7 +26,7 @@ pack_density: 0.78
 # RANGE: > 0
 # TYPE: INT
 # TESTED ON: 50-1000 mm
-x_max: 60
+x_max: 200
     
 # Grain diameter (mm)
 # RANGE: > 0
@@ -47,7 +47,7 @@ level_limit: 3
 # RANGE: > 0
 # TYPE: INT
 # TESTED: 5-10000
-n_iterations: 50
+n_iterations: 1000
 
 # Lamba for poisson dist. used to
 # determine the number of entrainment events.
@@ -73,4 +73,4 @@ snapshot_interval: 1
 
 height_dependancy: False
 
-filename_prefix: "Default"
+filename_prefix: "simTiming"

@@ -6,7 +6,6 @@ import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib.collections import PatchCollection
-from matplotlib.collections import LineCollection
 from matplotlib.patches import Circle
 from scipy.optimize import curve_fit
 from scipy.special import factorial

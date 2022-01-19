@@ -1,6 +1,6 @@
 ---
 
-title: 'pyBeLT: A Python software for stochastic fluvial sediment transport under rarefied conditions'
+title: 'pySBeLT: A Python software for stochastic sediment transport under rarefied conditions'
 tags:
   - Python
   - geomorphology
@@ -18,8 +18,7 @@ affiliations:
  - name: School of Environmental Science, Simon Fraser University
    index: 1
 date: 12 January 2022
-bibliography: "paper.bib"
-link-citations: true
+bibliography: paper.bib
 
 ---
 

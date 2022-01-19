@@ -6,7 +6,6 @@ from datetime import datetime
 from pathlib import Path 
 from shortuuid import uuid
 import h5py
-import cProfile
 import time
 from tqdm import tqdm
 

@@ -1,13 +1,7 @@
-from __future__ import division
 import math
 import random
 import numpy as np
-import sympy as sy
-import copy
 
-from collections import defaultdict
-# from codetiming import Timer
-from numba import jit, njit
 
 import logging
 
@@ -470,10 +464,8 @@ def compute_available_vertices(model_particles, bed_particles, set_diam, level_l
     
     # If we are lifting particles, we need to consider the subset of particles
     # that includes every particles _except_ the particles being 
-    if lifted_particles is not None:
-        # TODO: Unecessary deepcopy. Refactor to mask or something else.
-        model_particles_lifted = copy.deepcopy(model_particles)   
-        model_particles_lifted = np.delete(model_particles_lifted, 
+    if lifted_particles is not None:  
+        model_particles_lifted = np.delete(model_particles, 
                                            lifted_particles, 0)
         all_particles = np.concatenate((model_particles_lifted, 
                                         bed_particles), axis=0)

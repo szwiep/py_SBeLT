@@ -1,5 +1,4 @@
 ---
-
 title: 'pySBeLT: A Python software for stochastic sediment transport under rarefied conditions'
 tags:
   - Python
@@ -10,16 +9,16 @@ tags:
 authors:
   - name: Sarah Zwiep^[co-first author] 
     orcid: 
-    affiliation: "1"
+    affiliation: 1
   - name: Shawn M. Chartrand^[co-first author] 
   - orcid: 0000-0002-9309-1137
-    affiliation: 1
+    affiliation: 1, 2
 affiliations:
  - name: School of Environmental Science, Simon Fraser University
    index: 1
+ - name: Department of Earth Sciences, Simon Fraser University
 date: 12 January 2022
 bibliography: paper.bib
-
 ---
 
 # Summary
@@ -27,9 +26,11 @@ bibliography: paper.bib
 Granular sediment of various sizes moves downstream along river beds when water flow is capable of entraining particles from 
 the bed surface. This process is known as bed load sediment transport because the particles travel close to the boundary. 
 It is common to treat the transport process as a predictive problem in which the mean transport rate past a stationary 
-observation point is a function of local water flow conditions [@Parker2008; @Wainwright2014; @Ancey2020]. A predictive approach introduces challenges to understanding bed load transport, however, because the stochastic nature of transport due to the movements of individual particles is neglected [@Einstein1937; @FurbDoane2021]. Here, we present an open-source Python model, 'pySBeLT', 
+observation point is a function of local water flow conditions [@Parker2008; @Wainwright2014; @Ancey2020]. A predictive approach 
+introduces challenges to understanding bed load transport, however, because the stochastic nature of transport due to the 
+movements of individual particles is neglected [@Einstein1937; @FurbDoane2021]. Here, we present an open-source Python model, `pySBeLT`, 
 which simulates the kinematics of rarefied particle transport (low rates) as a stochastic process along a riverbed profile. 
-The primary aim of the model is to examine connections between individual particle motions and local transport rates, or the flux.
+The primary aim of `pySBeLT` is to examine connections between individual particle motions and local transport rates, or the flux.
 
 # Statement of need
 
@@ -46,15 +47,15 @@ of individual particles arriving from upstream locations [@Furbish2012].
 
 Because particle motions are controlled by fluid turbulence, the irregular bed surface, and collective effects 
 [@Ancey2006; @Ancey2008; @LeeJerol2018], the connection between particle movements and the bedload 
-transport rate has been difficult to formulate mathematically. The pySBeLT model provides an extensible framework within 
+transport rate has been difficult to formulate mathematically. `pySBeLT` provides an extensible framework within 
 Python to numerically examine correlations between upstream particle entrainment rates and travel distances, with downstream 
-flux. The pySBeLT model was motivated by a birth-death, immigration-emigration Markov model for bedload transport. Here, 
+flux. `pySBeLT` was motivated by a birth-death, immigration-emigration Markov model for bedload transport. Here, 
 the movements of individual particles are represented by stochastic entrainment, motion, and deposition processes, and sediment 
 flux is represented as a counting phenomenon where the number of particles in motion above the bed surface is a random 
-variable [@Ancey2008]. The pySBeLT model supports ensemble simulations so that repeat numerical experiments can be conducted,
-or the problem can be efficiently probed across a range of input parameter values (discussed below).
+variable [@Ancey2008]. The model supports ensemble simulations so that repeat numerical experiments can be conducted efficiently,
+or the problem can be probed across a range of input parameter values (discussed below).
 
-pyBeLT is run forward in time according to default or user specified parameter values in **'param.yaml'** (see the README.md for 
+`pySBeLT` is run forward in time according to default or user specified parameter values in **'param.yaml'** (see the README.md for 
 more details). After initialization, pyBeLT first constructs a bed of fixed particles of set_diam in both the downstream and 
 cross-stream dimensions (one particle wide in the present build), and over a downstream domain length **'x_max'**. Bed surface particles
 of **'set_diam'** are then randomly placed at vertices between fixed bed particles until the **'pack_density'** is met. Vertices are defined 
@@ -68,17 +69,18 @@ Placed particles are permitted to stack up to the **'level_limit in height'**. T
 queued at the upstream boundary, and are introduced back into the domain at the next numerical step according to travel distance sampling 
 described above. This overall process repeats for the specified n_iterations. 
 
-pyBeLT tracks a number of different parameters through a simulation: the vertical and horizontal positions of every particle center, 
+`pySBeLT` tracks a number of different parameters through a simulation: the vertical and horizontal positions of every particle center, 
 the randomly sampled number of entrainment events, the number of particles actually entrained, the randomly sampled particle travel 
 distance, the actual particle travel distance, the particle ‘age’, or the number of numerical steps since last entrainment for every 
-particle, and the number of particles which cross all boundaries, i.e. sub-region and downstream at x_max. All values are written to **'h5py'** files. 
-The pyBeLT model produces a time varying signal of particle flux counted at the downstream domain (as well as internal subregion domains), with a 
-particle bed that changes through particle stacking and pile removal, and downstream motions of travel distance (Fig. 1). An implication 
-of particle stacking within the context of the pySBeLT stochastic framework is a time varying signal of the average “particle age”, as well 
-as the average “particle age range”, defined as the difference of the maximum and minimum particle ages. The model can be readily modified 
-to simulate kinematics using different probability distributions, or examining particle age dynamics for deeper beds of particles available 
-for transport. py_BeLT can also be extended to 2-dimensions in the cross-stream. The relatively simple parameterization of pySBeLT execution 
-also makes it suitable for use as a teaching tool within advanced undergraduate and graduate courses emphasizing bedload transport.
+particle, and the number of particles which cross all boundaries, i.e. sub-region and downstream at x_max. All values are stored 
+in HDF5 data files using the `h5py` package [@Collette:2014]. `pySBeLT` produces a time varying signal of particle flux counted at the downstream 
+domain (as well as internal subregion domains), with a particle bed that changes through particle stacking and pile removal, and downstream 
+motions of travel distance (Fig. 1). An implication of particle stacking within the context of the `pySBeLT` stochastic framework is a time 
+varying signal of the average “particle age”, as well as the average “particle age range”, defined as the difference of the maximum and minimum 
+particle ages. The model can be readily modified to simulate kinematics using different probability distributions, or examining particle age 
+dynamics for deeper beds of particles available for transport. `py_SBeLT` can also be extended to 2-dimensions in the cross-stream. The relatively 
+simple parameterization of pySBeLT execution also makes it suitable for use as a teaching tool within advanced undergraduate and graduate courses 
+emphasizing bedload transport.
 
 # Figures
 

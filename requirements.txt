@@ -4,7 +4,6 @@ tqdm==4.56.0
 shortuuid==1.0.1
 numpy==1.19.5
 tornado==6.1
-pywin32==301
 matplotlib==3.3.4
 h5py==3.6.0
 brotli==1.0.9

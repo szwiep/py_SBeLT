@@ -71,7 +71,7 @@ described above. This overall process repeats for the specified n_iterations.
 pyBeLT tracks a number of different parameters through a simulation: the vertical and horizontal positions of every particle center, 
 the randomly sampled number of entrainment events, the number of particles actually entrained, the randomly sampled particle travel 
 distance, the actual particle travel distance, the particle ‘age’, or the number of numerical steps since last entrainment for every 
-particle, and the number of particles which cross all boundaries, i.e. sub-region and downstream at x_max. All values are written to ____ files. 
+particle, and the number of particles which cross all boundaries, i.e. sub-region and downstream at x_max. All values are written to **'h5py'** files. 
 The pyBeLT model produces a time varying signal of particle flux counted at the downstream domain (as well as internal subregion domains), with a 
 particle bed that changes through particle stacking and pile removal, and downstream motions of travel distance (Fig. 1). An implication 
 of particle stacking within the context of the pySBeLT stochastic framework is a time varying signal of the average “particle age”, as well 
@@ -83,7 +83,7 @@ also makes it suitable for use as a teaching tool within advanced undergraduate 
 # Figures
 
 
-|![Image](/figures/Figure%201.png)
+|![Image](/figures/Figure1.png)
 |:--:| 
 | *Example py_BeLT output of particle flux at downstream boundary and particle bed configuration at numerical step 100* |
 
@@ -98,5 +98,3 @@ of model development and testing. Kevin Pierce also provided helpful feedback du
 development. 
 
 # References
-
-<div id="refs"></div>

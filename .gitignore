@@ -141,10 +141,8 @@ cython_debug/
 # Ignore run results
 .model/logs/*.log
 plots/*/
-model/output/*.db
-model/output/*.dir
-model/output/*.bak
-model/output/*.dat
+model/output/*.hdf5
+
 
 
 .DS_Store

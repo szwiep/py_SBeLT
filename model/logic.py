@@ -132,10 +132,10 @@ def define_subregions(bed_length, num_subregions, iterations):
     subregions_arr -- The np array of Subregions
 
     """
-    # try:
-    assert(math.remainder(bed_length, num_subregions) == 0)
-    # except AssertionError:
-    #     raise ValueError(f'Number of subregions needs to be a divisor of the bed length: {bed_length}%{num_subregions} != 0')
+    try:
+        assert(math.remainder(bed_length, num_subregions) == 0)
+    except AssertionError:
+        raise ValueError(f'Number of subregions needs to be a divisor of the bed length: {bed_length}%{num_subregions} != 0')
     
     subregion_length = bed_length/num_subregions
     left_boundary = 0.0
@@ -186,19 +186,19 @@ def build_streambed(x_max, set_diam):
     
     # TODO: This behaviour should be gotten rid of with a check for incompat diams.
     # Bed packing does not always match x_max. Adjust if off
-    bed_max = int(math.ceil(bed_particles[(-particle_id)-2][1] 
-                            + bed_particles[(-particle_id)-2][3]))
-    if x_max != bed_max:
-        msg = (
-            f'Bed packing could not match x_max parameter... Updating '
-            f'x_max to match packing extent: {bed_max}....'
-        )
-        logging.warning(msg)
-        x_max = bed_max
-    else: x_max = x_max
-    # strip zero element particles tuples from the original array
-    valid = ((bed_particles==0).all(axis=(1)))
-    bed_particles = bed_particles[~valid]
+    # bed_max = int(math.ceil(bed_particles[(-particle_id)-2][1] 
+    #                         + bed_particles[(-particle_id)-2][3]))
+    # if x_max != bed_max:
+    #     msg = (
+    #         f'Bed packing could not match x_max parameter... Updating '
+    #         f'x_max to match packing extent: {bed_max}....'
+    #     )
+    #     logging.warning(msg)
+    #     x_max = bed_max
+    # else: x_max = x_max
+    # # strip zero element particles tuples from the original array
+    # valid = ((bed_particles==0).all(axis=(1)))
+    # bed_particles = bed_particles[~valid]
 
     return bed_particles, len(bed_particles)*set_diam
 
@@ -245,7 +245,6 @@ def place_particle(particle, model_particles, bed_particles, h):
     # TODO: It would be ideal to avoid a call to find_supports here.
     left_support, right_support = find_supports(particle, model_particles, 
                                                 bed_particles, already_placed=False)
-    
     return round(particle[0], 2), round(np.add(h, left_support[2]), 2), left_support[3], right_support[3]
 
 # @Timer("update_states", text="update_particle_states call: {:.5f} seconds", logger=None)
@@ -508,7 +507,7 @@ def elevation_list(elevations, desc=True):
     if desc:
            ue = ue[::-1]
     return ue
-  
+ 
 def compute_hops(event_particle_ids, model_particles, mu, sigma, normal=False):
     """ Given a list of (event) paritcles, this function will 
     add a 'hop' distance to all particles' current x-locations. 
@@ -572,6 +571,9 @@ def move_model_particles(event_particles, model_particles, model_supp, bed_parti
             logging.info(exceed_msg) 
             particle[6] = particle[6] + 1
             particle[0] = verified_hop
+
+            model_supp[int(particle[3])][0] = np.nan
+            model_supp[int(particle[3])][1] = np.nan
         else:
             hop_msg = (
                 f'Particle {int(particle[3])} entrained from {orig_x} '
@@ -595,6 +597,9 @@ def move_model_particles(event_particles, model_particles, model_supp, bed_parti
 
 def update_flux(initial_positions, final_positions, iteration, subregions):
     # This can _most definitely_ be made quicker but for now, it works
+    if len(initial_positions) != len(final_positions):
+        raise ValueError(f'Initial_positions and final_positions do not contain the same # of elements')
+    
     for position in range(0, len(initial_positions)):
 
         initial_pos = initial_positions[position]
@@ -624,6 +629,11 @@ def find_closest_vertex(desired_hop, available_vertices):
     Returns:
     vertex -- the closest available vertex that is >= desired_hop
     """    
+    if available_vertices.size == 0:
+        raise ValueError('Available vertices array is empty, cannot find closest vertex')
+    if desired_hop < 0:
+        raise ValueError('Desired hop is negative (invalid)')
+
     available_vertices = np.sort(available_vertices)
     forward_vertices = available_vertices[available_vertices >= desired_hop]
     

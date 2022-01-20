@@ -9,7 +9,7 @@ from matplotlib.collections import PatchCollection
 from matplotlib.patches import Circle
 from scipy.optimize import curve_fit
 from scipy.special import factorial
-import seaborn as sns
+from PIL import Image
 
 def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out):
     """ Plot the complete stream from 0,0 to x_lim and y_lim. Bed particles 
@@ -54,6 +54,22 @@ def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out):
     plt.savefig(plots_path, format='png',)
         
     return
+
+def stream_gif(start, stop, dir):
+    in_filename = 'iter{i}.png'
+    out_filename = 'simulation_snapshot.gif'
+
+    fp_in = dir + in_filename
+    fp_out = dir + out_filename
+
+    step = 1
+    images = []
+
+    for i in range(start, stop, step):
+        im = Image.open(fp_in.format(i=i))
+        images.append(im)
+
+    images[0].save(fp_out, save_all=True, append_images=images[1:], optimize=True, duration=150, loop=0)
 
 def crossing_info(particle_crossing_list, iterations, subsample, fp_out):
     plt.clf()

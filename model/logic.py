@@ -245,7 +245,6 @@ def place_particle(particle, model_particles, bed_particles, h):
     # TODO: It would be ideal to avoid a call to find_supports here.
     left_support, right_support = find_supports(particle, model_particles, 
                                                 bed_particles, already_placed=False)
-    
     return round(particle[0], 2), round(np.add(h, left_support[2]), 2), left_support[3], right_support[3]
 
 # @Timer("update_states", text="update_particle_states call: {:.5f} seconds", logger=None)
@@ -278,7 +277,7 @@ def update_particle_states(model_particles, model_supports, bed_particles):
     # New method, same results as previous. Cannot fully vectorize due to find_supports()
     inactive_left = np.intersect1d(in_stream_particles[:,3], model_supports[:,0])
     inactive_right = np.intersect1d(in_stream_particles[:,3], model_supports[:,1])
-
+    
     if inactive_left.size != 0:
         model_particles[inactive_left.astype(int), 4] = 0
     if inactive_right.size != 0:
@@ -508,7 +507,7 @@ def elevation_list(elevations, desc=True):
     if desc:
            ue = ue[::-1]
     return ue
-  
+ 
 def compute_hops(event_particle_ids, model_particles, mu, sigma, normal=False):
     """ Given a list of (event) paritcles, this function will 
     add a 'hop' distance to all particles' current x-locations. 
@@ -572,6 +571,9 @@ def move_model_particles(event_particles, model_particles, model_supp, bed_parti
             logging.info(exceed_msg) 
             particle[6] = particle[6] + 1
             particle[0] = verified_hop
+
+            model_supp[int(particle[3])][0] = np.nan
+            model_supp[int(particle[3])][1] = np.nan
         else:
             hop_msg = (
                 f'Particle {int(particle[3])} entrained from {orig_x} '

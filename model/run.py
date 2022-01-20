@@ -11,7 +11,6 @@ from tqdm import tqdm
 from jsonschema import validate, exceptions
 
 import logic
-import util
 import sys
 import os
 

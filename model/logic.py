@@ -132,10 +132,10 @@ def define_subregions(bed_length, num_subregions, iterations):
     subregions_arr -- The np array of Subregions
 
     """
-    # try:
-    assert(math.remainder(bed_length, num_subregions) == 0)
-    # except AssertionError:
-    #     raise ValueError(f'Number of subregions needs to be a divisor of the bed length: {bed_length}%{num_subregions} != 0')
+    try:
+        assert(math.remainder(bed_length, num_subregions) == 0)
+    except AssertionError:
+        raise ValueError(f'Number of subregions needs to be a divisor of the bed length: {bed_length}%{num_subregions} != 0')
     
     subregion_length = bed_length/num_subregions
     left_boundary = 0.0
@@ -186,19 +186,19 @@ def build_streambed(x_max, set_diam):
     
     # TODO: This behaviour should be gotten rid of with a check for incompat diams.
     # Bed packing does not always match x_max. Adjust if off
-    bed_max = int(math.ceil(bed_particles[(-particle_id)-2][1] 
-                            + bed_particles[(-particle_id)-2][3]))
-    if x_max != bed_max:
-        msg = (
-            f'Bed packing could not match x_max parameter... Updating '
-            f'x_max to match packing extent: {bed_max}....'
-        )
-        logging.warning(msg)
-        x_max = bed_max
-    else: x_max = x_max
-    # strip zero element particles tuples from the original array
-    valid = ((bed_particles==0).all(axis=(1)))
-    bed_particles = bed_particles[~valid]
+    # bed_max = int(math.ceil(bed_particles[(-particle_id)-2][1] 
+    #                         + bed_particles[(-particle_id)-2][3]))
+    # if x_max != bed_max:
+    #     msg = (
+    #         f'Bed packing could not match x_max parameter... Updating '
+    #         f'x_max to match packing extent: {bed_max}....'
+    #     )
+    #     logging.warning(msg)
+    #     x_max = bed_max
+    # else: x_max = x_max
+    # # strip zero element particles tuples from the original array
+    # valid = ((bed_particles==0).all(axis=(1)))
+    # bed_particles = bed_particles[~valid]
 
     return bed_particles, len(bed_particles)*set_diam
 
@@ -277,7 +277,7 @@ def update_particle_states(model_particles, model_supports, bed_particles):
     # New method, same results as previous. Cannot fully vectorize due to find_supports()
     inactive_left = np.intersect1d(in_stream_particles[:,3], model_supports[:,0])
     inactive_right = np.intersect1d(in_stream_particles[:,3], model_supports[:,1])
-    
+
     if inactive_left.size != 0:
         model_particles[inactive_left.astype(int), 4] = 0
     if inactive_right.size != 0:
@@ -597,6 +597,9 @@ def move_model_particles(event_particles, model_particles, model_supp, bed_parti
 
 def update_flux(initial_positions, final_positions, iteration, subregions):
     # This can _most definitely_ be made quicker but for now, it works
+    if len(initial_positions) != len(final_positions):
+        raise ValueError(f'Initial_positions and final_positions do not contain the same # of elements')
+    
     for position in range(0, len(initial_positions)):
 
         initial_pos = initial_positions[position]
@@ -626,6 +629,11 @@ def find_closest_vertex(desired_hop, available_vertices):
     Returns:
     vertex -- the closest available vertex that is >= desired_hop
     """    
+    if available_vertices.size == 0:
+        raise ValueError('Available vertices array is empty, cannot find closest vertex')
+    if desired_hop < 0:
+        raise ValueError('Desired hop is negative (invalid)')
+
     available_vertices = np.sort(available_vertices)
     forward_vertices = available_vertices[available_vertices >= desired_hop]
     

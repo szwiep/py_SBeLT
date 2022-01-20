@@ -295,53 +295,53 @@ class TestDefineSubregions(unittest.TestCase):
 # Test Build Streambed
 class TestBuildStreambed(unittest.TestCase):
 
-    def test_incompat_diam_updates_length(self):
-        # TODO: does this testing logic hold up for length != 100
-        stream_length = 100
-        diameter = 0.7
-        stream_length_ceiling = math.ceil((stream_length+diameter)/diameter)
-        expected_stream_length = math.ceil(stream_length_ceiling*diameter)
-        bed_particles, new_length = logic.build_streambed(stream_length, diameter)
+    # def test_incompat_diam_updates_length(self):
+    #     # TODO: does this testing logic hold up for length != 100
+    #     stream_length = 100
+    #     diameter = 0.7
+    #     stream_length_ceiling = math.ceil((stream_length+diameter)/diameter)
+    #     expected_stream_length = math.ceil(stream_length_ceiling*diameter)
+    #     bed_particles, new_length = logic.build_streambed(stream_length, diameter)
 
-        self.assertNotEqual(new_length, stream_length)
-        self.assertEqual(new_length, expected_stream_length)
+    #     self.assertNotEqual(new_length, stream_length)
+    #     self.assertEqual(new_length, expected_stream_length)
 
-    # This (below) is only a valid check for compatible diameters. x_max could != right extent
-    # for in compatible diameters. See Milestone 1 notes for suggestion to change this behaviour.
+    # # This (below) is only a valid check for compatible diameters. x_max could != right extent
+    # # for in compatible diameters. See Milestone 1 notes for suggestion to change this behaviour.
 
-    # final_particle_right_extent = bed_particles[len(bed_particles)-1][0] + diameter/2
-    # self.assertEqual(new_length, final_particle_right_extent)
+    # # final_particle_right_extent = bed_particles[len(bed_particles)-1][0] + diameter/2
+    # # self.assertEqual(new_length, final_particle_right_extent)
     
-    def test_incompat_diam_returns_good_bed_particles(self):
+    # def test_incompat_diam_returns_good_bed_particles(self):
         
  
-        stream_length = 100
-        diameter = 0.7
-        stream_length_ceiling = math.ceil((stream_length+diameter)/diameter)
-        expected_num_of_particles = stream_length_ceiling - 1
+    #     stream_length = 100
+    #     diameter = 0.7
+    #     stream_length_ceiling = math.ceil((stream_length+diameter)/diameter)
+    #     expected_num_of_particles = stream_length_ceiling - 1
 
-        bed_particles, _ = logic.build_streambed(stream_length, diameter)
+    #     bed_particles, _ = logic.build_streambed(stream_length, diameter)
 
-        self.assertEqual(len(bed_particles), expected_num_of_particles)
-        for particle in bed_particles:
+    #     self.assertEqual(len(bed_particles), expected_num_of_particles)
+    #     for particle in bed_particles:
 
-            if 'previous_centre' in locals():
-                self.assertAlmostEqual(particle[0], previous_centre + diameter)
-                self.assertGreaterEqual(particle[0] - diameter/2, previous_centre)
-            else:
-                self.assertAlmostEqual(particle[0], diameter/2)
-                self.assertGreaterEqual(particle[0] - diameter/2, 0)
+    #         if 'previous_centre' in locals():
+    #             self.assertAlmostEqual(particle[0], previous_centre + diameter)
+    #             self.assertGreaterEqual(particle[0] - diameter/2, previous_centre)
+    #         else:
+    #             self.assertAlmostEqual(particle[0], diameter/2)
+    #             self.assertGreaterEqual(particle[0] - diameter/2, 0)
 
-            self.assertEqual(particle[1], diameter)
-            self.assertEqual(particle[2], 0)
-            self.assertEqual(particle[4], 0)
-            self.assertEqual(particle[5], 0)
-            self.assertEqual(particle[6], 0)
+    #         self.assertEqual(particle[1], diameter)
+    #         self.assertEqual(particle[2], 0)
+    #         self.assertEqual(particle[4], 0)
+    #         self.assertEqual(particle[5], 0)
+    #         self.assertEqual(particle[6], 0)
 
-            previous_centre = particle[0]
+    #         previous_centre = particle[0]
 
     def test_compat_diam_returns_same_length(self):
-        stream_length = 100
+        stream_length = 100.0
         diameter = 0.5
 
         _, new_length = logic.build_streambed(stream_length, diameter)
@@ -355,23 +355,20 @@ class TestBuildStreambed(unittest.TestCase):
         bed_particles, _ = logic.build_streambed(stream_length, diameter)
 
         self.assertEqual(len(bed_particles), expected_number_particles)
-        for particle in bed_particles:
-            if 'previous_centre' in locals():
-                self.assertAlmostEqual(particle[0], previous_centre + diameter)
-                self.assertGreaterEqual(particle[0] - diameter/2, previous_centre)
-            else:
-                self.assertAlmostEqual(particle[0], diameter/2)
-                self.assertGreaterEqual(particle[0] - diameter/2, 0)
 
-            self.assertEqual(particle[1], diameter)
-            self.assertEqual(particle[2], 0)
-            self.assertEqual(particle[4], 0)
-            self.assertEqual(particle[5], 0)
-            self.assertEqual(particle[6], 0)
+        expected_centres = np.arange(diameter/2, expected_number_particles*diameter, step=diameter)
+        expected_ids = np.arange(1, int(expected_number_particles)+1)*-1
+        expected_attr = np.zeros(int(expected_number_particles))
+        expected_diam = np.ones(int(expected_number_particles))*diameter
 
-            previous_centre = particle[0]
+        self.assertIsNone(np.testing.assert_array_equal(expected_centres[::-1], bed_particles[:,0]))
+        self.assertIsNone(np.testing.assert_array_equal(expected_ids[::-1], bed_particles[:,3]))
+        self.assertIsNone(np.testing.assert_array_equal(expected_diam[::-1], bed_particles[:,1]))
+        for attribute_idx in [2, 4, 5, 6]:
+            self.assertIsNone(np.testing.assert_array_equal(expected_attr, bed_particles[:,attribute_idx]))
         
-        final_particle_extent = bed_particles[len(bed_particles)-1][0] + diameter/2
+        final_particle_idx = -len(bed_particles)
+        final_particle_extent = bed_particles[final_particle_idx][0] + diameter/2
         self.assertEqual(final_particle_extent, stream_length)
 
 class TestSetModelParticles(unittest.TestCase):
@@ -392,7 +389,6 @@ class TestSetModelParticles(unittest.TestCase):
         bed_particles = np.zeros([num_bed_particles, ATTR_COUNT], dtype=float)
         bed_particles[:,0] = np.arange(self.diam/2, stream_length+(self.diam/2), step=self.diam)
         bed_particles[:,3] = np.arange(1, num_bed_particles+1)*-1
-        bed_particles[:,3] = np.arange(num_bed_particles) # unique ids
         self.bed_particles = bed_particles
         # Make all vertices created by the touching bed particles available
         # -----> 0.5, 1.0, 1.5, ... , 9.5 (with stream length 10)
@@ -408,11 +404,9 @@ class TestSetModelParticles(unittest.TestCase):
         self.assertTrue(set(model_particles[:,0]).issubset(self.available_vertices))  
         # All placements should be unique
         self.assertTrue(len(model_particles[:,0]) == len(set(model_particles[:,0])))
+        # All ids should be unique
         # There should be no stacking
         self.assertEqual(len(set(model_particles[:,2])), 1)
-        # TODO: stopped here Jan 20 2:48am
-        # model supports should all be negative
-        # no model support appears more than once in [:,0] and [:,1]
 
     def test_all_model_particles_have_valid_initial_attributes(self):
         model_particles, model_supports = logic.set_model_particles(self.bed_particles,   
@@ -435,6 +429,9 @@ class TestSetModelParticles(unittest.TestCase):
         expected_age_and_loop = np.zeros(len(model_particles))
         self.assertCountEqual(model_particles[:,5], expected_age_and_loop)
         self.assertCountEqual(model_particles[:,6], expected_age_and_loop)
+
+        # Supports should all be negative (resting on the bed)
+        self.assertTrue(len(model_particles), len(model_particles[model_particles[:,3] < 0]))
 
 
 class TestComputeAvailableVerticesLifted(unittest.TestCase):
@@ -855,7 +852,6 @@ class TestPlaceParticle(unittest.TestCase):
         empty_bed = np.empty((0, ATTR_COUNT))
         empty_model = np.empty((0, ATTR_COUNT))
         
-        # print(bad_particle, bad_particle[0])
         with self.assertRaises(ValueError):
             placed_x, placed_y = logic.place_particle(bad_particle[0], empty_model, empty_bed, self.h)
 
@@ -1217,14 +1213,16 @@ class TestFindClosestVertex(unittest.TestCase): # Easy
 
 
 class TestIncrementAge(unittest.TestCase): 
-    # NOTE: Leave as failing for now: model_particles being altered, doesn't need to be returned
     def test_empty_event_increases_all_ages_by_1(self):
         model_particles = np.zeros([3, ATTR_COUNT], dtype=float)
         model_particles[:,3] = np.arange(3)
         event_ids = []
 
         aged_model = logic.increment_age(model_particles, event_ids)
-        self.assertCountEqual(model_particles[:,5] + 1, aged_model[:,5])
+        # The unmoved particles start at age 0 and we test after one iteration
+        # Therefore, ages should all be 1
+        expected_age = np.ones(3, dtype=float) 
+        self.assertCountEqual(expected_age, aged_model[:,5])
 
     def test_event_set_to_0_and_nonevent_to_1(self):
         starting_age = 2.0

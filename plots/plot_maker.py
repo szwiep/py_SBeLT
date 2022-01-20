@@ -61,14 +61,14 @@ def main(filename, save_location, iter_min, iter_max):
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Plotting script using the Python shelf files created by a py_BeRCM model run')
-    parser.add_argument('pathTofile', help='Path to hdf5 file being plotted')
+    parser.add_argument('path_to_file', help='Path to hdf5 file being plotted')
     parser.add_argument('save_location', help='Path to plot output location')
     parser.add_argument('iter_min', help='First iteration for stream plot')
     parser.add_argument('iter_max', help='Final iteration for stream plot')
     args = parser.parse_args()
-    return args.filename, args.save_location, int(args.iter_min), int(args.iter_max)
+    return args.path_to_file, args.save_location, int(args.iter_min), int(args.iter_max)
 
 if __name__ == '__main__':
     # TODO: Replace save location param with the filename parsed of path and format
-    filename, save_location, iter_min, iter_max = parse_arguments()
-    main(filename, save_location, iter_min, iter_max)
+    path_to_file, save_location, iter_min, iter_max = parse_arguments()
+    main(path_to_file, save_location, iter_min, iter_max)

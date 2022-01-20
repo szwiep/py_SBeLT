@@ -8,6 +8,7 @@ from shortuuid import uuid
 import h5py
 import time
 from tqdm import tqdm
+from jsonschema import validate, exceptions
 
 import logic
 import util
@@ -19,7 +20,7 @@ ENTRAINMENT_HEADER = ('Entraining particles {event_particles}')
 
 def main(run_id, pid, param_path):
 
-    logConf_path, log_path, output_path = get_relative_paths()
+    logConf_path, log_path, schema_path, output_path = get_relative_paths()
 
     #############################################################################
     # Set up logging
@@ -29,13 +30,17 @@ def main(run_id, pid, param_path):
     
     #############################################################################
     # Get and validate parameters
-    # TODO: update validation to work with yaml
-        # JSON-Schema validation
     #############################################################################
     
+    with open(schema_path, 'r') as s:
+        schema = yaml.safe_load(s.read())
     with open(param_path, 'r') as p:
         parameters = yaml.safe_load(p.read())
-    # util.validate_parameters(parameters)   
+    try:
+        validate(parameters, schema)
+    except exceptions.ValidationError as e:
+        print("Invalid configuration of param file at {param_path}. See the exception below:\n" )
+        raise e
 
     #############################################################################
     #  Create model data and data structures
@@ -117,7 +122,7 @@ def main(run_id, pid, param_path):
             particle_age_array[iteration] = avg_age
 
             # Record per-iteration information 
-            if (snapshot_counter == parameters['snapshot_interval']):
+            if (snapshot_counter == parameters['data_save_interval']):
                 grp_i = f.create_group(f'iteration_{iteration}')
                 grp_i.create_dataset("model", data=model_particles, compression="gzip")
                 grp_i.create_dataset("event_ids", data=event_particle_ids, compression="gzip")
@@ -204,8 +209,9 @@ def configure_logging(run_id, logConf_path, log_path):
 def get_relative_paths():
     logConf_path = Path(__file__).parent / 'logs/conf.yaml'
     log_path =  Path(__file__).parent / 'logs/'
+    schema_path = Path(__file__).parent / 'parameters/schema.yaml'
     output_path = Path(__file__).parent / 'output/'
-    return logConf_path,log_path,output_path
+    return logConf_path,log_path, schema_path, output_path
 
 
 if __name__ == '__main__':

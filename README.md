@@ -14,7 +14,7 @@ Then install the required Python dependancies:
 
 ## Nomeculture
 
-- **Stream**: An 2D area/domain consisting of bed particles and model particles. The length of the stream is set via parameters while the height has not explicit value. The left-most point of the stream is considered the upstram boundary while the right-most is considered the downstream boundary.
+- **Stream**: An 2D (x,y) area/domain consisting of bed particles and model particles. The length of the stream is set via parameters while the height has not explicit value. The left-most point of the stream is considered the upstram boundary while the right-most is considered the downstream boundary.
 - **Bed Particle**: A particle embedded (static/fixed) in the stream bed. At no point in the model simulation do bed particles move. Bed particles represent the lowest elevation in the stream.
 - **Model Particle**: A particle subject to entrainment events. These particles move and have their location and other metrics tracked per-iteration for the duration of the model simulation.
 - **Supporting Particle**: Particle that hold up other particles (i.e in a stack of 3 particles, the bottom two particles are supporting the top). Both bed and model particles can also be considered supporting particles at a given point in the model simulation.

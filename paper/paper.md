@@ -8,7 +8,7 @@ tags:
   - Poisson
 authors:
   - name: Sarah Zwiep^[co-first author] 
-    orcid: 
+    orcid: 0000-0002-0812-9509
     affiliation: 1
   - name: Shawn M. Chartrand^[co-first author] 
   - orcid: 0000-0002-9309-1137

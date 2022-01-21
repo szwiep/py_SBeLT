@@ -621,31 +621,8 @@ class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
 class TestFindSupports(unittest.TestCase):
     def setUp(self):
         self.diam = 0.5
-    
-    def test_already_placed_returns_supports_in_bed(self):
-        particle_height = 1.0
-        bed = np.zeros([2, ATTR_COUNT], dtype=float)
-        bed[:,0] = np.arange(self.diam/2, 1+(self.diam/2), step=self.diam)
-        
-        placement = self.diam # between the two bed particles
-        particles = np.zeros((1, ATTR_COUNT), dtype=float)
-        particles[:,1] = self.diam
-        particles[0,0] = placement
-        particles[0,2] = particle_height
-        
-        left_support, right_support = logic.find_supports(particles[0], particles, bed, already_placed=True)
-        expected_left = bed[0]
-        expected_right = bed[1]
-        self.assertIsNone(np.testing.assert_array_equal(expected_left, left_support))
-        self.assertIsNone(np.testing.assert_array_equal(expected_right, right_support))
 
-        left_support, right_support = logic.find_supports(particles[0], particles, bed, already_placed=False)
-        expected_left = bed[0]
-        expected_right = bed[1]
-        self.assertIsNone(np.testing.assert_array_equal(expected_left, left_support))
-        self.assertIsNone(np.testing.assert_array_equal(expected_right, right_support))
-
-    def test_already_placed_returns_both_supports_below(self):
+    def test_placement_returns_highest_elevation_supports(self):
         particle_placement = 1.0
         particle_height = 1.0
 
@@ -659,29 +636,7 @@ class TestFindSupports(unittest.TestCase):
         particles[[1,3],2] = particle_height + 1.0
         empty_bed = np.empty((0, ATTR_COUNT))
 
-        left_support, right_support = logic.find_supports(particles[4], particles, empty_bed, already_placed=True)
-
-        expected_left = particles[0]
-        expected_right = particles[2]
-        self.assertIsNone(np.testing.assert_array_equal(expected_left, left_support))
-        self.assertIsNone(np.testing.assert_array_equal(expected_right, right_support))
-    
-    # Test not placed finds highest left and right 
-    def test_not_placed_returns_highest_elevation_supports(self):
-        particle_placement = 1.0
-        particle_height = 1.0
-
-        particles = np.zeros((5, ATTR_COUNT), dtype=float)
-        particles[:,1] = self.diam
-        particles[4,0] = particle_placement
-        particles[4,2] = particle_height
-        particles[0:2,0] = particle_placement - self.diam/2
-        particles[2:4,0] = particle_placement + self.diam/2
-        particles[[0,2],2] = particle_height - 1.0
-        particles[[1,3],2] = particle_height + 1.0
-        empty_bed = np.empty((0, ATTR_COUNT))
-
-        left_support, right_support = logic.find_supports(particles[4], particles, empty_bed, already_placed=False)
+        left_support, right_support = logic.find_supports(particles[4], particles, empty_bed)
 
         expected_left = particles[1]
         expected_right = particles[3]
@@ -702,27 +657,20 @@ class TestFindSupports(unittest.TestCase):
         empty_bed = np.empty((0, ATTR_COUNT))
 
         # Both potential supporting particles outisde support threshold
-        # Both already_placed=True and alread_placed=False should fail
         with self.assertRaises(ValueError):
-            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
-        with self.assertRaises(ValueError):
-            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
+            _, _ = logic.find_supports(particles[2], particles, empty_bed)
         
         # Only 1 potential supporting particles outisde support threshold
         particles[0,0] = particle_placement + self.diam/2 # right support within threshold
 
         with self.assertRaises(ValueError):
-            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
-        with self.assertRaises(ValueError):
-            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
+            _, _ = logic.find_supports(particles[2], particles, empty_bed)
 
         particles[0,0] = particle_placement + self.diam # right support outside threshold again
         particles[1,0] = particle_placement + self.diam/2 # left support within threshold
 
         with self.assertRaises(ValueError):
-            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
-        with self.assertRaises(ValueError):
-            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
+            _, _ = logic.find_supports(particles[2], particles, empty_bed)
 
 # NOTE: This will probably also be subject to the whole pass model-particle-array-in thing
 class TestUpdateParticleStates(unittest.TestCase):

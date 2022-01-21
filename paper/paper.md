@@ -12,7 +12,7 @@ authors:
     affiliation: 1
   - name: Shawn M. Chartrand^[co-first author] 
   - orcid: 0000-0002-9309-1137
-    affiliation: "1, 2"
+  - affiliation: "1, 2"
 affiliations:
  - name: School of Environmental Science, Simon Fraser University
    index: 1

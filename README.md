@@ -94,7 +94,7 @@ RCM_BedloadTransport
 |   |   ...
 ```
 
-Each run will have a unique filename based on the following syntax: `filename_prefix-YYYYMM-DDHH`, where `YYMM-DDHH` represents the time the simulation was started and `filename-prefix` is a string given in the `param.yaml` file. For example, a run started on December 24th, 2030 at 12:01pm and assigned the prefix hello-river will use the filename:
+Each run will have a unique filename based on the following syntax: `filename_prefix-YYMM-DDHH`, where `YYMM-DDHH` represents the time the simulation was started and `filename-prefix` is a string given in the `param.yaml` file. For example, a run started on December 24th, 2030 at 12:01pm and assigned the prefix hello-river will use the filename:
 
 - **`hello-river-3012-2412.hdf5`**
 

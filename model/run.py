@@ -40,6 +40,10 @@ def main(run_id, pid, param_path):
     except exceptions.ValidationError as e:
         print("Invalid configuration of param file at {param_path}. See the exception below:\n" )
         raise e
+    if (parameters['x_max'] % parameters['set_diam'] != 0):
+        raise ValueError('set_diam must be a divisor of x_max')
+    elif (parameters['x_max'] % parameters['num_subregions'] != 0):
+        raise ValueError('n_subregions must be a divisor of x_max')
 
     #############################################################################
     #  Create model data and data structures
@@ -64,9 +68,11 @@ def main(run_id, pid, param_path):
     particle_range_array = np.ones(parameters['n_iterations'])*(-1)
     snapshot_counter = 0
 
+    #############################################################################
+
     h5py_filename = f'{parameters["filename_prefix"]}-{run_id}.hdf5'
     hdf5_path = f'{output_path}/{h5py_filename}'
-    # Open h5py file (where information will be saved) in append mode in a context manager
+
     with h5py.File(hdf5_path, "a") as f: 
         
         grp_p = f.create_group(f'params')

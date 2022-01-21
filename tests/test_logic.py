@@ -294,65 +294,13 @@ class TestDefineSubregions(unittest.TestCase):
 
 # Test Build Streambed
 class TestBuildStreambed(unittest.TestCase):
-
-    # def test_incompat_diam_updates_length(self):
-    #     # TODO: does this testing logic hold up for length != 100
-    #     stream_length = 100
-    #     diameter = 0.7
-    #     stream_length_ceiling = math.ceil((stream_length+diameter)/diameter)
-    #     expected_stream_length = math.ceil(stream_length_ceiling*diameter)
-    #     bed_particles, new_length = logic.build_streambed(stream_length, diameter)
-
-    #     self.assertNotEqual(new_length, stream_length)
-    #     self.assertEqual(new_length, expected_stream_length)
-
-    # # This (below) is only a valid check for compatible diameters. x_max could != right extent
-    # # for in compatible diameters. See Milestone 1 notes for suggestion to change this behaviour.
-
-    # # final_particle_right_extent = bed_particles[len(bed_particles)-1][0] + diameter/2
-    # # self.assertEqual(new_length, final_particle_right_extent)
-    
-    # def test_incompat_diam_returns_good_bed_particles(self):
-        
- 
-    #     stream_length = 100
-    #     diameter = 0.7
-    #     stream_length_ceiling = math.ceil((stream_length+diameter)/diameter)
-    #     expected_num_of_particles = stream_length_ceiling - 1
-
-    #     bed_particles, _ = logic.build_streambed(stream_length, diameter)
-
-    #     self.assertEqual(len(bed_particles), expected_num_of_particles)
-    #     for particle in bed_particles:
-
-    #         if 'previous_centre' in locals():
-    #             self.assertAlmostEqual(particle[0], previous_centre + diameter)
-    #             self.assertGreaterEqual(particle[0] - diameter/2, previous_centre)
-    #         else:
-    #             self.assertAlmostEqual(particle[0], diameter/2)
-    #             self.assertGreaterEqual(particle[0] - diameter/2, 0)
-
-    #         self.assertEqual(particle[1], diameter)
-    #         self.assertEqual(particle[2], 0)
-    #         self.assertEqual(particle[4], 0)
-    #         self.assertEqual(particle[5], 0)
-    #         self.assertEqual(particle[6], 0)
-
-    #         previous_centre = particle[0]
-
-    def test_compat_diam_returns_same_length(self):
-        stream_length = 100.0
-        diameter = 0.5
-
-        _, new_length = logic.build_streambed(stream_length, diameter)
-        self.assertEqual(new_length, stream_length)
-
+    # compatibiliy is assured by validation at start of model
     def test_compat_diam_returns_good_particles(self):
         stream_length = 100
         diameter = 0.5
         expected_number_particles = stream_length / diameter
 
-        bed_particles, _ = logic.build_streambed(stream_length, diameter)
+        bed_particles = logic.build_streambed(stream_length, diameter)
 
         self.assertEqual(len(bed_particles), expected_number_particles)
 
@@ -695,7 +643,7 @@ class TestUpdateParticleStates(unittest.TestCase):
         # particle 1 is placed between bed particle 1 and 2, etc.
         no_pile_supports = np.array([[-1, -2],[-2, -3],[-3, -4],[-4, -5],[-5, -6],[-6, -7],[-7, -8]])
 
-        returned_particles = logic.update_particle_states(no_pile_particles, no_pile_supports, bed)
+        returned_particles = logic.update_particle_states(no_pile_particles, no_pile_supports)
 
         expected_active = np.ones((7, ATTR_COUNT))
         self.assertIsNone(np.testing.assert_array_equal(expected_active[:,4], returned_particles[:,4]))
@@ -724,7 +672,7 @@ class TestUpdateParticleStates(unittest.TestCase):
         two_layer_supports = np.array([[-1, -2],[-2, -3],[-3, -4],[-4, -5],[-5, -6],[-6, -7], [-7, -8],
                                             [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6]])
 
-        returned_particles = logic.update_particle_states(two_layer_particles, two_layer_supports, bed)
+        returned_particles = logic.update_particle_states(two_layer_particles, two_layer_supports)
         expected_inactive = np.zeros(7)
         expected_active = np.ones(6)
         expected_active_state = np.concatenate((expected_inactive, expected_active))
@@ -751,7 +699,7 @@ class TestUpdateParticleStates(unittest.TestCase):
         some_piles_supports = np.array([[-1, -2],[-2, -3],[-3, -4],[-4, -5],[-5, -6],[-6, -7],
                                             [-7, -8], [0, 1], [4, 5]])
         
-        returned_particles = logic.update_particle_states(some_piles_particles, some_piles_supports, bed)
+        returned_particles = logic.update_particle_states(some_piles_particles, some_piles_supports)
         expected_active_state = np.zeros(9)
         # Particles are supported by 0,1, 4, and 5. Every other particle (0-8) should be available
         expected_active_state[[2, 3, 6, 7, 8]] = 1
@@ -773,7 +721,7 @@ class TestUpdateParticleStates(unittest.TestCase):
 
         triangle_supports = np.array([[-1, -2],[-2, -3],[0, 1]])
 
-        returned_particles = logic.update_particle_states(triangle_particles, triangle_supports, bed)
+        returned_particles = logic.update_particle_states(triangle_particles, triangle_supports)
         expected_inactive = np.zeros(2)
         expected_active = np.ones(1)
         expected_active_state = np.concatenate((expected_inactive, expected_active))

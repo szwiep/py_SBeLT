@@ -217,19 +217,6 @@ class TestDefineSubregions(unittest.TestCase):
     def setUp(self):
         self.bed_length = 10
         self.iterations = 10
-    
-    def test_bad_subregion_count_returns_value_error(self):
-        subregion_count = 3
-        with self.assertRaises(ValueError):
-            subregion_list = logic.define_subregions(self.bed_length, 
-                                                    subregion_count, 
-                                                    self.iterations)
-
-        subregion_zero = 0
-        with self.assertRaises(ValueError):
-            subregion_list = logic.define_subregions(self.bed_length, 
-                                                    subregion_zero, 
-                                                    self.iterations)
 
     def test_good_parameters_return_good_subregion_list(self):
         subregion_count_even = 2

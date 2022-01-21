@@ -99,6 +99,6 @@ funded through a Postdoctoral Fellowship awarded by NSERC, and through internal 
 funding provided by Simon Fraser University. The model was inspired by discussions with 
 David Jon Furbish, who also provided useful input and critical feedback at various stages 
 of model development and testing. Kevin Pierce also provided helpful feedback during model 
-development. 
+development. Greg Baker provided insightful mentorship for S. Zwiep during improvements to the model.
 
 # References

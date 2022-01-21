@@ -27,8 +27,6 @@ def main(n_processes, param_path):
         procs.append(proc)
         print(f'Process [{proc.pid}] using {param_path[i]}')
 
-    # TODO: add communication/timeout errors with process
-    # TODO: add stream for sterror
     for proc in procs:
         proc.wait()
     print(f'All processes complete.')

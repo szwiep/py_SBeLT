@@ -294,65 +294,13 @@ class TestDefineSubregions(unittest.TestCase):
 
 # Test Build Streambed
 class TestBuildStreambed(unittest.TestCase):
-
-    # def test_incompat_diam_updates_length(self):
-    #     # TODO: does this testing logic hold up for length != 100
-    #     stream_length = 100
-    #     diameter = 0.7
-    #     stream_length_ceiling = math.ceil((stream_length+diameter)/diameter)
-    #     expected_stream_length = math.ceil(stream_length_ceiling*diameter)
-    #     bed_particles, new_length = logic.build_streambed(stream_length, diameter)
-
-    #     self.assertNotEqual(new_length, stream_length)
-    #     self.assertEqual(new_length, expected_stream_length)
-
-    # # This (below) is only a valid check for compatible diameters. x_max could != right extent
-    # # for in compatible diameters. See Milestone 1 notes for suggestion to change this behaviour.
-
-    # # final_particle_right_extent = bed_particles[len(bed_particles)-1][0] + diameter/2
-    # # self.assertEqual(new_length, final_particle_right_extent)
-    
-    # def test_incompat_diam_returns_good_bed_particles(self):
-        
- 
-    #     stream_length = 100
-    #     diameter = 0.7
-    #     stream_length_ceiling = math.ceil((stream_length+diameter)/diameter)
-    #     expected_num_of_particles = stream_length_ceiling - 1
-
-    #     bed_particles, _ = logic.build_streambed(stream_length, diameter)
-
-    #     self.assertEqual(len(bed_particles), expected_num_of_particles)
-    #     for particle in bed_particles:
-
-    #         if 'previous_centre' in locals():
-    #             self.assertAlmostEqual(particle[0], previous_centre + diameter)
-    #             self.assertGreaterEqual(particle[0] - diameter/2, previous_centre)
-    #         else:
-    #             self.assertAlmostEqual(particle[0], diameter/2)
-    #             self.assertGreaterEqual(particle[0] - diameter/2, 0)
-
-    #         self.assertEqual(particle[1], diameter)
-    #         self.assertEqual(particle[2], 0)
-    #         self.assertEqual(particle[4], 0)
-    #         self.assertEqual(particle[5], 0)
-    #         self.assertEqual(particle[6], 0)
-
-    #         previous_centre = particle[0]
-
-    def test_compat_diam_returns_same_length(self):
-        stream_length = 100.0
-        diameter = 0.5
-
-        _, new_length = logic.build_streambed(stream_length, diameter)
-        self.assertEqual(new_length, stream_length)
-
+    # compatibiliy is assured by validation at start of model
     def test_compat_diam_returns_good_particles(self):
         stream_length = 100
         diameter = 0.5
         expected_number_particles = stream_length / diameter
 
-        bed_particles, _ = logic.build_streambed(stream_length, diameter)
+        bed_particles = logic.build_streambed(stream_length, diameter)
 
         self.assertEqual(len(bed_particles), expected_number_particles)
 
@@ -621,31 +569,8 @@ class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
 class TestFindSupports(unittest.TestCase):
     def setUp(self):
         self.diam = 0.5
-    
-    def test_already_placed_returns_supports_in_bed(self):
-        particle_height = 1.0
-        bed = np.zeros([2, ATTR_COUNT], dtype=float)
-        bed[:,0] = np.arange(self.diam/2, 1+(self.diam/2), step=self.diam)
-        
-        placement = self.diam # between the two bed particles
-        particles = np.zeros((1, ATTR_COUNT), dtype=float)
-        particles[:,1] = self.diam
-        particles[0,0] = placement
-        particles[0,2] = particle_height
-        
-        left_support, right_support = logic.find_supports(particles[0], particles, bed, already_placed=True)
-        expected_left = bed[0]
-        expected_right = bed[1]
-        self.assertIsNone(np.testing.assert_array_equal(expected_left, left_support))
-        self.assertIsNone(np.testing.assert_array_equal(expected_right, right_support))
 
-        left_support, right_support = logic.find_supports(particles[0], particles, bed, already_placed=False)
-        expected_left = bed[0]
-        expected_right = bed[1]
-        self.assertIsNone(np.testing.assert_array_equal(expected_left, left_support))
-        self.assertIsNone(np.testing.assert_array_equal(expected_right, right_support))
-
-    def test_already_placed_returns_both_supports_below(self):
+    def test_placement_returns_highest_elevation_supports(self):
         particle_placement = 1.0
         particle_height = 1.0
 
@@ -659,29 +584,7 @@ class TestFindSupports(unittest.TestCase):
         particles[[1,3],2] = particle_height + 1.0
         empty_bed = np.empty((0, ATTR_COUNT))
 
-        left_support, right_support = logic.find_supports(particles[4], particles, empty_bed, already_placed=True)
-
-        expected_left = particles[0]
-        expected_right = particles[2]
-        self.assertIsNone(np.testing.assert_array_equal(expected_left, left_support))
-        self.assertIsNone(np.testing.assert_array_equal(expected_right, right_support))
-    
-    # Test not placed finds highest left and right 
-    def test_not_placed_returns_highest_elevation_supports(self):
-        particle_placement = 1.0
-        particle_height = 1.0
-
-        particles = np.zeros((5, ATTR_COUNT), dtype=float)
-        particles[:,1] = self.diam
-        particles[4,0] = particle_placement
-        particles[4,2] = particle_height
-        particles[0:2,0] = particle_placement - self.diam/2
-        particles[2:4,0] = particle_placement + self.diam/2
-        particles[[0,2],2] = particle_height - 1.0
-        particles[[1,3],2] = particle_height + 1.0
-        empty_bed = np.empty((0, ATTR_COUNT))
-
-        left_support, right_support = logic.find_supports(particles[4], particles, empty_bed, already_placed=False)
+        left_support, right_support = logic.find_supports(particles[4], particles, empty_bed)
 
         expected_left = particles[1]
         expected_right = particles[3]
@@ -702,27 +605,20 @@ class TestFindSupports(unittest.TestCase):
         empty_bed = np.empty((0, ATTR_COUNT))
 
         # Both potential supporting particles outisde support threshold
-        # Both already_placed=True and alread_placed=False should fail
         with self.assertRaises(ValueError):
-            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
-        with self.assertRaises(ValueError):
-            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
+            _, _ = logic.find_supports(particles[2], particles, empty_bed)
         
         # Only 1 potential supporting particles outisde support threshold
         particles[0,0] = particle_placement + self.diam/2 # right support within threshold
 
         with self.assertRaises(ValueError):
-            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
-        with self.assertRaises(ValueError):
-            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
+            _, _ = logic.find_supports(particles[2], particles, empty_bed)
 
         particles[0,0] = particle_placement + self.diam # right support outside threshold again
         particles[1,0] = particle_placement + self.diam/2 # left support within threshold
 
         with self.assertRaises(ValueError):
-            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=True)
-        with self.assertRaises(ValueError):
-            _, _ = logic.find_supports(particles[2], particles, empty_bed, already_placed=False)
+            _, _ = logic.find_supports(particles[2], particles, empty_bed)
 
 # NOTE: This will probably also be subject to the whole pass model-particle-array-in thing
 class TestUpdateParticleStates(unittest.TestCase):
@@ -747,7 +643,7 @@ class TestUpdateParticleStates(unittest.TestCase):
         # particle 1 is placed between bed particle 1 and 2, etc.
         no_pile_supports = np.array([[-1, -2],[-2, -3],[-3, -4],[-4, -5],[-5, -6],[-6, -7],[-7, -8]])
 
-        returned_particles = logic.update_particle_states(no_pile_particles, no_pile_supports, bed)
+        returned_particles = logic.update_particle_states(no_pile_particles, no_pile_supports)
 
         expected_active = np.ones((7, ATTR_COUNT))
         self.assertIsNone(np.testing.assert_array_equal(expected_active[:,4], returned_particles[:,4]))
@@ -776,7 +672,7 @@ class TestUpdateParticleStates(unittest.TestCase):
         two_layer_supports = np.array([[-1, -2],[-2, -3],[-3, -4],[-4, -5],[-5, -6],[-6, -7], [-7, -8],
                                             [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6]])
 
-        returned_particles = logic.update_particle_states(two_layer_particles, two_layer_supports, bed)
+        returned_particles = logic.update_particle_states(two_layer_particles, two_layer_supports)
         expected_inactive = np.zeros(7)
         expected_active = np.ones(6)
         expected_active_state = np.concatenate((expected_inactive, expected_active))
@@ -803,7 +699,7 @@ class TestUpdateParticleStates(unittest.TestCase):
         some_piles_supports = np.array([[-1, -2],[-2, -3],[-3, -4],[-4, -5],[-5, -6],[-6, -7],
                                             [-7, -8], [0, 1], [4, 5]])
         
-        returned_particles = logic.update_particle_states(some_piles_particles, some_piles_supports, bed)
+        returned_particles = logic.update_particle_states(some_piles_particles, some_piles_supports)
         expected_active_state = np.zeros(9)
         # Particles are supported by 0,1, 4, and 5. Every other particle (0-8) should be available
         expected_active_state[[2, 3, 6, 7, 8]] = 1
@@ -825,7 +721,7 @@ class TestUpdateParticleStates(unittest.TestCase):
 
         triangle_supports = np.array([[-1, -2],[-2, -3],[0, 1]])
 
-        returned_particles = logic.update_particle_states(triangle_particles, triangle_supports, bed)
+        returned_particles = logic.update_particle_states(triangle_particles, triangle_supports)
         expected_inactive = np.zeros(2)
         expected_active = np.ones(1)
         expected_active_state = np.concatenate((expected_inactive, expected_active))

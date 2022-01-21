@@ -4,7 +4,7 @@ properties:
     pack_density:
             type: number
             exclusiveMinimum: 0
-            exclusiveMaximum: 1
+            maximum: 1
     x_max:
             type: integer
             exclusiveMinimum: 0
@@ -22,10 +22,12 @@ properties:
             exclusiveMinimum: 0
     lambda_1:
             type: number
+            minimum: 0
     normal_dist:
             type: boolean
     mu:
             type: number
+            minimum: 0
     sigma:
             type: number
             exclusiveMinimum: 0

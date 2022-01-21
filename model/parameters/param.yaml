@@ -26,7 +26,7 @@ pack_density: 0.78
 # RANGE: > 0
 # TYPE: INT
 # TESTED ON: 50-1000 mm
-x_max: 200
+x_max: 100
     
 # Grain diameter (mm)
 # RANGE: > 0
@@ -69,7 +69,7 @@ sigma: 0.25
 
 # Record a snapshot of the stream data (arrays) every 
 # n iterations. Set to 1 to record every iteration
-snapshot_interval: 1
+data_save_interval: 1
 
 height_dependancy: False
 

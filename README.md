@@ -1,8 +1,12 @@
 # Py_SBeLT
 
-## Requirements
+Rivers transport sediment particles. Individual particles can exhibit transport behavior that differs significantly when compared to other particles. pySBeLT provides a simple Python framework to numerically examine how individual particle motions in rivers combine to produce rates of transport that can be measured at one of a number of downstream points. The model's relatively straightforward set-up makes it an effective and efficient teaching tool to help students build intuition about river transport of sediment particles.
 
-Installing Python requirements:
+## Installation
+
+First, [clone the Py_SBeLT repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) in a desired location.
+
+Then install the required Python dependancies:
 
 ```bash
  pip3 install -r requirements.txt
@@ -10,45 +14,51 @@ Installing Python requirements:
 
 ## Nomeculture
 
-- **Bed Particle**: A particle embedded in the stream bed. Does not move.
-- **Model Particle**: A particle subject to entrainment events. Moves.
-- **Event Particle**: A Model Particle which has been selected for entrainment.
-- **Desired Hop**: The hop distance an Event Particle is assigned at the beginning of an entrainment event
-- **Stream**: Consists of the Bed and Model particles.
+- **Stream**: An 2D area/domain consisting of bed particles and model particles. The length of the stream is set via parameters while the height has not explicit value. The left-most point of the stream is considered the upstram boundary while the right-most is considered the downstream boundary.
+- **Bed Particle**: A particle embedded (static/fixed) in the stream bed. At no point in the model simulation do bed particles move. Bed particles represent the lowest elevation in the stream.
+- **Model Particle**: A particle subject to entrainment events. These particles move and have their location and other metrics tracked per-iteration for the duration of the model simulation.
+- **Supporting Particle**: Particle that hold up other particles (i.e in a stack of 3 particles, the bottom two particles are supporting the top). Both bed and model particles can also be considered supporting particles at a given point in the model simulation.
+- **Event Particle**: A model which has been selected to undergo an entrainment event. Only model particles can be considered event particles.
+- **Available Vertex**: A horizontal location in the stream which a model particle is permitted to rest/land.
+- **Desired Hop**: The place in the stream bed an event particle is assigned to move to based on random sampling informed by parameters.
 
 ## Parameters
 
-The model reads in parameters from a yaml file. The default parameters file for the model is `param.yaml`, located in the **`model/`** directory:
+The model reads in parameters from a yaml file. The default parameters file for the model is `param.yaml`, located in the **`model/parameters/`** directory:
 
 ```
 project
 │   README.md
 │   requirements.txt
 └───model
-│   │   param.yaml
+|   └───parameters
+│   │   |   param.yaml
+|   |   |   schema.yaml
 │   │   run.py
 │   │   ...
 ```
 
-Comments indicate what values have been tested for each parameter and within what range. Users are welcome to enter parameters outside these bounds to see the results, however data type violations and specific values will be caught during the validation process and cause the model not to run (e.g set_diam: 0).
+These parameters can be changed for whatever type of run you desire! However, all parameters have data type requirements and some have minimum and maximum permitted values. The parameters are validated at the start of the run and any incompatible entries will cause an error and error message to be raised. The following is a table of the parameters:
+
+| Parameter | Type |Description |
+| ----------- | ------- | ----------- |
+| pack_density | float | The packing density of the model particles |
+| x_max | int |Length of the domain in the streamwise direction (mm) |
+| set_diam | float |Grain diameter (mm) |
+| num_subregions | int | The number of bed subregions |
+| level_limit | int | The maximum number of levels permitted (i.e how many particles high to stack)  |
+| n_iterations | int | The number of iterations to run |
+| lambda_1 | float | Lamba for poisson dist., used to determine the number of entrainment events |
+| normal_dist | boolean |Flag for which distribution to sample from for hop calculations. True=Normal, False=logNormal |
+| mu | float |Mean/expectation of the logNormal/Normal distribution for hop calculations |
+| sigma | float |Standard deviation of logNormal/Normal distribution for hop calculations|
+| data_save_interval | int | How often to record model particle arrays (e.g 1=save every iteration, 2=save every other) |
+| height_dependancy | boolean | Flag indicating whether model automatically entrains particles that are at the height limit |
+| filename_prefix | strong | Prefix for output filenames |
 
 ## Running the Model
 
-First, confirm you have a **`plots/`** directory located in the **`BeRCM/`** project:
-
-```
-BeRCM
-│   README.md
-│   requirements.txt
-└───model
-│   │   ...
-└───plots <--- Make sure this exists!
-│   │   ...
-```
-
-### Running from Command Line
-
-1. Set current directory to **`BeRCM/model`**:
+1. Set current directory to **`py_SBeLT/model`**:
 
 ```bash
  cd /path/to/BeRCM/model
@@ -58,99 +68,65 @@ BeRCM
     a. Run a _single_ instance of the model:
 
     ```bash
-    python3 run.py PARAM_FILE
+    python3 run.py PATH_TO_PARAM_FILE
     ```
 
-    Where `PARAM_FILE` is the path to the desired parameters file. To use the default parameters file set `PARAM_FILE=`**`param.yaml`**. 
+    Where `PATH_TO_PARAM_FILE` is the path to the desired parameters file. To use the default parameters file set `PARAM_FILE=`**`parameters/param.yaml`**.
 
-    b. Run _multiple_ instances of the model:
+    b. Run _multiple_ instances (not parallel, just multiple processes) of the model:
 
     ```bash
-    python3 parallel.py NUM_PROCESSES PARAM_FILE...
+    python3 run_multiple.py NUM_PROCESSES PARAM_FILE...
     ```
 
-    Note that multiple parameter files can be passed to the **`parallel.py`** script. If more than one parameter file is passed then the number of files passed must be equal to the number of processes requested.
-
-### Running in Spyder (THIS SECTION IS WIP)
-
-<!-- 1. Open **`run.py`** and **`parameters.py`** in Spyder
-
-2. Navigate to **`run.py`** and execute using the `'Run file (F5)'` button
-
-If you wish to view the plots in the plot pane instead of saving, set the last call 
-to `stream` and `flux_info` at the end of **`run.py`** (58-60) to:
-
-```python
-    ml.plot_stream(iteration, bed_particles, model_particles, pm.x_max, 10, 
-                   available_vertices, to_file=False)
-```
-
-and:
-
-```python
-    plot.flux_info(particle_flux_list, to_file=False)
-```
-
-Ensuring `to_file` is set to `False` for one or both calls. Then follow steps 1 and 2 above. -->
+    Note that multiple parameter files can be passed to the **`run_multiple.py`** script. If more than one parameter file is passed then the number of files passed must be equal to the number of processes requested. If only one is passed, then that one file is used by all processes.
 
 ## Results
 
-All relevant information from the run will be stored in a Python [shelf](https://docs.python.org/3/library/shelve.html) in the **`plots/`** directory:
+All relevant information from the run is stored in an HDF5 file in the **`output/`** directory:
 
 ```
 RCM_BedloadTransport
 │   README.md
 │   requirements.txt
 └───model
-│   │   ...
-└───plots <--- here!
-│   │   ...
+│   └───output <--- here!
+|   |   ...
 ```
 
-Each run will have a unique shelf filename based on the following syntax: `run-info-YYYYMM-DDHH-MMSS-UUID`, where `YYYYMM-DDHH-MMSS` represents the time the model was started and `UUID` is a unique identifier assigned by the script. For example, a run started on December 24th, 2030 at 12:01:42pm and assigned the UUID 1a4c536f-4bf3-4534-becf-90f207caf9e will use the filename: 
-    
-- **`run-info-203012-2412-0142-1a4c536f-4bf3-4534-becf-90f207caf9e`**
+Each run will have a unique filename based on the following syntax: `filename_prefix-YYYYMM-DDHH`, where `YYMM-DDHH` represents the time the simulation was started and `filename-prefix` is a string given in the `param.yaml` file. For example, a run started on December 24th, 2030 at 12:01pm and assigned the prefix hello-river will use the filename:
 
-Each shelf file will contain: the parameters used, the bed particle array, the model particle array, available vertices, and event particles for each iteration, the particle flux list, and the particle age and age range lists.
+- **`hello-river-3012-2412.hdf5`**
 
-Each of these data values can be retrieved by opening the shelf file and using the appropriate keys as shown below:
+Each HDF5 file will contain: the parameters used, the bed particle array, and initial model particle array. Then for each iteration the model particle arrays and event particles. Finally the particle flux list and the particle age and age range lists.
+
+Each of these data values can be retrieved by opening the HDF5 file using [h5py](https://docs.h5py.org/en/stable/) and using the appropriate keys as shown below:
 
 ```{python3}
-with shelve.open(beRCM_shelf, 'r') as shelf:
-    shelf["param"]      # parameters
-    shelf["bed"]        # bed particles
-    shelf["12"][0]      # model particles at end of iteration 12
-    shelf["12"][1]      # available vertices for iteration 12
-    shelf["12"][2]      # events particles for iteration 12
-    shelf["flux"]       # flux list
-    shelf["avg_age"]    # avg age list
-    shelf["age_range"]  # age range list
+with h5py.File('hello-river-3012-2412.hdf5', 'r') as f:
+    f["params"]["..param name..."][()]                              # parameters
+    np.array(f["initial_values"]["bed"])                            # bed particles
+    np.array(f["iteration_i"]["model"])                             # model p at end of iter i
+    np.array(f["iteration_i"]["event_ids"])                         # events ids for iter i
+    np.array(f["final_metrics"]["subregions"]["subregion-i-flux"])  # flux list
+    np.array(f["final_metrics"]["avg_age"])                         # avg age list
+    np.array(f["final_metrics"]["age_range"])                       # age range list
 ```
 
 ## Plotting
-### Plotting from Shelf
-The project currently contains logic for plotting a visual of the streambed, the particle flux distribution, and particle age-related information.
 
-Navigate to the **`plots/`** directory. Choose a desired run-info shelf file to plot, create or choose a location for the plots to save, and decide what range of iterations to plot for the streambed. Then run the following command:
+The project currently contains logic for plotting a visual of the streambed, a .gif of the streambed, the particle flux distribution, and particle age-related information.
+
+Navigate to the **`plots/`** directory. Choose a desired HDF5 file to plot, name of the subfoler to save the plots into, and decide what range of iterations to plot for the streambed. Then run the following command:
 
 ```{bash}
-python3 plot_maker.py SHELF_NAME SAVE_LOCATION MIN_ITER MAX_ITER
+python3 plot_maker.py PATH_TO_HDF5_FILE OUTPUT_NAME MIN_ITER MAX_ITER
 ```
 
-### Creating Gif of Streambed
+For example, if you wanted to plot iterations 100 to 1000 from the **`hello-river-3012-2412.hdf5`** run in a directory named `hello-river-run` the command would be:
 
-A GIF can me made from streambed plots using the **`gif_maker.py`** script. In the script alter the `in_dir` and `out_dir` variables to point to the location of the strambed plots and where the GIF should be saved resepectively. Similarly, change the `start` and `stop` variables to reflect which range of plots to use in the GIF compilation.
-
-For example:
-
-```{python3}
-in_dir = '../plots/test/'
-out_dir = '../plots/test/'
-
-start = 0
-stop = 99
+```{bash}
+python3 plot_maker.py ../model/output/hello-river-3012-2412.hdf5 hello-river-run 100 1000
 ```
-
-Will create a GIF using plots of iterations 0-99 and will store the GIF in the same location of the .png plots.
 
 <!-- Embed a gif here as an example/motivation -->

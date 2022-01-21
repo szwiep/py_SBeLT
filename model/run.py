@@ -177,7 +177,7 @@ def build_stream(parameters, h):
         subregions -- array of subregion objects
     
     """
-    bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])
+    bed_particles = logic.build_streambed(parameters['x_max'], parameters['set_diam'])
     empty_model = np.empty((0, 7))      
     available_vertices = logic.compute_available_vertices(empty_model, bed_particles, parameters['set_diam'],
                                                         parameters['level_limit'])    
@@ -185,7 +185,7 @@ def build_stream(parameters, h):
     model_particles, model_supp = logic.set_model_particles(bed_particles, available_vertices, parameters['set_diam'], 
                                                         parameters['pack_density'],  h)
     # Define stream's subregions
-    subregions = logic.define_subregions(bed_length, parameters['num_subregions'], parameters['n_iterations'])
+    subregions = logic.define_subregions(parameters['x_max'], parameters['num_subregions'], parameters['n_iterations'])
     return bed_particles,model_particles, model_supp, subregions
 
 def run_entrainments(model_particles, model_supp, bed_particles, event_particle_ids, avail_vertices, 
@@ -223,7 +223,7 @@ def run_entrainments(model_particles, model_supp, bed_particles, event_particle_
                                                                 h)
     final_x = model_particles[event_particle_ids][:,0]
     subregions = logic.update_flux(initial_x, final_x, iteration, subregions)
-    model_particles = logic.update_particle_states(model_particles, model_supp, bed_particles)
+    model_particles = logic.update_particle_states(model_particles, model_supp)
     # Increment age at the end of each entrainment
     model_particles = logic.increment_age(model_particles, event_particle_ids)
 

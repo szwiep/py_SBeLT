@@ -38,4 +38,4 @@ properties:
             type: boolean
     filename_prefix:
             type: string
-            pattern: ^[a-zA-Z\d]*$
+            pattern: ^[a-zA-Z\d\-\_]*$

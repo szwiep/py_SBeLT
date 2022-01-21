@@ -115,6 +115,16 @@ with h5py.File('hello-river-3012-2412.hdf5', 'r') as f:
     np.array(f["final_metrics"]["age_range"])                       # age range list
 ```
 
+Many metrics can be derived from this saved information. For example, to retrieve the distance traveled by all particles between iterations 6 and 7 you:
+
+```{python}
+with h5py.File('hello-river-3012-2412.hdf5', 'r') as f:
+    model_6 = np.array(f["iteration_5"]["model"])
+    model_7 = np.array(f["iteration_6"]["model"])
+
+distance_traveled = model_7[:,0] - model_6[:,0] # but watch out for values that are -1 (ghosts) in model_7
+```
+
 ## Plotting
 
 The project currently contains logic for plotting a visual of the streambed, a .gif of the streambed, the particle flux distribution, and particle age-related information.

@@ -251,20 +251,13 @@ def get_relative_paths():
 
 if __name__ == '__main__':
 
-    # pr = cProfile.Profile()
-    # pr.enable()
     tic = time.perf_counter()
-    uid = uuid()
     pid = os.getpid()
-    run_id = datetime.now().strftime('%y%m-%d%H-') + uid
+    run_id = datetime.now().strftime('%y%m-%d%H')
     print(f'Process [{pid}] run ID: {run_id}')
     
     main(run_id, pid, sys.argv[1])
     toc = time.perf_counter()
     print(f"Completed in {toc - tic:0.4f} seconds")
-
-    # pr.disable()
-    # pr.dump_stats('profile_dump_nov_24')
-
     
     

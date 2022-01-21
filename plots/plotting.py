@@ -13,8 +13,19 @@ from PIL import Image
 
 def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out):
     """ Plot the complete stream from 0,0 to x_lim and y_lim. Bed particles 
-    are plotted as light grey and model particles are dark blue. Allows
-    for closer look at state of a subregion of the stream during simulation """
+    are plotted as light grey and model particles are platted in a colour
+    range dependant on their age. 
+    Allows for closer look at state of a subregion of the stream during simulation.
+    Also makes for fun gifs.
+
+    Keyowrd arguments:
+        iteration -- the iteration of the stream being plotted 
+        bed_particles -- array of all bed particles
+        model_particles -- array of all model particles
+        x_lim -- length of stream to plot
+        y_lim -- height of stream to plot
+        fp_out -- save location
+    """
     plt.clf()
     fig = plt.figure(1)
     fig.set_size_inches(20, 6.5)
@@ -56,6 +67,7 @@ def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out):
     return
 
 def stream_gif(start, stop, dir):
+    """Plot gif of the streambed"""
     in_filename = 'iter{i}.png'
     out_filename = 'simulation_snapshot.gif'
 
@@ -72,6 +84,14 @@ def stream_gif(start, stop, dir):
     images[0].save(fp_out, save_all=True, append_images=images[1:], optimize=True, duration=150, loop=0)
 
 def crossing_info(particle_crossing_list, iterations, subsample, fp_out):
+    """Histogram of downstream particle crossings per iteration
+    
+    Keyowrd arguments:
+        particle_crossing_list -- array of # of crossings per iteration
+        iteration -- number of iterations
+        subsample -- value to subsample by (use if data too large)
+        fp_out -- save location 
+    """
     plt.clf()
     fig = plt.figure(figsize=(8,7))
     ax = fig.add_subplot(1, 1, 1)
@@ -128,6 +148,17 @@ def crossing_info(particle_crossing_list, iterations, subsample, fp_out):
     fig.savefig(fiCS_path, format='png', dpi=600)
         
 def crossing_info2(particle_crossing_list, particle_age_list, n_iterations, subsample, fp_out):
+    """Plot of particle crossing/flux vs. particle age. For very large values the
+    data can be subsampled using the subsample parameter
+    
+    Keyowrd arguments:
+    particle_crossing_list -- array of # of crossings per iteration
+    particle_crossing_list -- array of average particle age per iteration
+    n_iteration -- number of iterations
+    subsample -- value to subsample by (use if data too large)
+    fp_out -- save location 
+    
+    """
     plt.clf()
     fig = plt.figure(figsize=(8,7))
     ax3 = fig.add_subplot(1, 1, 1)

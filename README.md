@@ -16,7 +16,7 @@ Then install the required Python dependancies:
 
 - **Stream**: An 2D (x,y) area/domain consisting of bed particles and model particles. The length of the stream is set via parameters while the height has no explicit value. The left-most point of the stream is considered the upstram boundary while the right-most is considered the downstream boundary.
 - **Bed Particle**: A fixed particle comprising the stream bed. At no point in the model simulation do bed particles move. Bed particles represent the lowest elevation in the stream.
-- **Model Particle**: A particle subject to entrainment events. These particles move and have their location and other metrics tracked per-iteration for the duration of the model simulation.
+- **Model Particle**: A particle subject to entrainment events. These particles sit on top of the fixed bed particles. Model particles move and have their location and other metrics tracked per-iteration for the duration of the model simulation.
 - **Supporting Particle**: Particle that hold up other particles (i.e in a stack of 3 particles, the bottom two particles are supporting the top). Both bed and model particles can also be considered supporting particles at a given point in the model simulation.
 - **Event Particle**: A model which has been selected to undergo an entrainment event. Only model particles can be considered event particles.
 - **Available Vertex**: A horizontal location in the stream which a model particle is permitted to rest/land.

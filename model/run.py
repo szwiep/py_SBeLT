@@ -70,9 +70,11 @@ def main(run_id, pid, param_path):
     particle_range_array = np.ones(parameters['n_iterations'])*(-1)
     snapshot_counter = 0
 
+    #############################################################################
+
     h5py_filename = f'{parameters["filename_prefix"]}-{run_id}.hdf5'
     hdf5_path = f'{output_path}/{h5py_filename}'
-    # Open h5py file (where information will be saved) in append mode in a context manager
+
     with h5py.File(hdf5_path, "a") as f: 
         
         grp_p = f.create_group(f'params')
@@ -157,7 +159,27 @@ def main(run_id, pid, param_path):
 #############################################################################
 
 def build_stream(parameters, h):
-    bed_particles, bed_length = logic.build_streambed(parameters['x_max'], parameters['set_diam'])
+    """ Build the data structures which define a stream
+
+    Build array of n bed particles and array of m model particles.
+    The arrays will have n-7 and m-7 size, respectively. Model 
+    particles will be assigned (x,y) positions which represent resting
+    on top of the bed particles. At the end of the build, each model 
+    particle will have 2 support particles from the bed recorded 
+    in an array. Finally, define array of subregion objects. 
+
+    Keyword arguments:
+        parameters -- dictionary of parameters passed for the model
+        h -- geometric value to help with particle placement 
+    Returns:
+        bed_particles -- array of bed particles
+        model_particles -- array of model particles
+        model_supp -- array of supporting particle ids for each 
+                                                    model particle
+        subregions -- array of subregion objects
+    
+    """
+    bed_particles = logic.build_streambed(parameters['x_max'], parameters['set_diam'])
     empty_model = np.empty((0, 7))      
     available_vertices = logic.compute_available_vertices(empty_model, bed_particles, parameters['set_diam'],
                                                         parameters['level_limit'])    
@@ -165,27 +187,33 @@ def build_stream(parameters, h):
     model_particles, model_supp = logic.set_model_particles(bed_particles, available_vertices, parameters['set_diam'], 
                                                         parameters['pack_density'],  h)
     # Define stream's subregions
-    subregions = logic.define_subregions(bed_length, parameters['num_subregions'], parameters['n_iterations'])
+    subregions = logic.define_subregions(parameters['x_max'], parameters['num_subregions'], parameters['n_iterations'])
     return bed_particles,model_particles, model_supp, subregions
 
-# So, so many parameters.
-def run_entrainments(model_particles, model_supp, bed_particles, event_particle_ids, avail_vertices, unverified_e, subregions, iteration, h):
-    """ This function mimics an 'entrainment event' through
-    calls to the entrainment-related functions. 
+def run_entrainments(model_particles, model_supp, bed_particles, event_particle_ids, avail_vertices, 
+                                                                    unverified_e, subregions, iteration, h):
+    """ This function mimics a single entrainment event through
+    calls to the entrainment-related logic functions. 
     
-    Uniqueness of entrainments is forced post-event. Particles
-    which select non-unique entrainments will be forced
-    to re-entrain at another vertex.
+    An entrainment event begins by moving a subset set 
+    of the model particles (the event particles) downstream.
+    The crossings/flux across each downstream boundaries are
+    recorded. Then all model particles states are updated 
+    followed by the increment of resetting of partciel ages.
     
     Keyword arguments:
-        model_particles -- model's model particles np array
-        bed_particles -- model's bed particle np array
-        event_particle_ids -- list of ids of event particles
+        model_particles -- array of all model particles 
+        model_supp -- array of ids representing supporting particles
+                                                for all model particles
+        bed_particles -- array of all bed particles
+        event_particle_ids -- array of ids representing the particles
+                                                to be entrained this event
         
     Returns:
-        model_particles -- updated model_particles array
-        particle_flux -- number (int) of particles which 
-                            passed the downstream boundary
+        model_particles -- updated array of all model particles 
+        model_supp -- updated array of ids representing supporting particles
+                                                for all model particles
+        subregions -- array of subregion objects with updated flux arrays
     """
 
     initial_x = model_particles[event_particle_ids][:,0]
@@ -197,7 +225,7 @@ def run_entrainments(model_particles, model_supp, bed_particles, event_particle_
                                                                 h)
     final_x = model_particles[event_particle_ids][:,0]
     subregions = logic.update_flux(initial_x, final_x, iteration, subregions)
-    model_particles = logic.update_particle_states(model_particles, model_supp, bed_particles)
+    model_particles = logic.update_particle_states(model_particles, model_supp)
     # Increment age at the end of each entrainment
     model_particles = logic.increment_age(model_particles, event_particle_ids)
 
@@ -205,6 +233,7 @@ def run_entrainments(model_particles, model_supp, bed_particles, event_particle_
 
 
 def configure_logging(run_id, logConf_path, log_path):
+    """"Configure logging procedure using conf.yaml"""
     with open(logConf_path, 'r') as f:
         config = yaml.safe_load(f.read())
         config['handlers']['file']['filename'] = f'{log_path}/{run_id}.log'
@@ -212,6 +241,7 @@ def configure_logging(run_id, logConf_path, log_path):
 
 
 def get_relative_paths():
+    """"Return relavent relative paths in the project"""
     logConf_path = Path(__file__).parent / 'logs/conf.yaml'
     log_path =  Path(__file__).parent / 'logs/'
     schema_path = Path(__file__).parent / 'parameters/schema.yaml'

@@ -20,6 +20,7 @@ def main(filename, save_location, iter_min, iter_max):
     # Don't overwrite data without user's permission
     try: 
         os.mkdir(save_location)
+        print(f'Creating output directory...')
     except FileExistsError:
         while True: 
             response = input(f'Directory {save_location}/ already exists. You could be overwriting existing data, continue (Y/N)? ')
@@ -38,6 +39,7 @@ def main(filename, save_location, iter_min, iter_max):
         #   the model particles at the start of iteration 0. Since the
         #   model particles are stored (runpy) at the end of each iteration, 
         #   we need to plot 1 index back.
+        print(f'Plotting stream bed...')
         for iter in range(iteration_range[0], iteration_range[1]+1):
             if iter == 0:
                 model_particles = np.array(f['initial_values']['model'])
@@ -48,9 +50,11 @@ def main(filename, save_location, iter_min, iter_max):
                                     f['params']['x_max'][()], 
                                     y_limit, 
                                     fp_out)
+        print(f'Creating gif of stream bed...')
         # Create a gif of the stream bed for iter_min to iter_max
         plotting.stream_gif(iter_min, iter_max, fp_out)
        
+        print(f'Plotting flux and age plot...')
         # Plot downstream boundary crossing histogram
         plotting.crossing_info(f['final_metrics']['subregions'][ds_boundary_key][()], 
                                 f['params']['n_iterations'][()], 1, fp_out)

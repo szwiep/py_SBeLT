@@ -1,6 +1,6 @@
 # Py_SBeLT
 
-Rivers transport sediment particles. Individual particles can exhibit transport behavior that differs significantly when compared to other particles. pySBeLT provides a simple Python framework to numerically examine how individual particle motions in rivers combine to produce rates of transport that can be measured at one of a number of downstream points. The model's relatively straightforward set-up makes it an effective and efficient teaching tool to help students build intuition about river transport of sediment particles.
+Rivers transport sediment particles. Individual particles can exhibit transport behavior that differs significantly when compared to other particles. py_SBeLT provides a simple Python framework to numerically examine how individual particle motions in rivers combine to produce rates of transport that can be measured at one of a number of downstream points. The model's relatively straightforward set-up makes it an effective and efficient teaching tool to help students build intuition about river transport of sediment particles.
 
 ## Installation
 
@@ -94,7 +94,7 @@ RCM_BedloadTransport
 |   |   ...
 ```
 
-Each run will have a unique filename based on the following syntax: `filename_prefix-YYYYMM-DDHH`, where `YYMM-DDHH` represents the time the simulation was started and `filename-prefix` is a string given in the `param.yaml` file. For example, a run started on December 24th, 2030 at 12:01pm and assigned the prefix hello-river will use the filename:
+Each run will have a unique filename based on the following syntax: `filename_prefix-YYMM-DDHH`, where `YYMM-DDHH` represents the time the simulation was started and `filename-prefix` is a string given in the `param.yaml` file. For example, a run started on December 24th, 2030 at 12:01pm and assigned the prefix hello-river will use the filename:
 
 - **`hello-river-3012-2412.hdf5`**
 

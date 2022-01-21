@@ -69,7 +69,7 @@ sigma: 0.25
 
 # Record a snapshot of the stream data (arrays) every 
 # n iterations. Set to 1 to record every iteration
-snapshot_interval: 1
+data_save_interval: 1
 
 height_dependancy: False
 

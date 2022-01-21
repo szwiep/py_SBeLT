@@ -40,6 +40,12 @@ def main(run_id, pid, param_path):
     except exceptions.ValidationError as e:
         print("Invalid configuration of param file at {param_path}. See the exception below:\n" )
         raise e
+    if parameters['x_max'] % parameters['set_diam'] != 0:
+        print("Invalid configuration of param file at {param_path}: x_max must be divisible by set_diam.")
+        raise ValueError("x_max must be divisible by set_diam")
+    if parameters['x_max'] % parameters['num_subregions'] != 0:
+        print("Invalid configuration of param file at {param_path}: x_max must be divisible by num_subregions.")
+        raise ValueError("x_max must be divisible by num_subregions")
 
     #############################################################################
     #  Create model data and data structures

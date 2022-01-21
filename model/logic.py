@@ -121,11 +121,6 @@ def define_subregions(bed_length, num_subregions, iterations):
     subregions_arr -- array of initialized subregion objects
 
     """
-    try:
-        assert(math.remainder(bed_length, num_subregions) == 0)
-    except AssertionError:
-        raise ValueError(f'Number of subregions needs to be a divisor of the bed length: {bed_length}%{num_subregions} != 0')
-    
     subregion_length = bed_length/num_subregions
     left_boundary = 0.0
     subregions_arr = []

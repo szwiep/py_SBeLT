@@ -33,5 +33,5 @@ travel distances that diverge from the underlying randmoly sampled distance. For
 close to zero, the closest available deposition location has a high liklihood of diverging from location associated with the randomly sampled travel distance.
 
 We overcame this challenge in the most reasonable manner possible by using probability distribution functions which provide for modes displaced from zero, and for 
-which the probability of sampling relatively small values vanishes \(rightarrow\) 0 
+which the probability of sampling relatively small values vanishes &rarr0 
 

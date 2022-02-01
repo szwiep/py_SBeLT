@@ -7,15 +7,15 @@ is simply keeping track of particle motions and locations along the bed that are
 
 With this general set-up, transport in **'py_SBeLT'** is treated as a stochastic process, with two random variables that are indexed to time and space: the number
 of entrainment events and the particle travel distance. Entrainment events are sampled from the Poisson probability mass function (pmf). The Poisson pmf expresses
-the probability that a specific number of events will occur within a time interval according to the rate constant #####Lowercase:\lambda. Practically, this means 
+the probability that a specific number of events will occur within a time interval according to the rate constant $\lambda$. Practically, this means 
 entrainment is treated as independent events between **'num_subregions'** (see readme.md and paper.md) and between each iteration. For example, 
-#####Lowercase:\lambda is specified within the **'parameter.yaml'** file as #####Lowercase:\lambda~1~. Therefore, the Poisson pmf is fixed for any given 
+$\lambda$ is specified within the **'parameter.yaml'** file as $\lambda_1$. Therefore, the Poisson pmf is fixed for any given 
 simulation. However, for each iteration and subregion a new value is randomly sampled from the Poisson pmf to define the entrainment events. 
 
 Use of the Poisson pmf is linked to sediment transport theory and associated physical experiments which indicate **'rarefied'** transport [@Furb:2016] is 
 characterized as a Poisson process when entrainment includes effects related to fluid phenomena under steady state transport conditions [@Ancey:2008]. Collective 
 related entrainment effects are not represented [@Ancey:2008; @LeeJerol:2018]. We have tested **'py_SBeLT'** for a range of rate parameter values (see readme.md). 
-Results from this testing reveals that the value specified for #####Lowercase:\lambda~1~ along with the **'num_subregions'** controls the intensity or magnitude 
+Results from this testing reveals that the value specified for $\lambda_1$ along with the **'num_subregions'** controls the intensity or magnitude 
 of transport.
 
 Physical experiments have generally shown that particle travel distances under **'rarefied'** transport conditions is commonly skewed to longer lengths with a 
@@ -33,5 +33,5 @@ travel distances that diverge from the underlying randmoly sampled distance. For
 close to zero, the closest available deposition location has a high liklihood of diverging from location associated with the randomly sampled travel distance.
 
 We overcame this challenge in the most reasonable manner possible by using probability distribution functions which provide for modes displaced from zero, and for 
-which the probability of sampling relatively small values vanishes &rarr0 
+which the probability of sampling relatively small values vanishes $\rightarrow$0 
 

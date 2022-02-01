@@ -69,7 +69,7 @@ for entrainment, and if there are insufficient surface particles available for e
 entrained particle moves a distance according to a randomly sampled value from either the normal or lognormal distribution, and is placed at 
 the nearest vertex between two particles that is available for placement. Placed particles are permitted to stack up to the **'level_limit in height'**. 
 Travel distances of particles that exceed **'x_max'** are returned and queued at the upstream boundary, and are introduced back into the 
-domain at the next numerical step according to travel distance sampling described above. This overall process repeats for the specified n_iterations.
+domain at the next numerical step according to travel distance sampling described above. This overall process repeats for the specified **'n_iterations'**.
 
 `pySBeLT` tracks a number of different parameters through a simulation: the vertical and horizontal positions of every particle center, 
 the randomly sampled number of entrainment events, the number of particles actually entrained, the randomly sampled particle travel 

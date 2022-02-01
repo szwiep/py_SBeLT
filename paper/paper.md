@@ -60,7 +60,7 @@ or the problem can be probed across a range of input parameter values (discussed
 more details). After initialization, `pySBeLT` first constructs a bed of fixed particles of set_diam in both the downstream and 
 cross-stream dimensions (one particle wide in the present build), and over a downstream domain length **'x_max'**. Bed surface particles
 of **'set_diam'** are then randomly placed at vertices between fixed bed particles until the **'pack_density'** is met. Vertices are defined 
-by a contact point between two adjacent particles. The bed of surface particles is then separated into **'num_subregions"**, and at this 
+by a contact point between two adjacent particles. The bed of surface particles is then separated into **'num_subregions'**, and at this 
 point the forward simulations are ready to commence. 
 
 Simulation iterations involve three steps: (1) the number of particle entrainment events per **'num_subregions'** are drawn from a Poisson pmf, 
@@ -69,7 +69,7 @@ for entrainment, and if there are insufficient surface particles available for e
 entrained particle moves a distance according to a randomly sampled value from either the normal or lognormal distribution, and is placed at 
 the nearest vertex between two particles that is available for placement. Placed particles are permitted to stack up to the **'level_limit in height'**. 
 Travel distances of particles that exceed **'x_max'** are returned and queued at the upstream boundary, and are introduced back into the 
-domain at the next numerical step according to travel distance sampling described above. This overall process repeats for the specified n_iterations. 
+domain at the next numerical step according to travel distance sampling described above. This overall process repeats for the specified n_iterations.
 
 `pySBeLT` tracks a number of different parameters through a simulation: the vertical and horizontal positions of every particle center, 
 the randomly sampled number of entrainment events, the number of particles actually entrained, the randomly sampled particle travel 

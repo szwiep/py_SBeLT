@@ -7,7 +7,7 @@ is simply keeping track of particle motions and locations along the bed that are
 
 With this general set-up, transport in **'py_SBeLT'** is treated as a stochastic process, with two random variables that are indexed to time and space: the number
 of entrainment events and the particle travel distance. Entrainment events are sampled from the Poisson probability mass function (pmf). The Poisson pmf expresses
-the probability that a specific number of events will occur within a time interval according to the rate constant $\lambda$. Practically, this means 
+the probability that a specific number of events will occur within a time interval according to the rate constant &#955;. Practically, this means 
 entrainment is treated as independent events between **'num_subregions'** (see readme.md and paper.md) and between each iteration. For example, 
 $\lambda$ is specified within the **'parameter.yaml'** file as $\lambda_1$. Therefore, the Poisson pmf is fixed for any given 
 simulation. However, for each iteration and subregion a new value is randomly sampled from the Poisson pmf to define the entrainment events. 

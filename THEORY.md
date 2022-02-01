@@ -26,11 +26,16 @@ tendancy in the following manner:
 
 **'py_SBeLT'** does not consider disentrainment rates because entrainment and deposition occur within the same numerical iteration. However, the general idea 
 expressed by Fathel et al. (2015) is that following entrainment, sediment particles are most likely to deposit nearest to the point of entrainment, with 
-decreasing liklihood at points increasingly distant from the location of entrainment. Due in part to the simplicity of the model build, testing revealed two 
-importnat outcomes. Travel distance distributions with modes close to zero lead to: (1) the development of isolated particle piles, and (2) realized particle 
-travel distances that diverge from the underlying randmoly sampled distance. For example, if isolated particle piles occur and are limited by the height limit 
-(see readme.md and paper.md), locally available deposition locations are increasingly distant from the entrainment location. Therefore, for travel distance modes 
-close to zero, the closest available deposition location has a high liklihood of diverging from location associated with the randomly sampled travel distance.
+decreasing liklihood at points increasingly distant from the location of entrainment. For **'py_SBeLT'** this is entirely controled by the randomly sampled travel 
+distance and the availability of deposition locations in proximity to the mapped travel distance. The particle bed in the model is characterized by a discrete 
+distribution of available deposition locations because these locations are defined by vertices between adjacent particles (subject to the level limit specified in 
+**'parameter.yaml'**). 
+
+Due in part to the simplicity of the model build, testing revealed two important outcomes with respect to parameterizing the particel travel distance. Travel
+distance distributions with modes close to zero lead to: (1) the development of isolated particle piles, and (2) realized particle travel distances that diverge 
+from the underlying randmoly sampled distance. For example, if isolated particle piles occur and are limited by the height limit (see readme.md and paper.md), 
+locally available deposition locations are increasingly distant from the entrainment location. Therefore, for travel distance modes close to zero, the closest 
+available deposition location has a high liklihood of diverging from the nearest location associated with the randomly sampled travel distance.
 
 We overcame this challenge in the most reasonable manner possible by using probability distribution functions which provide for modes displaced from zero, and for 
 which the probability of sampling relatively small values vanishes $\rightarrow$0 

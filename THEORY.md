@@ -19,7 +19,7 @@ Results from this testing reveals that the value specified for &#955;<sub>1</sub
 of transport.
 
 Physical experiments have generally shown that particle travel distances under **'rarefied'** transport conditions is commonly skewed to longer lengths with a 
-well defined mode $>$0, and on the order of 1 or more particle diameters (Lajueness et al., 2010; Fathel et al., 2015). Fathel et al. (2015) describe this 
+well defined mode >0, and on the order of 1 or more particle diameters (Lajueness et al., 2010; Fathel et al., 2015). Fathel et al. (2015) describe this 
 tendancy in the following manner:
 
 > That is, particles initially have a high likelihood of disentrainment but then experience a decreasing spatial disentrainment rate...with increasing hop distance L<sub>x</sub>.

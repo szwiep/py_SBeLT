@@ -2,7 +2,7 @@
 
 Sediment particle transport in **'py_SBeLT'** is simplified from natural rivers in two key ways. Transport is simulated along a profile that is one particle wide,
 and the causes of particle motions are represented through the resulting kinematic descriptions--namely the number of entrainment events and the particle hop or
-travel distance. These two quatities alone are the engine that drives transport and the resulting behavior that emerges from model simulations. Most of the code
+travel distance. These two quantities alone are the engine that drives transport and the resulting behavior that emerges from model simulations. Most of the code
 is simply keeping track of particle motions and locations along the bed that are available for deposition. 
 
 With this general set-up, transport in **'py_SBeLT'** is treated as a stochastic process, with two random variables that are indexed to time and space: the number

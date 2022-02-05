@@ -1,16 +1,17 @@
 ## Theory
 
 Sediment particle transport in **'py_SBeLT'** is simplified from natural rivers in two key ways. Transport is simulated along a profile that is one particle wide,
-and the causes of particle motions are represented through the resulting kinematic descriptions--namely the number of entrainment events and the particle hop or
-travel distance. These two quantities alone are the engine that drives transport and the resulting behavior that emerges from model simulations. Most of the code
-is simply keeping track of particle motions and locations along the bed that are available for deposition. 
+and the causes of particle motions are represented through the resulting kinematics--namely the number of entrainment events and the particle hop or
+travel distance. These two quantities alone are the engine that drives transport and the resulting behavior that emerges from model simulations with
+**'py_SBeLT'**. The remainder of the code is primarily keeping track of particle motions, the changing bed conditions and locations along the bed that are
+available for deposition. 
 
-With this general set-up, transport in **'py_SBeLT'** is treated as a stochastic process, with two random variables that are indexed to time and space: the number
-of entrainment events and the particle travel distance. Entrainment events are sampled from the Poisson probability mass function (pmf). The Poisson pmf expresses
-the probability that a specific number of events will occur within a time interval according to the rate constant &#955;. Practically, this means 
-entrainment is treated as independent events between **'num_subregions'** (see readme.md and paper.md) and between each iteration. For example, 
-&#955; is specified within the **'parameter.yaml'** file as &#955;<sub>1</sub>. Therefore, the Poisson pmf is fixed for any given 
-simulation. However, for each iteration and subregion a new value is randomly sampled from the Poisson pmf to define the entrainment events. 
+With this general set-up, transport in **'py_SBeLT'** is treated as a stochastic process. There are two random variables that are indexed to time and space: the
+number of entrainment events and the particle travel distance. Entrainment events are sampled from the Poisson probability mass function (pmf). The Poisson pmf
+expresses the probability that a specific number of events will occur within a time interval according to the rate constant &#955;. Practically, this means 
+particle entrainment is treated as independent events between the of **'num_subregions'** (see readme.md and paper.md) and between each iteration. For example, 
+&#955; is specified within the **'parameter.yaml'** file as &#955;<sub>1</sub>. Therefore, the Poisson pmf is fixed for any given simulation. However, for each
+iteration and subregion a new value is randomly sampled from the Poisson pmf to define the entrainment events. 
 
 Use of the Poisson pmf is linked to sediment transport theory and associated physical experiments which indicate **'rarefied'** transport [@Furb:2016] is 
 characterized as a Poisson process when entrainment includes effects related to fluid phenomena under steady state transport conditions [@Ancey:2008]. Collective 
@@ -18,8 +19,8 @@ related entrainment effects are not represented [@Ancey:2008; @LeeJerol:2018]. W
 Results from this testing reveals that the value specified for &#955;<sub>1</sub> along with the **'num_subregions'** controls the intensity or magnitude 
 of transport.
 
-Physical experiments have generally shown that particle travel distances under **'rarefied'** transport conditions is commonly skewed to longer lengths with a 
-well defined mode >0, and on the order of 1 or more particle diameters (Lajueness et al., 2010; Fathel et al., 2015). Fathel et al. (2015) describe this 
+Physical experiments have generally shown that particle travel distances under **'rarefied'** transport conditions are commonly skewed to longer lengths with a 
+well defined mode >0 that is on the order of 1 or more particle diameters (Lajueness et al., 2010; Fathel et al., 2015). Fathel et al. (2015) describe this 
 tendancy in the following manner:
 
 > That is, particles initially have a high likelihood of disentrainment but then experience a decreasing spatial disentrainment rate...with increasing hop distance L<sub>x</sub>.

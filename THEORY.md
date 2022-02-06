@@ -13,11 +13,11 @@ particle entrainment is treated as independent events between the of **'num_subr
 &#955; is specified within the **'parameter.yaml'** file as &#955;<sub>1</sub>. Therefore, the Poisson pmf is fixed for any given simulation. However, for each
 iteration and subregion a new value is randomly sampled from the Poisson pmf to define the entrainment events. 
 
-Use of the Poisson pmf is linked to sediment transport theory and associated physical experiments which indicate **'rarefied'** transport [@Furb:2016] is 
-characterized as a Poisson process when entrainment includes effects related to fluid phenomena under steady state transport conditions [@Ancey:2008]. Collective 
-related entrainment effects are not represented [@Ancey:2008; @LeeJerol:2018]. We have tested **'py_SBeLT'** for a range of rate parameter values (see readme.md). 
-Results from this testing reveals that the value specified for &#955;<sub>1</sub> along with the **'num_subregions'** controls the intensity or magnitude 
-of transport.
+Use of the Poisson pmf is linked to sediment transport theory and associated physical experiments which indicate **'rarefied'** transport (Furbish et al., 2016)
+is characterized as a Poisson process when entrainment includes effects related to fluid phenomena under steady state transport conditions (Ancey et al., 2008).
+Collective related entrainment effects are not represented (Ancey et al., 2008; Lee and Jerolmack, 2018). We have tested **'py_SBeLT'** for a range of rate 
+parameter values (see readme.md). Results from this testing reveals that the value specified for &#955;<sub>1</sub> along with the **'num_subregions'** controls
+the intensity or magnitude of transport.
 
 Physical experiments have generally shown that particle travel distances under **'rarefied'** transport conditions are commonly skewed to longer lengths with a 
 well defined mode >0 that is on the order of 1 or more particle diameters (Lajueness et al., 2010; Fathel et al., 2015). Fathel et al. (2015) describe this 
@@ -38,6 +38,6 @@ from the underlying randmoly sampled distance. For example, if isolated particle
 locally available deposition locations are increasingly distant from the entrainment location. Therefore, for travel distance modes close to zero, the closest 
 available deposition location has a high liklihood of diverging from the nearest location associated with the randomly sampled travel distance.
 
-We overcame this challenge in the most reasonable manner possible by using probability distribution functions which provide for modes displaced from zero, and for 
-which the probability of sampling relatively small values vanishes $\rightarrow$0 
+We overcame this challenge by using probability distribution functions which provide for modes displaced from zero, and for which the probability of sampling 
+relatively small values vanishes $\rightarrow$0. 
 

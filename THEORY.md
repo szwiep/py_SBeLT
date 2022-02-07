@@ -41,3 +41,17 @@ available deposition location has a high liklihood of diverging from the nearest
 We overcame this challenge by using probability distribution functions which provide for modes displaced from zero, and for which the probability of sampling 
 relatively small values vanishes $\rightarrow$0. 
 
+## References
+
+Ancey, C., Davison, A. C., Böhm, T., Jodeau, M., & Frey, P. (2008). Entrainment and motion of coarse particles in a shallow water stream down a steep slope. Journal of Fluid Mechanics, 595, 83–114. https://doi.org/10.1017/S0022112007008774
+
+Fathel, S. L., Furbish, D. J., & Schmeeckle, M. W. (2015). Experimental evidence of statistical ensemble behavior in bed load sediment transport. Journal of Geophysical Research: Earth Surface, 120(11), 2298–2317. https://doi.org/10.1002/2015JF003552
+
+Furbish, D. J., Schmeeckle, M. W., Schumer, R., & Fathel, S. L. (2016). Probability distributions of bed load particle velocities, accelerations, hop distances, and travel times informed by Jaynes’s principle of maximum entropy. Journal of Geophysical Research: Earth Surface, 121(7), 1373–1390. https://doi.org/10.1002/2016JF003833
+
+Lajeunesse, E., Malverti, L., & Charru, F. (2010). Bed load transport in turbulent flow at the grain scale: Experiments and modeling. Journal of Geophysical Research: Earth Surface, 115(F4). https://doi.org/10.1029/2009JF001628
+
+Lee, D. B., & Jerolmack, D. (2018). Determining the scales of collective entrainment in collision-driven bed load. Earth Surface Dynamics, 6(4), 1089–1099. https://doi.org/10.5194/esurf-6-1089-2018
+
+
+

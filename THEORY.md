@@ -32,14 +32,16 @@ distance and the availability of deposition locations in proximity to the mapped
 distribution of available deposition locations because these locations are defined by vertices between adjacent particles (subject to the level limit specified in 
 **'parameter.yaml'**). 
 
-Due in part to the simplicity of the model build, testing revealed two important outcomes with respect to parameterizing the particel travel distance. Travel
-distance distributions with modes close to zero lead to: (1) the development of isolated particle piles, and (2) realized particle travel distances that diverge 
-from the underlying randmoly sampled distance. For example, if isolated particle piles occur and are limited by the height limit (see readme.md and paper.md), 
-locally available deposition locations are increasingly distant from the entrainment location. Therefore, for travel distance modes close to zero, the closest 
-available deposition location has a high liklihood of diverging from the nearest location associated with the randomly sampled travel distance.
+Testing revealed two important outcomes with respect to parameterizing the particle travel distance. Travel distance distributions with modes close to zero lead
+to two challenges. First, the development of isolated particle piles, and second, realized particle travel distances that diverge from the underlying randmoly
+sampled distance. For example, if isolated particle piles occur and their vertical height is controlled by the height limit (see readme.md and paper.md), locally
+available deposition locations are increasingly distant from the entrainment location. This is because most sediment particles are sampled to travel a relativley
+short distance, and therefore the model looks for an available deposition location close to the point of entrainment. However, as more iterations occur the 
+liklihood is high that deposition sites relatively close to the point of entrainment will not be available. The model is therefore forced to search farther beyond 
+the sampled travel distance for an available depoistion location. This leads to the development of enlongated and isoloated piles, and anomalous transport
+behavior. 
 
-We overcame this challenge by using probability distribution functions which provide for modes displaced from zero, and for which the probability of sampling 
-relatively small values vanishes $\rightarrow$0. 
+We overcame thses two challenges by using probability distribution functions which provide for modes displaced from zero (generally > 1 particle diameter equivalent), and for which the probability of sampling relatively small values vanishes &#8594 0. 
 
 ## References
 

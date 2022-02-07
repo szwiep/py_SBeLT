@@ -41,7 +41,7 @@ liklihood is high that deposition sites relatively close to the point of entrain
 the sampled travel distance for an available depoistion location. This leads to the development of enlongated and isoloated piles, and anomalous transport
 behavior. 
 
-We overcame thses two challenges by using probability distribution functions which provide for modes displaced from zero (generally > 1 particle diameter equivalent), and for which the probability of sampling relatively small values Pr(X<=x) vanishes as x &#8594; 0. 
+We overcame these two challenges by using probability distribution functions which provide for modes displaced from zero (generally > 1 particle diameter equivalent), and for which the probability of sampling relatively small values Pr(X<=x) vanishes as x &#8594; 0. 
 
 ## References
 

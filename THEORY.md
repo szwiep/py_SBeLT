@@ -16,7 +16,7 @@ iteration and subregion a new value is randomly sampled from the Poisson pmf to 
 Use of the Poisson pmf is linked to sediment transport theory and associated physical experiments which indicate **'rarefied'** transport (Furbish et al., 2016)
 is characterized as a Poisson process when entrainment includes effects related to fluid phenomena under steady state transport conditions (Ancey et al., 2008).
 Collective related entrainment effects are not represented (Ancey et al., 2008; Lee and Jerolmack, 2018). We have tested **'py_SBeLT'** for a range of rate 
-parameter values (see readme.md). Results from this testing reveals that the value specified for &#955;<sub>1</sub> along with the **'num_subregions'** controls
+constant values (see readme.md). Results from this testing reveals that the value specified for &#955;<sub>1</sub> along with the **'num_subregions'** controls
 the intensity or magnitude of transport.
 
 Physical experiments have generally shown that particle travel distances under **'rarefied'** transport conditions are commonly skewed to longer lengths with a 

@@ -55,12 +55,15 @@ travel distance for an available depoistion location. This leads to enlongated g
 
 We overcame these two challenges by using probability distribution functions which provide for modes displaced from zero (generally > 1 or more particle diameter 
 equivalents in length), and for which the probability of sampling relatively small values Pr(X<=x) vanishes as x &#8594; 0. At present, **'py_SBeLT'** uses the 
-normal or lognormal probability density functions to specify sediment particle travel distances. The selection of which particular function is used is done within 
-the **'parameter.yaml'** file (see readme.md and paper.md), and the readme.md provides the distribution function parameter value ranges tested to date. The gamma 
-and Weibull distributions, for example, can also provide modes displaced from zero, and with distribution shapes that are skewed to longer lengths. Furthermore, 
-physical experiments that provide reasonable analog conditions to those envisioned for **'py_SBeLT'** report that particle hop distances are well described by the 
-Weibull distribution (Fathel et al., 2015). These additional pdfs can be easily incorporated into future model extensions using the **'scipy.stats'** library of 
-functions.  
+normal or lognormal probability density functions to specify sediment particle travel distances. The normal distribution notably does not satisfy observations of 
+travel distance distributions that are skewed to long lengths. However, we have incorporated the normal distribution as a model reference condition with respect 
+to generating quasi-random sets of travel distances. 
+
+The selection of which particular function is used is done within the **'parameter.yaml'** file (see readme.md and paper.md), and the readme.md provides the 
+distribution function parameter value ranges tested to date. The gamma and Weibull distributions, for example, can also provide modes displaced from zero, and 
+with distribution shapes that are skewed to longer lengths. Furthermore, physical experiments that provide reasonable analog conditions to those envisioned for 
+**'py_SBeLT'** report that particle hop distances are well described by the Weibull distribution (Fathel et al., 2015). These additional pdfs can be easily 
+incorporated into future model extensions using the **'scipy.stats'** library of functions.  
 
 ## References
 

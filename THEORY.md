@@ -6,6 +6,8 @@ namely the number of entrainment events and the particle hop or travel distance.
 resulting behavior that emerges from model simulations with **'py_SBeLT'**. The remainder of the code is primarily keeping track of particle motions, the changing 
 bed conditions and locations along the bed that are available for deposition. 
 
+### Entrainment
+
 With this general set-up, transport in **'py_SBeLT'** is treated as a stochastic process. The number of entrainment events and the particle travel distance are
 random variables that are indexed to time and space. Entrainment events are sampled from the Poisson probability mass function (pmf). The Poisson pmf
 expresses the probability that a specific number of events will occur within a time interval according to the rate constant &#955;. This means particle 
@@ -19,6 +21,8 @@ can be characterized as a Poisson process when entrainment includes effects rela
 constant values (see readme.md). Results from our testing reveal that the value specified for &#955;<sub>1</sub> along with the **'num_subregions'** controls
 the intensity, or magnitude of transport. This makes intuitive sense because the local transport intensity is directly linked to the number of sediment particles 
 entrained from the bed surface.
+
+### Travel Distance
 
 Physical experiments show that particle travel distances under **'rarefied'** transport conditions are commonly skewed to longer lengths with a 
 well defined mode >0 that is on the order of 1 or more particle diameters (Lajueness et al., 2010; Fathel et al., 2015). Fathel et al. (2015, page 2309) describe 
@@ -53,13 +57,13 @@ locations. Under this scenario, future entrained particles travel to more distan
 high that deposition sites relatively close to the point of entrainment will not be available. The model is therefore forced to search farther beyond the sampled 
 travel distance for an available depoistion location. This leads to enlongated growth of the initially isoloated piles, and anomalous transport behavior. 
 
-We overcame these two challenges by using probability distribution functions which provide for modes displaced from zero (generally > 1 or more particle diameter 
+We overcame these two challenges by using probability density functions which provide for modes displaced from zero (generally > 1 or more particle diameter 
 equivalents in length), and for which the probability of sampling relatively small values Pr(X<=x) vanishes as x &#8594; 0. At present, **'py_SBeLT'** uses the 
 normal or lognormal probability density functions to specify sediment particle travel distances. The normal distribution notably does not satisfy observations of 
 travel distance distributions that are skewed to long lengths. However, we have incorporated the normal distribution as a model reference condition with respect 
 to generating quasi-random sets of travel distances. 
 
-The selection of which particular function is used is done within the **'parameter.yaml'** file (see readme.md and paper.md), and the readme.md provides the 
+The selected probability density function is specified within the **'parameter.yaml'** file (see readme.md and paper.md), and the readme.md provides the 
 distribution function parameter value ranges tested to date. The gamma and Weibull distributions, for example, can also provide modes displaced from zero, and 
 with distribution shapes that are skewed to longer lengths. Furthermore, physical experiments that provide reasonable analog conditions to those envisioned for 
 **'py_SBeLT'** report that particle hop distances are well described by the Weibull distribution (Fathel et al., 2015). These additional pdfs can be easily 

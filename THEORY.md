@@ -15,6 +15,10 @@ entrainment is treated as independent events between the **'num_subregions'** (s
 &#955; is specified within the **'parameter.yaml'** file as &#955;<sub>1</sub>. Therefore, the Poisson pmf is fixed for any given simulation. However, for each
 iteration and subregion a new value is randomly sampled from the Poisson pmf to define the entrainment events. 
 
+|![Image](../figures/poisson.png)
+|:--:| 
+| *Example `py_SBeLT` output of particle flux at downstream boundary and particle bed configuration at numerical step 100* |
+
 Use of the Poisson pmf is linked to sediment transport theory and supproting experimental results which show **'rarefied'** transport (Furbish et al., 2016)
 can be characterized as a Poisson process when entrainment includes effects related to fluid phenomena under steady state transport conditions (Ancey et al., 
 2008). Collective related entrainment effects are not represented (Ancey et al., 2008; Lee and Jerolmack, 2018). We have tested **'py_SBeLT'** for a range of rate 

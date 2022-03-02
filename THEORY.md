@@ -15,7 +15,7 @@ entrainment is treated as independent events between the **'num_subregions'** (s
 &#955; is specified within the **'parameter.yaml'** file as &#955;<sub>1</sub>. Therefore, the Poisson pmf is fixed for any given simulation. However, for each
 iteration and subregion a new value is randomly sampled from the Poisson pmf to define the entrainment events. 
 
-|![Image](../figures/poisson.png)
+|![Image](/figures/poisson.png)
 |:--:| 
 | *Example `py_SBeLT` output of particle flux at downstream boundary and particle bed configuration at numerical step 100* |
 

@@ -90,7 +90,7 @@ emphasizing bed load sediment transport.
 
 |![Image](../paper/figures/Figure1.png)
 |:--:| 
-| *Example `py_SBeLT` output of particle flux at downstream boundary and particle bed configuration at numerical step 100* |
+| *Figure 1. Example `py_SBeLT` output of particle flux at downstream boundary and particle bed configuration at numerical step 100* |
 
 # Acknowledgements
 

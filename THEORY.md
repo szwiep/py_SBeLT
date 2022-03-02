@@ -9,7 +9,7 @@ bed conditions and locations along the bed that are available for deposition.
 ### Entrainment
 
 With this general set-up, transport in **'py_SBeLT'** is treated as a stochastic process. The number of entrainment events and the particle travel distance are
-random variables that are indexed to time and space. Entrainment events are sampled from the Poisson probability mass function (pmf). The Poisson pmf
+random variables that are indexed to time and space. Entrainment events are sampled from the Poisson probability mass function (pmf) (Figure 1). The Poisson pmf
 expresses the probability that a specific number of events will occur within a time interval according to the rate constant &#955;. This means particle 
 entrainment is treated as independent events between the **'num_subregions'** (see readme.md and paper.md) and between each iteration. For example, 
 &#955; is specified within the **'parameter.yaml'** file as &#955;<sub>1</sub>. Therefore, the Poisson pmf is fixed for any given simulation. However, for each
@@ -17,7 +17,7 @@ iteration and subregion a new value is randomly sampled from the Poisson pmf to 
 
 |![Image](/figures/poisson.png)
 |:--:| 
-| *Example `py_SBeLT` output of particle flux at downstream boundary and particle bed configuration at numerical step 100* |
+| *Figure 1. Example Poisson pmf used to set the number of entrainment events in `py_SBeLT`.* |
 
 Use of the Poisson pmf is linked to sediment transport theory and supproting experimental results which show **'rarefied'** transport (Furbish et al., 2016)
 can be characterized as a Poisson process when entrainment includes effects related to fluid phenomena under steady state transport conditions (Ancey et al., 
@@ -63,9 +63,13 @@ travel distance for an available depoistion location. This leads to enlongated g
 
 We overcame these two challenges by using probability density functions which provide for modes displaced from zero (generally > 1 or more particle diameter 
 equivalents in length), and for which the probability of sampling relatively small values Pr(X<=x) vanishes as x &#8594; 0. At present, **'py_SBeLT'** uses the 
-normal or lognormal probability density functions to specify sediment particle travel distances. The normal distribution notably does not satisfy observations of 
+normal or lognormal probability density functions to specify sediment particle travel distances (Figure 2). The normal distribution notably does not satisfy observations of 
 travel distance distributions that are skewed to long lengths. However, we have incorporated the normal distribution as a model reference condition with respect 
 to generating quasi-random sets of travel distances. 
+
+|![Image](/figures/lognormal.png)
+|:--:| 
+| *Figure 2. Example Lognormal pdf used to set the particle travel distance in `py_SBeLT`.* |
 
 The selected probability density function is specified within the **'parameter.yaml'** file (see readme.md and paper.md), and the readme.md provides the 
 distribution function parameter value ranges tested to date. The gamma and Weibull distributions, for example, can also provide modes displaced from zero, and 

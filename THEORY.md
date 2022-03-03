@@ -17,7 +17,7 @@ iteration and subregion a new value is randomly sampled from the Poisson pmf to 
 
 |![Image](/figures/poisson.png)
 |:--:| 
-| *Figure 1. Example Poisson pmf used to set the number of entrainment events in `py_SBeLT`.* |
+| *Figure 1. Example Poisson pmf used to set the number of entrainment events in **`py_SBeLT`**.* |
 
 Use of the Poisson pmf is linked to sediment transport theory and supproting experimental results which show **'rarefied'** transport (Furbish et al., 2016)
 can be characterized as a Poisson process when entrainment includes effects related to fluid phenomena under steady state transport conditions (Ancey et al., 
@@ -69,13 +69,13 @@ to generating quasi-random sets of travel distances.
 
 |![Image](/figures/lognormal.png)
 |:--:| 
-| *Figure 2. Example Lognormal pdf used to set the particle travel distance in `py_SBeLT`.* |
+| *Figure 2. Example Lognormal pdf used to set the particle travel distance in **`py_SBeLT`**.* |
 
 The selected probability density function is specified within the **'parameter.yaml'** file (see readme.md and paper.md), and the readme.md provides the 
-distribution function parameter value ranges tested to date. The gamma and Weibull distributions, for example, can also provide modes displaced from zero, and 
-with distribution shapes that are skewed to longer lengths. Physical experiments that in part motivated development of **`py_SBeLT`** provide analog conditions to 
-those envisioned for **'py_SBeLT'** report that particle hop distances are well described by the Weibull distribution (Fathel et al., 2015). These additional pdfs 
-can be easily incorporated into future model extensions using the **'scipy.stats'** library of functions.  
+distribution function parameter value ranges tested to date. The gamma distribution, for example, can also provide modes displaced from zero, and with 
+distribution shapes that are skewed to longer lengths. Furthermore, physical experiments that in part motivated development of **`py_SBeLT`** report that particle 
+hop distances are well described by the Weibull distribution (Fathel et al., 2015). These additional pdfs can be easily incorporated into future model extensions 
+using the **'scipy.stats'** library of functions.
 
 ## References
 

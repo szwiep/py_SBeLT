@@ -73,9 +73,9 @@ to generating quasi-random sets of travel distances.
 
 The selected probability density function is specified within the **'parameter.yaml'** file (see readme.md and paper.md), and the readme.md provides the 
 distribution function parameter value ranges tested to date. The gamma and Weibull distributions, for example, can also provide modes displaced from zero, and 
-with distribution shapes that are skewed to longer lengths. Furthermore, physical experiments that provide reasonable analog conditions to those envisioned for 
-**'py_SBeLT'** report that particle hop distances are well described by the Weibull distribution (Fathel et al., 2015). These additional pdfs can be easily 
-incorporated into future model extensions using the **'scipy.stats'** library of functions.  
+with distribution shapes that are skewed to longer lengths. Physical experiments that in part motivated development of **`py_SBeLT`** provide analog conditions to 
+those envisioned for **'py_SBeLT'** report that particle hop distances are well described by the Weibull distribution (Fathel et al., 2015). These additional pdfs 
+can be easily incorporated into future model extensions using the **'scipy.stats'** library of functions.  
 
 ## References
 

@@ -75,8 +75,11 @@ The selected probability density function is specified within the **'parameter.y
 distribution function parameter value ranges tested to date. The gamma distribution, for example, can also provide modes displaced from zero, and with 
 distribution shapes that are skewed to longer lengths. Furthermore, physical experiments that in part motivated development of **`py_SBeLT`** report that particle 
 hop distances are well described by the Weibull distribution (Fathel et al., 2015). Note however that **'py_SBeLT'** would likely produce isolated particle piles 
-if the shape parameter *k* were constrained to values <1 (Fathel et al., 2015). These additional pdfs can be easily incorporated into future model extensions 
-using the **'scipy.stats'** library of functions with appropiate modifications to the **'parameter.yaml'** and **'run.py'** files.
+if the shape parameter *k* were constrained to values <1 (Fathel et al., 2015). This limitation reflects the present model build which simulates rarefied 
+transport along a downstream profile of particles with available deposition locations constrained by particle diameter. We expect that a model build expanded to 
+cross-stream scales of many particle diameters in length might be more capable of simulating the experimental conditions reported by Fathel et al. (2015). These 
+additional pdfs can be easily incorporated into future model extensions using the **'scipy.stats'** library of functions with appropiate modifications to the 
+**'parameter.yaml'** and **'run.py'** files.
 
 |![Image](/figures/weibull.png)
 |:--:| 

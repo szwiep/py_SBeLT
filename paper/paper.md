@@ -89,7 +89,7 @@ graduate courses emphasizing bed load sediment transport.
 
 # Figures
 
-|![Image](../paper/figures/Figure1.svg)
+|![Image](../paper/figures/Figure 1 Graphic.svg)
 |:--:| 
 | *Figure 1. Graphic illustrating the three steps of particle transport modelling by `py_SBeLT`. The internal subregion boundaries shown are located by: (1) the 
 user specifies the total number of subregions in the **'param.yaml'** file (see Readme.md), and (2) the subregion boundaries occur at domain locations set by a 

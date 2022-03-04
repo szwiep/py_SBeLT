@@ -61,7 +61,8 @@ more details). After initialization, `pySBeLT` first constructs a bed of fixed p
 cross-stream dimensions (one particle wide in the present build), and over a downstream domain length **'x_max'**. Bed surface particles
 of **'set_diam'** are then randomly placed at vertices between fixed bed particles until the **'pack_density'** is met. Vertices are defined 
 by a contact point between two adjacent particles. The bed of surface particles is then separated into **'num_subregions'**, and at this 
-point the forward simulations are ready to commence. 
+point the forward simulations are ready to commence. The subregion boundaries are located by: (1) the user specifies the **'num_subregions'** in the 
+**'param.yaml'** file (see Readme.md), and (2) the subregion boundaries occur at domain locations set by a distance = **'x_max'** / **'num_subregions'**.
 
 Simulation iterations involve three steps (Fig. 1): (1) the number of particle entrainment events per **'num_subregions'** are drawn from a Poisson pmf, 
 and this is done randomly for each numerical step up to **'n_iterations'**; (2) surface particles from each subregion are randomly selected 
@@ -91,9 +92,7 @@ graduate courses emphasizing bed load sediment transport.
 
 |![Image](../paper/figures/Figure1.png)
 |:--:| 
-| *Figure 1. Graphic illustrating the three steps of particle transport modelling by `py_SBeLT`. The internal subregion boundaries shown are located by: (1) the 
-user specifies the total number of subregions in the **'param.yaml'** file (see Readme.md), and (2) the subregion boundaries occur at domain locations set by a 
-distance = domain length / number of subregions.* |
+| *Figure 1. Graphic illustrating the three steps of particle transport modelling by `py_SBeLT`.* |
 
 |![Image](../paper/figures/Figure2.png)
 |:--:| 

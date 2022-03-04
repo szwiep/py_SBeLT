@@ -56,20 +56,22 @@ flux is represented as a counting phenomenon where the number of particles in mo
 variable [@Ancey:2008]. The model supports ensemble simulations so that repeat numerical experiments can be conducted efficiently,
 or the problem can be probed across a range of input parameter values (discussed below).
 
-`pySBeLT` is run forward in time according to default or user specified parameter values in **'param.yaml'** (see the README.md for 
+`pySBeLT` is run forward in time according to default or user specified parameter values in **'param.yaml'** (see README.md for 
 more details). After initialization, `pySBeLT` first constructs a bed of fixed particles of set_diam in both the downstream and 
 cross-stream dimensions (one particle wide in the present build), and over a downstream domain length **'x_max'**. Bed surface particles
 of **'set_diam'** are then randomly placed at vertices between fixed bed particles until the **'pack_density'** is met. Vertices are defined 
 by a contact point between two adjacent particles. The bed of surface particles is then separated into **'num_subregions'**, and at this 
 point the forward simulations are ready to commence. 
 
-Simulation iterations involve three steps: (1) the number of particle entrainment events per **'num_subregions'** are drawn from a Poisson pmf, 
+Simulation iterations involve three steps (Fig. 1): (1) the number of particle entrainment events per **'num_subregions'** are drawn from a Poisson pmf, 
 and this is done randomly for each numerical step up to **'n_iterations'**; (2) surface particles from each subregion are randomly selected 
 for entrainment, and if there are insufficient surface particles available for entrainment, then all available particles are moved; (3) each 
-entrained particle moves a distance according to a randomly sampled value from either the normal or lognormal distribution, and is placed at 
+entrained particle moves a distance according to a randomly sampled value from either the normal or lognormal distribution (see THEORY.md), and is placed at 
 the nearest vertex between two particles that is available for placement. Placed particles are permitted to stack up to the **'level_limit in height'**. 
-Travel distances of particles that exceed **'x_max'** are returned and queued at the upstream boundary, and are introduced back into the 
-domain at the next numerical step according to travel distance sampling described above. This overall process repeats for the specified **'n_iterations'**.
+Particles are not permitted to travel to the same available vertex; when this occurs the discrepancy is addressed by randmoly sampling for one particle to deposit 
+at the identified vertex and the remaining particle(s) are placed at the nearest available vertices. Travel distances of particles that exceed **'x_max'** are 
+returned and queued at the upstream boundary, and are introduced back into the domain at the next numerical step according to travel distance sampling described 
+above. This overall process repeats for the specified **'n_iterations'**.
 
 `pySBeLT` tracks a number of different parameters through a simulation: the vertical and horizontal positions of every particle center, 
 the randomly sampled number of entrainment events, the number of particles actually entrained, the randomly sampled particle travel 
@@ -78,19 +80,24 @@ particle, and the number of particles which cross all boundaries, i.e. sub-regio
 in HDF5 data files using the `h5py` package [@Collette:2014]. 
 
 `pySBeLT` produces a time varying signal of particle flux counted at the downstream domain (as well as internal subregion domains), with a particle 
-bed that changes through particle stacking and pile removal, and downstream motions of travel distance (Fig. 1). An implication of particle 
+bed that changes through particle stacking and pile removal, and downstream motions of travel distance (Fig. 2). An implication of particle 
 stacking within the context of the `pySBeLT` stochastic framework is a time varying signal of the average “particle age”, as well as the 
 average “particle age range”, defined as the difference of the maximum and minimum particle ages. The model can be readily modified to simulate 
-kinematics using different probability distributions, or examining particle age dynamics for deeper beds of particles available for transport. The relatively 
-simple parameterization of `pySBeLT` execution also makes it suitable for use as a teaching tool within advanced undergraduate and graduate courses 
-emphasizing bed load sediment transport.
+kinematics using different probability distributions (see THEORY.md for more details), or examining particle age dynamics for deeper beds of particles available 
+for transport. The relatively simple parameterization of `pySBeLT` execution also makes it suitable for use as a teaching tool within advanced undergraduate and 
+graduate courses emphasizing bed load sediment transport.
 
 # Figures
 
+|![Image](../paper/figures/Figure1.svg)
+|:--:| 
+| *Figure 1. Graphic illustrating the three steps of particle transport modelling by `py_SBeLT`. The internal subregion boundaries shown are located by: (1) the 
+user specifies the total number of subregions in the **'param.yaml'** file (see Readme.md), and (2) the subregion boundaries occur at domain locations set by a 
+distance = domain length / number of subregions.* |
 
 |![Image](../paper/figures/Figure1.png)
 |:--:| 
-| *Figure 1. Example `py_SBeLT` output of particle flux at downstream boundary and particle bed configuration at numerical step 100* |
+| *Figure 2. Example `py_SBeLT` output of particle flux at downstream boundary and particle bed configuration at numerical step 100* |
 
 # Acknowledgements
 
@@ -98,8 +105,8 @@ S. Zwiep was funded in part through an Undergraduate Student Research Award from
 National Science and Engineering Research Council of Canada (NSERC). S.M. Chartrand was 
 funded through a Postdoctoral Fellowship awarded by NSERC, and through internal research 
 funding provided by Simon Fraser University. The model was inspired by discussions with 
-David Jon Furbish, who also provided useful input and critical feedback at various stages 
-of model development and testing. Kevin Pierce also provided helpful feedback during model 
-development. Greg Baker provided insightful mentorship for S. Zwiep during improvements to the model.
+D.J. Furbish, who also provided useful input and critical feedback at various stages 
+of model development and testing. K. Pierce also provided helpful feedback during model 
+development. G. Baker provided insightful mentorship for S. Zwiep during improvements to the model.
 
 # References

@@ -44,17 +44,17 @@ These parameters can be changed for whatever type of run you desire! However, al
 
 | Parameter | Type | Tested Range | Description |
 | ----------- | ------- | ----------- |
-| pack_density | float | 0.50 - 0.80 | The packing fraction of the model particles (-) |
-| x_max | int | 100 - 1000 | Length of the domain in the streamwise direction (mm) |
-| set_diam | int or float =+ 0.5 | 0.5 - 10 | Grain diameter (mm) |
-| num_subregions | int | 1 - 10 | The number of bed subregions |
-| level_limit | int | 1 - 3 | The maximum number of levels permitted (i.e how many particles high to stack)  |
-| n_iterations | int | 1 - 10$^6$ |The number of iterations to run |
-| lambda_1 | int | 1 - 5 | Lamba for poisson dist., used to determine the number of entrainment events |
-| normal_dist | boolean |Flag for which distribution to sample from for hop calculations. True=Normal, False=logNormal |
-| mu | float | 0.25 - 2 | Mean/expectation of the logNormal/Normal distribution for hop calculations |
-| sigma | float | 0.25 - 0.50 | Standard deviation of logNormal/Normal distribution for hop calculations|
-| data_save_interval | int | 1 -2 | How often to record model particle arrays (e.g 1=save every iteration, 2=save every other) |
+| pack_density | float | 0.50, 0.80 | The packing fraction of the model particles (-) |
+| x_max | int | 100, 1000 | Length of the domain in the streamwise direction (mm) |
+| set_diam | int or float =+ 0.5 | 0.5, 10 | Grain diameter (mm) |
+| num_subregions | int | 1, 10 | The number of bed subregions |
+| level_limit | int | 1, 3 | The maximum number of levels permitted (i.e how many particles high to stack)  |
+| n_iterations | int | 1, 1000000 |The number of iterations to run |
+| lambda_1 | int | 1, 5 | Lamba for poisson dist., used to determine the number of entrainment events |
+| normal_dist | boolean | - | Flag for which distribution to sample from for hop calculations. True=Normal, False=logNormal |
+| mu | float | 0.25, 2 | Mean/expectation of the logNormal/Normal distribution for hop calculations |
+| sigma | float | 0.25, 0.50 | Standard deviation of logNormal/Normal distribution for hop calculations|
+| data_save_interval | int | 1, 2 | How often to record model particle arrays (e.g 1=save every iteration, 2=save every other) |
 | height_dependancy | boolean | - | Flag indicating whether model automatically entrains particles that are at the height limit |
 | filename_prefix | strong | - | Prefix for output filenames |
 

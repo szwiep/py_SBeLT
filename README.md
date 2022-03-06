@@ -43,7 +43,7 @@ project
 These parameters can be changed for whatever type of run you desire! However, all parameters have data type requirements and some have minimum and maximum permitted values. The parameters are validated at the start of the run and any incompatible entries will cause an error message to be raised. The following is a table of the parameters:
 
 | Parameter | Type | Tested Range | Description |
-| ----------- | ------- | ----------- |
+| ----------- | ------- | ------ | ----------- |
 | pack_density | float | 0.50, 0.80 | The packing fraction of the model particles (-) |
 | x_max | int | 100, 1000 | Length of the domain in the streamwise direction (mm) |
 | set_diam | int or float =+ 0.5 | 0.5, 10 | Grain diameter (mm) |

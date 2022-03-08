@@ -1,0 +1,58 @@
+# Parameters file. 
+
+# Here you can set the parameter values
+# of the run. Above each paramter is a
+# comment describing the parameter, it's
+# required type and range
+
+
+# The packing density of the model particles
+pack_density: 0.78
+
+# Length of the domain in the streamwise direction (mm).
+# RANGE: > 0
+# TYPE: INT
+x_max: 100
+    
+# Grain diameter (mm)
+# RANGE: > 0
+set_diam: 0.5
+
+# The number of bed subregions
+# RANGE: > 0
+# TYPE: INT
+num_subregions: 4
+
+# The maximum number of levels permitted in stream
+level_limit: 3
+
+# The number of iterations to run
+# RANGE: > 0
+# TYPE: INT
+n_iterations: 1000
+
+# Lamba for poisson dist. used to
+# determine the number of entrainment events.
+lambda_1: 5
+
+# Distribution used for entrainment hop calculation
+# If False: distribution = logNormal
+# If True: distribution = Normal
+normal_dist: False
+
+# Mean/expectation of the logNormal/Normal distribution
+mu: 1
+
+# Standard deviation of logNormal/Normal distribution
+# RANGE: > 0
+sigma: 0.25
+
+# Record a snapshot of the stream data (arrays) every 
+# n iterations. Set to 1 to record every iteration
+data_save_interval: 1
+
+# Boolean flag for whether to automatically
+# entrain any particle at the level limit
+height_dependancy: False
+
+filename_prefix: "hello-world"

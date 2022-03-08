@@ -1,0 +1,41 @@
+
+type: object
+properties:
+    pack_density:
+            type: number
+            exclusiveMinimum: 0
+            maximum: 1
+    x_max:
+            type: integer
+            exclusiveMinimum: 0
+    set_diam:
+            type: number
+            exclusiveMinimum: 0
+    num_subregions:
+            type: integer
+            exclusiveMinimum: 0
+    level_limit:
+            type: integer
+            exclusiveMinimum: 0
+    n_iterations:
+            type: integer
+            exclusiveMinimum: 0
+    lambda_1:
+            type: number
+            minimum: 0
+    normal_dist:
+            type: boolean
+    mu:
+            type: number
+            minimum: 0
+    sigma:
+            type: number
+            exclusiveMinimum: 0
+    data_save_interval:
+            type: integer
+            exclusiveMinimum: 0
+    height_dependancy:
+            type: boolean
+    filename_prefix:
+            type: string
+            pattern: ^[a-zA-Z\d\-\_]*$

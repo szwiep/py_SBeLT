@@ -4,6 +4,7 @@ import numpy as np
 
 
 import logging
+logging.getLogger(__name__)
 
 
 class Subregion():
@@ -133,7 +134,7 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
                      f'Requested {e_events} events in {subregion.getName()} ' 
                      f'but {len(subregion_event_ids)} are occuring'
             )
-            logging.warning(msg)
+            logging.info(msg)
         event_particles = event_particles + subregion_event_ids
     event_particles = np.array(event_particles, dtype=np.intp)
 
@@ -162,12 +163,12 @@ def define_subregions(bed_length, num_subregions, iterations):
     
     return subregions_arr
     
-def build_streambed(x_max, set_diam):
+def build_streambed(bed_length, particle_diam):
     """ Builds the array of bed particles.
     
     Args:
-        x_max: The length of the stream (int).
-        set_diam: The diameter of all particles (float).
+        bed_length: The length of the stream (int).
+        particle_diam: The diameter of all particles (float).
     
     Returns:
         bed_particles: An m-7 NumPy array representing the stream's m 
@@ -181,25 +182,25 @@ def build_streambed(x_max, set_diam):
             active = 0, age = 0, and loops = 0. 
 
     """
-    max_particles = int(math.ceil( x_max / set_diam ))
+    max_particles = int(math.ceil( bed_length / particle_diam ))
     bed_particles = np.zeros([max_particles, 7],dtype=float)
     
     particle_id = -1
-    centre = (set_diam/2)  
+    centre = (particle_diam/2)  
     state = 0
     age = 0
     loop_age = 0
     elevation = 0
-    while not bed_complete(centre, x_max):  
+    while not bed_complete(centre, bed_length):  
         # index with negative indices... bed particles are built from the final element to the first
-        bed_particles[particle_id] = [centre, set_diam, elevation, particle_id, state, age, loop_age]
-        centre += set_diam
+        bed_particles[particle_id] = [centre, particle_diam, elevation, particle_id, state, age, loop_age]
+        centre += particle_diam
         particle_id += -1 # Bed particles get negative IDs
     
     return bed_particles
 
-def bed_complete(centre, x_max):
-    if centre >= x_max:
+def bed_complete(centre, bed_length):
+    if centre >= bed_length:
         return 1
     else: return 0
 
@@ -296,7 +297,7 @@ def find_supports(particle, model_particles, bed_particles):
     exactly a radius length away from p's centre.
 
     Args:   
-        particle: NumPy array representing a model particle.
+        particle: 1-7 NumPy array representing a model particle.
         model_particles: An n-7 NumPy array representing the stream's 
             n model particles.
         bed_particles: An m-7 NumPy array representing the stream's m 
@@ -338,7 +339,7 @@ def find_supports(particle, model_particles, bed_particles):
     return left_support[0], right_support[0]
 
 
-def set_model_particles(bed_particles, available_vertices, set_diam, pack_fraction, h):
+def set_model_particles(bed_particles, available_vertices, particle_diam, pack_fraction, h):
     """ Create array of n model particles and set each particle in-stream.
     
     Model particles are randomly placed at available vertex
@@ -358,7 +359,7 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
     Args:
         bed_particles: An m-7 NumPy array representing the stream's m bed particles.
         available_vertices: A NumPy array with all available vertices in the stream. 
-        set_diam: The diameter of all particles (float).
+        particle_diam: The diameter of all particles (float).
         pack_fraction: Packing density value (float). See THEORY.md in project
             repo for more information.
         h: Geometric value used in calculations of particle placement (float). See
@@ -399,7 +400,7 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
 
         # intialize the particle information
         model_particles[particle][0] = vertex 
-        model_particles[particle][1] = set_diam
+        model_particles[particle][1] = particle_diam
         
         model_particles[particle][3] = particle # id number for each particle
         model_particles[particle][4] = 1 # each particle begins as active
@@ -420,7 +421,7 @@ def set_model_particles(bed_particles, available_vertices, set_diam, pack_fracti
     return model_particles, model_supp
 
 
-def compute_available_vertices(model_particles, bed_particles, set_diam, level_limit,
+def compute_available_vertices(model_particles, bed_particles, particle_diam, level_limit,
                                lifted_particles=None):
     """ Compute the avaliable vertices in the model stream.
 
@@ -476,8 +477,8 @@ def compute_available_vertices(model_particles, bed_particles, set_diam, level_l
         for particle in tmp_particles:    
             nulled_vertices.append(particle[0])
         
-        right_vertices = tmp_particles[:,0] + (set_diam / 2)
-        left_vertices = tmp_particles[:,0] - (set_diam / 2)
+        right_vertices = tmp_particles[:,0] + (particle_diam / 2)
+        left_vertices = tmp_particles[:,0] - (particle_diam / 2)
         tmp_shared_vertices = np.intersect1d(left_vertices, right_vertices)
         
         # Enforce level limit by nulling any vertex above limit:

@@ -1,83 +1,87 @@
 import numpy as np
-import yaml
+# import yaml
 import logging
 import logging.config
 from datetime import datetime
 from pathlib import Path 
 import h5py
-import time
+# import time
 from tqdm import tqdm
-from jsonschema import validate, exceptions
+# from jsonschema import validate, exceptions
 
-import sbelt.logic as logic
+import logic
 import sys
-import os
 
 ITERATION_HEADER = ('Beginning iteration {iteration}...')
 ENTRAINMENT_HEADER = ('Entraining particles {event_particles}')
+logging.getLogger(__name__)
 
-def main():
-
-    # pid = os.getpid()
+def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens = 0.78, \
+                num_subregions=3, level_limit=3, poiss_lambda=5, gauss=False, gauss_mu=1, \
+                gauss_sigma=0.25, data_save_interval=1, height_dependant_entr=False, \
+                out_path='./', out_name='sbelt-out'):
+    
+    parameters = locals()
     # run_id = datetime.now().strftime('%y%m-%d%H')
-    # # TODO: send to default config, or get user to edit config, or ask for path to config
-    # param_path = sys.argv[1]
-
-    logConf_path, log_path, schema_path, output_path = get_relative_paths()
+    # logConf_path, log_path, schema_path, output_path = get_relative_paths()
 
     #############################################################################
     # Set up logging
     #############################################################################
     
-    configure_logging(run_id, logConf_path, log_path)
+    # TODO: temp removed 
+    # Packages/libraries should not configure logging:
+    #    https://stackoverflow.com/questions/50714316/
+    # configure_logging(run_id, logConf_path, log_path)
     
     #############################################################################
     # Get and validate parameters
     #############################################################################
     
-    with open(schema_path, 'r') as s:
-        schema = yaml.safe_load(s.read())
-    with open(param_path, 'r') as p:
-        parameters = yaml.safe_load(p.read())
-    try:
-        validate(parameters, schema)
-    except exceptions.ValidationError as e:
-        print("Invalid configuration of param file at {param_path}. See the exception below:\n" )
-        raise e
-    if parameters['x_max'] % parameters['set_diam'] != 0:
-        print("Invalid configuration of param file at {param_path}: x_max must be divisible by set_diam.")
-        raise ValueError("x_max must be divisible by set_diam")
-    if parameters['x_max'] % parameters['num_subregions'] != 0:
-        print("Invalid configuration of param file at {param_path}: x_max must be divisible by num_subregions.")
-        raise ValueError("x_max must be divisible by num_subregions")
+    # TODO: validate parameters in python
+    # with open(schema_path, 'r') as s:
+    #     schema = yaml.safe_load(s.read())
+    # with open(param_path, 'r') as p:
+    #     parameters = yaml.safe_load(p.read())
+    # try:
+    #     validate(parameters, schema)
+    # except exceptions.ValidationError as e:
+    #     print("Invalid configuration of param file at {param_path}. See the exception below:\n" )
+    #     raise e
+    # if parameters['x_max'] % parameters['set_diam'] != 0:
+    #     print("Invalid configuration of param file at {param_path}: x_max must be divisible by set_diam.")
+    #     raise ValueError("x_max must be divisible by set_diam")
+    # if parameters['x_max'] % parameters['num_subregions'] != 0:
+    #     print("Invalid configuration of param file at {param_path}: x_max must be divisible by num_subregions.")
+    #     raise ValueError("x_max must be divisible by num_subregions")
 
     #############################################################################
     #  Create model data and data structures
     # TODO: Better names for d, h variables
     #############################################################################
 
-    print(f'[{pid}] Building Bed and Model particle arrays...')
+    print(f'Building Bed and Model particle arrays...')
     # Pre-compute d and h values for particle elevation placement
         # see d and h here: https://math.stackexchange.com/questions/2293201/
-    d = np.divide(np.multiply(np.divide(parameters['set_diam'], 2), 
-                                        parameters['set_diam']), 
-                                        parameters['set_diam'])
-    h = np.sqrt(np.square(parameters['set_diam']) - np.square(d))
+    d = np.divide(np.multiply(np.divide(particle_diam, 2), 
+                                        particle_diam), 
+                                        particle_diam)
+    h = np.sqrt(np.square(particle_diam) - np.square(d))
     # Build the required structures for entrainment events
-    bed_particles, model_particles, model_supp, subregions = build_stream(parameters, h)
-
+    bed_particles, model_particles, model_supp, subregions = _build_stream(parameters, h)
+    print(f'Bed and Model particles built.')
     #############################################################################
     #  Create entrainment data and data structures
     #############################################################################
 
-    particle_age_array = np.ones(parameters['n_iterations'])*(-1)
-    particle_range_array = np.ones(parameters['n_iterations'])*(-1)
+    particle_age_array = np.ones(iterations)*(-1)
+    particle_range_array = np.ones(iterations)*(-1)
     snapshot_counter = 0
 
     #############################################################################
 
-    h5py_filename = f'{parameters["filename_prefix"]}-{run_id}.hdf5'
-    hdf5_path = f'{output_path}/{h5py_filename}'
+    h5py_filename = f'{out_name}.hdf5'
+    hdf5_path = f'{out_path}/{h5py_filename}'
 
     with h5py.File(hdf5_path, "a") as f: 
         
@@ -92,31 +96,31 @@ def main():
         #############################################################################
         #  Entrainment iterations
         #############################################################################
-
-        print(f'[{pid}] Bed and Model particles built. Beginning entrainments...')
-        for iteration in tqdm(range(parameters['n_iterations']), leave=False):
+        print(f'Model and event particle arrays will be written to {hdf5_path} every {data_save_interval} iteration(s).')
+        print(f'Beginning entrainments...')
+        for iteration in tqdm(range(iterations)):
             logging.info(ITERATION_HEADER.format(iteration=iteration))
             snapshot_counter += 1
 
             # Calculate number of entrainment events iteration
-            e_events = np.random.poisson(parameters['lambda_1'], None)
+            e_events = np.random.poisson(parameters['poiss_lambda'], None)
             # Select n (= e_events) particles, per-subregion, to be entrained
             event_particle_ids = logic.get_event_particles(e_events, subregions,
                                                         model_particles, 
-                                                        parameters['level_limit'], 
-                                                        parameters['height_dependancy'])
+                                                        level_limit, 
+                                                        height_dependant_entr)
             logging.info(ENTRAINMENT_HEADER.format(event_particles=event_particle_ids))
             # Determine hop distances of all event particles
-            unverified_e = logic.compute_hops(event_particle_ids, model_particles, parameters['mu'],
-                                                    parameters['sigma'], normal=parameters['normal_dist'])
+            unverified_e = logic.compute_hops(event_particle_ids, model_particles, gauss_mu,
+                                                    gauss_sigma, normal=gauss)
             # Compute available vertices based on current model_particles state
             avail_vertices = logic.compute_available_vertices(model_particles, 
                                                         bed_particles,
-                                                        parameters['set_diam'],
-                                                        parameters['level_limit'],
+                                                        particle_diam,
+                                                        level_limit,
                                                         lifted_particles=event_particle_ids)
             # Run entrainment event                    
-            model_particles, model_supp, subregions = run_entrainments(model_particles, 
+            model_particles, model_supp, subregions = _run_entrainments(model_particles, 
                                                                     model_supp,
                                                                     bed_particles, 
                                                                     event_particle_ids,
@@ -133,8 +137,8 @@ def main():
             particle_age_array[iteration] = avg_age
 
             # Record per-iteration information 
-            if (snapshot_counter == parameters['data_save_interval']):
-                grp_i = f.create_group(f'iteration_{iteration}')
+            if (snapshot_counter == data_save_interval):
+                grp_i = f.create_group(f"iteration_{iteration}")
                 grp_i.create_dataset("model", data=model_particles, compression="gzip")
                 grp_i.create_dataset("event_ids", data=event_particle_ids, compression="gzip")
                 snapshot_counter = 0
@@ -142,8 +146,7 @@ def main():
         #############################################################################
         # Store flux and age information
         #############################################################################
-        
-        print(f'[{pid}] Writting flux and age information to shelf...')
+        print(f'Writting flux and age information to file...')
         grp_final = f.create_group(f'final_metrics')
         grp_sub = grp_final.create_group(f'subregions')
         for subregion in subregions:
@@ -153,16 +156,16 @@ def main():
 
         grp_final.create_dataset('avg_age', data=particle_age_array, compression="gzip")
         grp_final.create_dataset('age_range', data=particle_range_array, compression="gzip")
-        print(f'[{pid}] Finished writing flux and age information.')
+        print(f'Finished writing flux and age information.')
 
-        print(f'[{pid}] Model run finished successfully.')
+        print(f'Model run finished successfully.')
     return
 
 #############################################################################
 # Helper functions
 #############################################################################
 
-def build_stream(parameters, h):
+def _build_stream(parameters, h):
     """ Build the data structures which define a stream.       
 
     Build array of m bed particles and array of n model particles. 
@@ -210,19 +213,19 @@ def build_stream(parameters, h):
         subregions: An array of Subregion objects
     
     """
-    bed_particles = logic.build_streambed(parameters['x_max'], parameters['set_diam'])
+    bed_particles = logic.build_streambed(parameters['bed_length'], parameters['particle_diam'])
     empty_model = np.empty((0, 7))      
-    available_vertices = logic.compute_available_vertices(empty_model, bed_particles, parameters['set_diam'],
+    available_vertices = logic.compute_available_vertices(empty_model, bed_particles, parameters['particle_diam'],
                                                         parameters['level_limit'])    
     # Create model particle array and set on top of bed particles
-    model_particles, model_supp = logic.set_model_particles(bed_particles, available_vertices, parameters['set_diam'], 
-                                                        parameters['pack_density'],  h)
+    model_particles, model_supp = logic.set_model_particles(bed_particles, available_vertices, parameters['particle_diam'], 
+                                                        parameters['particle_pack_dens'],  h)
     # Define stream's subregions
-    subregions = logic.define_subregions(parameters['x_max'], parameters['num_subregions'], parameters['n_iterations'])
+    subregions = logic.define_subregions(parameters['bed_length'], parameters['num_subregions'], parameters['iterations'])
     return bed_particles,model_particles, model_supp, subregions
 
 
-def run_entrainments(model_particles, model_supp, bed_particles, event_particle_ids, avail_vertices, 
+def _run_entrainments(model_particles, model_supp, bed_particles, event_particle_ids, avail_vertices, 
                                                                     unverified_e, subregions, iteration, h):
     """ This function mimics a single entrainment event through
     calls to the entrainment-related logic functions. 
@@ -269,21 +272,22 @@ def run_entrainments(model_particles, model_supp, bed_particles, event_particle_
     return model_particles, model_supp, subregions
 
 
-def configure_logging(run_id, logConf_path, log_path):
-    """Configure logging procedure using conf.yaml"""
-    with open(logConf_path, 'r') as f:
-        config = yaml.safe_load(f.read())
-        config['handlers']['file']['filename'] = f'{log_path}/{run_id}.log'
-        logging.config.dictConfig(config)
+# def _configure_logging(run_id, logConf_path, log_path):
+#     """Configure logging procedure using conf.yaml"""
+#     # with open(logConf_path, 'r') as f:
+#     #     config = yaml.safe_load(f.read())
+#     #     config['handlers']['file']['filename'] = f'{log_path}/{run_id}.log'
+#     #     logging.config.dictConfig(config)
+#     logging.getLogger('sbelt').addHandler(logging.NullHandler())
 
 
-def get_relative_paths():
-    """Return relavent relative paths in the project"""
-    logConf_path = Path(__file__).parent / 'logs/conf.yaml'
-    log_path =  Path(__file__).parent / 'logs/'
-    schema_path = Path(__file__).parent / 'parameters/schema.yaml'
-    output_path = Path(__file__).parent / 'output/'
-    return logConf_path,log_path, schema_path, output_path
+# def _get_relative_paths():
+#     """Return relavent relative paths in the project"""
+#     # logConf_path = Path(__file__).parent / 'logs/conf.yaml'
+#     # log_path =  Path(__file__).parent / 'logs/'
+#     schema_path = Path(__file__).parent / 'parameters/schema.yaml'
+#     output_path = Path(__file__).parent / 'output/'
+#     return logConf_path,log_path, schema_path, output_path
 
-    
-    
+if __name__ == '__main__':
+    run()

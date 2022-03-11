@@ -2,11 +2,10 @@ import unittest
 import random
 import math
 from unittest.case import expectedFailure
-import model 
 import numpy as np
 from unittest.mock import Mock
 
-from model import logic
+from ..sbelt import logic
 
 ATTR_COUNT = 7 # Number of attributes associated with a Particle
 # For reference:

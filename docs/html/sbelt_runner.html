@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>sbelt_runner API documentation</title>
+<meta name="description" content="This module is responsible for executing a run of the sbelt numerical model.
+Default parameter/argument values are provided for the run function. See
+…" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>sbelt_runner</code></h1>
+</header>
+<section id="section-intro">
+<p>This module is responsible for executing a run of the sbelt numerical model.
+Default parameter/argument values are provided for the run function. See
+the documentation in the project repository for more information on the
+arguments and how to change them. Have fun and entrain on!</p>
+<h2 id="examples">Examples</h2>
+<p>The model execution can be initiated by executing the script with an
+appropriate interpreter::</p>
+<pre><code>$ python sbelt_runner.py
+</code></pre>
+<p>or, by directly calling the run function once the module has been imported::</p>
+<pre><code>sbelt_runner.run()
+</code></pre>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>ITERATION_HEADER</code></strong></dt>
+<dd>String used to delineate iterations in INFO-level logs</dd>
+<dt><strong><code>ENTRAINMENT_HEADER</code></strong></dt>
+<dd>String used to idenitfy event particle being
+entrained each iteration in INFO-level logs</dd>
+</dl>
+<h2 id="todo">Todo</h2>
+<ul>
+<li>setuptools console_scripts and '$ python sbelt_runner.py' executions
+can only use the default values currently. Need to add in sys.argv
+parsing to let parameters be user-defined in these cases</li>
+</ul>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34; 
+This module is responsible for executing a run of the sbelt numerical model.
+Default parameter/argument values are provided for the run function. See
+the documentation in the project repository for more information on the 
+arguments and how to change them. Have fun and entrain on!
+
+Examples:
+    The model execution can be initiated by executing the script with an 
+    appropriate interpreter::
+    
+        $ python sbelt_runner.py
+
+    or, by directly calling the run function once the module has been imported::
+
+        sbelt_runner.run()
+
+Attributes:
+    ITERATION_HEADER: String used to delineate iterations in INFO-level logs
+    ENTRAINMENT_HEADER: String used to idenitfy event particle being
+                            entrained each iteration in INFO-level logs
+
+Todo:
+    * setuptools console_scripts and &#39;$ python sbelt_runner.py&#39; executions 
+        can only use the default values currently. Need to add in sys.argv 
+        parsing to let parameters be user-defined in these cases
+&#34;&#34;&#34;
+import numpy as np
+import h5py
+import logging
+from tqdm import tqdm
+
+import utils
+import logic
+
+ITERATION_HEADER = (&#39;Beginning iteration {iteration}...&#39;)
+ENTRAINMENT_HEADER = (&#39;Entraining particles {event_particles}&#39;)
+logging.getLogger(__name__)
+
+def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens = 0.78, \
+                num_subregions=4, level_limit=3, poiss_lambda=5, gauss=False, gauss_mu=1, \
+                gauss_sigma=0.25, data_save_interval=1, height_dependant_entr=False, \
+                out_path=&#39;.&#39;, out_name=&#39;sbelt-out&#39;): 
+    &#34;&#34;&#34; Execute an sbelt run.
+
+    This function is responsible for calling appropriate logic
+    and storing relevant information, as outlined in project documentation. 
+    
+    An sbelt run consists of (generally) the following:
+        (1) argument/parameter validation
+        (2) building the stream data structures
+        (3) running x iterations of entrainments over the stream
+        (4) storing particle and flux data from each iteration
+    
+    Args: 
+        iterations: An int indicating number of iterations for model
+        bed_length: A float indicating the length of the stream to build 
+        particle_diam: A float 
+        particle_pack_dens: A float indicating the packing fraction of 
+            the model particles
+        num_subregions: An int representing the number of subregions to 
+            define in the stream
+        level_limit: An int representing the maximum number of levels 
+            permitted in-stream at any time (i.e how many particles high to stack)
+        poiss_lambda: A float representing Lamba for poisson dist., 
+            used to determine the number of entrainment events
+        gauss: A boolean flag indicating which distribution to sample from for 
+            hop calculations. True=Normal, False=logNormal
+        gauss_mu: A float representing mean/expectation of the logNormal/Normal
+            distribution for hop calculations
+        gauss_sigma: A float representing standard deviation of logNormal/Normal 
+            distribution for hop calculations
+        data_save_interval: An int representing how often to record model 
+            particle arrays (e.g 1=save every iteration, 2=save every other)
+        height_dependant_entr: A boolean flag indicating whether model 
+            automatically entrains particles that are on the level limit
+        out_path: A string representing the relative location to save the output
+        out_name: A string representing the name of the output file
+    &#34;&#34;&#34; 
+    #############################################################################
+    # validate parameters
+    #############################################################################
+    
+    parameters = locals()
+    utils.validate_arguments(parameters)
+
+    #############################################################################
+    #  Create model data and data structures
+    # TODO: Better names for d, h variables
+    #############################################################################
+
+    print(f&#39;Building Bed and Model particle arrays...&#39;)
+    # Pre-compute d and h values for particle elevation placement
+        # see d and h here: https://math.stackexchange.com/questions/2293201/
+    d = np.divide(np.multiply(np.divide(particle_diam, 2), 
+                                        particle_diam), 
+                                        particle_diam)
+    h = np.sqrt(np.square(particle_diam) - np.square(d))
+    # Build the required structures for entrainment events
+    bed_particles, model_particles, model_supp, subregions = _build_stream(parameters, h)
+    print(f&#39;Bed and Model particles built.&#39;)
+
+    #############################################################################
+    #  Create entrainment data and data structures
+    #############################################################################
+
+    particle_age_array = np.ones(iterations)*(-1) # -1 represents an untouched element
+    particle_range_array = np.ones(iterations)*(-1)
+    snapshot_counter = 0
+
+    #############################################################################
+
+    h5py_filename = f&#39;{out_name}.hdf5&#39;
+    hdf5_path = f&#39;{out_path}/{h5py_filename}&#39;
+
+    with h5py.File(hdf5_path, &#34;a&#34;) as f: 
+        
+        grp_p = f.create_group(f&#39;params&#39;)
+        for key, value in parameters.items():
+            grp_p[key] = value
+
+        grp_iv = f.create_group(f&#39;initial_values&#39;)
+        grp_iv.create_dataset(&#39;bed&#39;, data=bed_particles)
+        grp_iv.create_dataset(&#39;model&#39;, data=model_particles)
+
+        #############################################################################
+        #  Entrainment iterations
+        #############################################################################
+        
+        print(f&#39;Model and event particle arrays will be written to {hdf5_path} every {data_save_interval} iteration(s).&#39;)
+        print(f&#39;Beginning entrainments...&#39;)
+        for iteration in tqdm(range(iterations)):
+            logging.info(ITERATION_HEADER.format(iteration=iteration))
+            snapshot_counter += 1
+
+            # Calculate number of entrainment events iteration
+            e_events = np.random.poisson(parameters[&#39;poiss_lambda&#39;], None)
+            # Select n (= e_events) particles, per-subregion, to be entrained
+            event_particle_ids = logic.get_event_particles(e_events, subregions,
+                                                        model_particles, 
+                                                        level_limit, 
+                                                        height_dependant_entr)
+            logging.info(ENTRAINMENT_HEADER.format(event_particles=event_particle_ids))
+            # Determine hop distances of all event particles
+            unverified_e = logic.compute_hops(event_particle_ids, model_particles, gauss_mu,
+                                                    gauss_sigma, normal=gauss)
+            # Compute available vertices based on current model_particles state
+            avail_vertices = logic.compute_available_vertices(model_particles, 
+                                                        bed_particles,
+                                                        particle_diam,
+                                                        level_limit,
+                                                        lifted_particles=event_particle_ids)
+            # Run entrainment event                    
+            model_particles, model_supp, subregions = _run_entrainments(model_particles, 
+                                                                    model_supp,
+                                                                    bed_particles, 
+                                                                    event_particle_ids,
+                                                                    avail_vertices, 
+                                                                    unverified_e,
+                                                                    subregions,
+                                                                    iteration,  
+                                                                    h)
+            # Compute age range and average age, store in np arrays
+            age_range = np.max(model_particles[:,5]) - np.min(model_particles[:,5])
+            particle_range_array[iteration] = age_range
+
+            avg_age = np.average(model_particles[:,5]) 
+            particle_age_array[iteration] = avg_age
+
+            # Record per-iteration information 
+            if (snapshot_counter == data_save_interval):
+                grp_i = f.create_group(f&#34;iteration_{iteration}&#34;)
+                grp_i.create_dataset(&#34;model&#34;, data=model_particles, compression=&#34;gzip&#34;)
+                grp_i.create_dataset(&#34;event_ids&#34;, data=event_particle_ids, compression=&#34;gzip&#34;)
+                snapshot_counter = 0
+
+        #############################################################################
+        # Store flux and age information
+        #############################################################################
+        
+        print(f&#39;Writting flux and age information to file...&#39;)
+        grp_final = f.create_group(f&#39;final_metrics&#39;)
+        grp_sub = grp_final.create_group(f&#39;subregions&#39;)
+        for subregion in subregions:
+            name = f&#39;{subregion.getName()}-flux&#39;
+            flux_list = subregion.getFluxList()
+            grp_sub.create_dataset(name, data=flux_list, compression=&#34;gzip&#34;)
+
+        grp_final.create_dataset(&#39;avg_age&#39;, data=particle_age_array, compression=&#34;gzip&#34;)
+        grp_final.create_dataset(&#39;age_range&#39;, data=particle_range_array, compression=&#34;gzip&#34;)
+        print(f&#39;Finished writing flux and age information.&#39;)
+
+        print(f&#39;Model run finished successfully.&#39;)
+    return
+
+#############################################################################
+# Helper functions
+#############################################################################
+
+def _build_stream(parameters, h):
+    &#34;&#34;&#34; Build the data structures which define a stream.       
+
+    Build array of m bed particles and array of n model particles. 
+    Model particles will be assigned (x,y) positions which represent 
+    resting on top of the bed particles. At the end of the build, each 
+    model particle will have 2 support particles from the bed recorded 
+    in an array. Finally, define an array of subregion objects. 
+
+    Args:
+        parameters: A dictionary of the 13 parameters required by the model.
+            
+        h: Geometric value used in calculations of particle placement. See
+            in-line and project documentation for further explanation.
+
+    Returns:
+        bed_particles: An m-7 NumPy array representing the stream&#39;s m bed
+            particles. For example:
+
+        [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
+        
+        All bed particles should share the same diameter and y (elevation valu), all uids 
+        must be negative, and to represent &#39;static&#39; bed particles active = 0 and loops = 0. 
+
+        model_particles: An n-7 NumPy array representing the stream&#39;s n model 
+            particles in their initial placement. For example:
+        
+        [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
+
+        model_supp: An n-2 NumPy array with the uids of the two particles supporting each 
+            model particle. For example:
+        
+        model_supp = [[[-1,-2]], ... ,[-3,-4]]
+
+        The above example states that model particle with uid 0 (model_supp[0]) is supported
+        by bed particles with uids -1 and -2. Similarly, the model particle with uid n 
+        (model_supp[n]) is supported by bed particles with uids -3 and -4.
+
+        subregions: An array of Subregion objects
+    
+    &#34;&#34;&#34;
+    bed_particles = logic.build_streambed(parameters[&#39;bed_length&#39;], parameters[&#39;particle_diam&#39;])
+    empty_model = np.empty((0, 7))      
+    available_vertices = logic.compute_available_vertices(empty_model, bed_particles, parameters[&#39;particle_diam&#39;],
+                                                        parameters[&#39;level_limit&#39;])    
+    # Create model particle array and set on top of bed particles
+    model_particles, model_supp = logic.set_model_particles(bed_particles, available_vertices, parameters[&#39;particle_diam&#39;], 
+                                                        parameters[&#39;particle_pack_dens&#39;],  h)
+    # Define stream&#39;s subregions
+    subregions = logic.define_subregions(parameters[&#39;bed_length&#39;], parameters[&#39;num_subregions&#39;], parameters[&#39;iterations&#39;])
+    return bed_particles,model_particles, model_supp, subregions
+
+
+def _run_entrainments(model_particles, model_supp, bed_particles, event_particle_ids, avail_vertices, 
+                                                                    unverified_e, subregions, iteration, h):
+    &#34;&#34;&#34; This function mimics a single entrainment event through
+    calls to the entrainment-related logic functions. 
+    
+    An entrainment event consists of:
+        (1) Moving a set of the model particles 
+            (event particles) downstream.
+        (2) Recording crossings/flux across each downstream 
+            boundary of the subregions.
+        (3) Updating model particles states (i.e can it be
+            selected for entrainment next iter?) and ages
+    
+    Args:
+        model_particles: An n-7 NumPy array representing the stream&#39;s 
+            n model particles. 
+        model_supp: An n-2 NumPy array with the uids of the two particles supporting each 
+            model particle (e.g model_supp[j] = supports for model particle j). 
+        bed_particles: An m-7 NumPy array representing the stream&#39;s m 
+            bed particles.
+        event_particle_ids: A NumPy array of k uids representing the model particles
+            that have been selected for entrainment.
+        
+    Returns:
+        model_particles: Updated model_particles (Args) with updated age, location, 
+            loops, and states, based on entrainment event placements.
+        model_supp: An updated model_supports (Args) based on placements.
+        subregions: Python array of Subregion objects with updated flux lists.
+    &#34;&#34;&#34;
+
+    initial_x = model_particles[event_particle_ids][:,0]
+    model_particles, model_supp = logic.move_model_particles(unverified_e, 
+                                                                model_particles,
+                                                                model_supp, 
+                                                                bed_particles, 
+                                                                avail_vertices,
+                                                                h)
+    final_x = model_particles[event_particle_ids][:,0]
+    subregions = logic.update_flux(initial_x, final_x, iteration, subregions)
+    model_particles = logic.update_particle_states(model_particles, model_supp)
+    # Increment age at the end of each entrainment
+    model_particles = logic.increment_age(model_particles, event_particle_ids)
+
+    return model_particles, model_supp, subregions
+
+if __name__ == &#39;__main__&#39;:
+    run()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="sbelt_runner.run"><code class="name flex">
+<span>def <span class="ident">run</span></span>(<span>iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens=0.78, num_subregions=4, level_limit=3, poiss_lambda=5, gauss=False, gauss_mu=1, gauss_sigma=0.25, data_save_interval=1, height_dependant_entr=False, out_path='.', out_name='sbelt-out')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Execute an sbelt run.</p>
+<p>This function is responsible for calling appropriate logic
+and storing relevant information, as outlined in project documentation. </p>
+<p>An sbelt run consists of (generally) the following:
+(1) argument/parameter validation
+(2) building the stream data structures
+(3) running x iterations of entrainments over the stream
+(4) storing particle and flux data from each iteration</p>
+<p>Args:
+iterations: An int indicating number of iterations for model
+bed_length: A float indicating the length of the stream to build
+particle_diam: A float
+particle_pack_dens: A float indicating the packing fraction of
+the model particles
+num_subregions: An int representing the number of subregions to
+define in the stream
+level_limit: An int representing the maximum number of levels
+permitted in-stream at any time (i.e how many particles high to stack)
+poiss_lambda: A float representing Lamba for poisson dist.,
+used to determine the number of entrainment events
+gauss: A boolean flag indicating which distribution to sample from for
+hop calculations. True=Normal, False=logNormal
+gauss_mu: A float representing mean/expectation of the logNormal/Normal
+distribution for hop calculations
+gauss_sigma: A float representing standard deviation of logNormal/Normal
+distribution for hop calculations
+data_save_interval: An int representing how often to record model
+particle arrays (e.g 1=save every iteration, 2=save every other)
+height_dependant_entr: A boolean flag indicating whether model
+automatically entrains particles that are on the level limit
+out_path: A string representing the relative location to save the output
+out_name: A string representing the name of the output file</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens = 0.78, \
+                num_subregions=4, level_limit=3, poiss_lambda=5, gauss=False, gauss_mu=1, \
+                gauss_sigma=0.25, data_save_interval=1, height_dependant_entr=False, \
+                out_path=&#39;.&#39;, out_name=&#39;sbelt-out&#39;): 
+    &#34;&#34;&#34; Execute an sbelt run.
+
+    This function is responsible for calling appropriate logic
+    and storing relevant information, as outlined in project documentation. 
+    
+    An sbelt run consists of (generally) the following:
+        (1) argument/parameter validation
+        (2) building the stream data structures
+        (3) running x iterations of entrainments over the stream
+        (4) storing particle and flux data from each iteration
+    
+    Args: 
+        iterations: An int indicating number of iterations for model
+        bed_length: A float indicating the length of the stream to build 
+        particle_diam: A float 
+        particle_pack_dens: A float indicating the packing fraction of 
+            the model particles
+        num_subregions: An int representing the number of subregions to 
+            define in the stream
+        level_limit: An int representing the maximum number of levels 
+            permitted in-stream at any time (i.e how many particles high to stack)
+        poiss_lambda: A float representing Lamba for poisson dist., 
+            used to determine the number of entrainment events
+        gauss: A boolean flag indicating which distribution to sample from for 
+            hop calculations. True=Normal, False=logNormal
+        gauss_mu: A float representing mean/expectation of the logNormal/Normal
+            distribution for hop calculations
+        gauss_sigma: A float representing standard deviation of logNormal/Normal 
+            distribution for hop calculations
+        data_save_interval: An int representing how often to record model 
+            particle arrays (e.g 1=save every iteration, 2=save every other)
+        height_dependant_entr: A boolean flag indicating whether model 
+            automatically entrains particles that are on the level limit
+        out_path: A string representing the relative location to save the output
+        out_name: A string representing the name of the output file
+    &#34;&#34;&#34; 
+    #############################################################################
+    # validate parameters
+    #############################################################################
+    
+    parameters = locals()
+    utils.validate_arguments(parameters)
+
+    #############################################################################
+    #  Create model data and data structures
+    # TODO: Better names for d, h variables
+    #############################################################################
+
+    print(f&#39;Building Bed and Model particle arrays...&#39;)
+    # Pre-compute d and h values for particle elevation placement
+        # see d and h here: https://math.stackexchange.com/questions/2293201/
+    d = np.divide(np.multiply(np.divide(particle_diam, 2), 
+                                        particle_diam), 
+                                        particle_diam)
+    h = np.sqrt(np.square(particle_diam) - np.square(d))
+    # Build the required structures for entrainment events
+    bed_particles, model_particles, model_supp, subregions = _build_stream(parameters, h)
+    print(f&#39;Bed and Model particles built.&#39;)
+
+    #############################################################################
+    #  Create entrainment data and data structures
+    #############################################################################
+
+    particle_age_array = np.ones(iterations)*(-1) # -1 represents an untouched element
+    particle_range_array = np.ones(iterations)*(-1)
+    snapshot_counter = 0
+
+    #############################################################################
+
+    h5py_filename = f&#39;{out_name}.hdf5&#39;
+    hdf5_path = f&#39;{out_path}/{h5py_filename}&#39;
+
+    with h5py.File(hdf5_path, &#34;a&#34;) as f: 
+        
+        grp_p = f.create_group(f&#39;params&#39;)
+        for key, value in parameters.items():
+            grp_p[key] = value
+
+        grp_iv = f.create_group(f&#39;initial_values&#39;)
+        grp_iv.create_dataset(&#39;bed&#39;, data=bed_particles)
+        grp_iv.create_dataset(&#39;model&#39;, data=model_particles)
+
+        #############################################################################
+        #  Entrainment iterations
+        #############################################################################
+        
+        print(f&#39;Model and event particle arrays will be written to {hdf5_path} every {data_save_interval} iteration(s).&#39;)
+        print(f&#39;Beginning entrainments...&#39;)
+        for iteration in tqdm(range(iterations)):
+            logging.info(ITERATION_HEADER.format(iteration=iteration))
+            snapshot_counter += 1
+
+            # Calculate number of entrainment events iteration
+            e_events = np.random.poisson(parameters[&#39;poiss_lambda&#39;], None)
+            # Select n (= e_events) particles, per-subregion, to be entrained
+            event_particle_ids = logic.get_event_particles(e_events, subregions,
+                                                        model_particles, 
+                                                        level_limit, 
+                                                        height_dependant_entr)
+            logging.info(ENTRAINMENT_HEADER.format(event_particles=event_particle_ids))
+            # Determine hop distances of all event particles
+            unverified_e = logic.compute_hops(event_particle_ids, model_particles, gauss_mu,
+                                                    gauss_sigma, normal=gauss)
+            # Compute available vertices based on current model_particles state
+            avail_vertices = logic.compute_available_vertices(model_particles, 
+                                                        bed_particles,
+                                                        particle_diam,
+                                                        level_limit,
+                                                        lifted_particles=event_particle_ids)
+            # Run entrainment event                    
+            model_particles, model_supp, subregions = _run_entrainments(model_particles, 
+                                                                    model_supp,
+                                                                    bed_particles, 
+                                                                    event_particle_ids,
+                                                                    avail_vertices, 
+                                                                    unverified_e,
+                                                                    subregions,
+                                                                    iteration,  
+                                                                    h)
+            # Compute age range and average age, store in np arrays
+            age_range = np.max(model_particles[:,5]) - np.min(model_particles[:,5])
+            particle_range_array[iteration] = age_range
+
+            avg_age = np.average(model_particles[:,5]) 
+            particle_age_array[iteration] = avg_age
+
+            # Record per-iteration information 
+            if (snapshot_counter == data_save_interval):
+                grp_i = f.create_group(f&#34;iteration_{iteration}&#34;)
+                grp_i.create_dataset(&#34;model&#34;, data=model_particles, compression=&#34;gzip&#34;)
+                grp_i.create_dataset(&#34;event_ids&#34;, data=event_particle_ids, compression=&#34;gzip&#34;)
+                snapshot_counter = 0
+
+        #############################################################################
+        # Store flux and age information
+        #############################################################################
+        
+        print(f&#39;Writting flux and age information to file...&#39;)
+        grp_final = f.create_group(f&#39;final_metrics&#39;)
+        grp_sub = grp_final.create_group(f&#39;subregions&#39;)
+        for subregion in subregions:
+            name = f&#39;{subregion.getName()}-flux&#39;
+            flux_list = subregion.getFluxList()
+            grp_sub.create_dataset(name, data=flux_list, compression=&#34;gzip&#34;)
+
+        grp_final.create_dataset(&#39;avg_age&#39;, data=particle_age_array, compression=&#34;gzip&#34;)
+        grp_final.create_dataset(&#39;age_range&#39;, data=particle_range_array, compression=&#34;gzip&#34;)
+        print(f&#39;Finished writing flux and age information.&#39;)
+
+        print(f&#39;Model run finished successfully.&#39;)
+    return</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="sbelt_runner.run" href="#sbelt_runner.run">run</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

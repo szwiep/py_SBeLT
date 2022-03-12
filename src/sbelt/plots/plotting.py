@@ -1,6 +1,6 @@
 """
 All things plotting related.
-Most of this code created by Dr. Shawn Chartrand.
+Most of the plotting logic created by Dr. Shawn Chartrand.
 """
 import numpy as np
 import matplotlib
@@ -18,13 +18,13 @@ def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out):
     Allows for closer look at state of a subregion of the stream during simulation.
     Also makes for fun gifs.
 
-    Keyowrd arguments:
-        iteration -- the iteration of the stream being plotted 
-        bed_particles -- array of all bed particles
-        model_particles -- array of all model particles
-        x_lim -- length of stream to plot
-        y_lim -- height of stream to plot
-        fp_out -- save location
+    Args:
+        iteration: the iteration of the stream being plotted 
+        bed_particles: array of all bed particles
+        model_particles: array of all model particles
+        x_lim: length of stream to plot
+        y_lim: height of stream to plot
+        fp_out: save location
     """
     plt.clf()
     fig = plt.figure(1)
@@ -86,11 +86,11 @@ def stream_gif(start, stop, dir):
 def crossing_info(particle_crossing_list, iterations, subsample, fp_out):
     """Histogram of downstream particle crossings per iteration
     
-    Keyowrd arguments:
-        particle_crossing_list -- array of # of crossings per iteration
-        iteration -- number of iterations
-        subsample -- value to subsample by (use if data too large)
-        fp_out -- save location 
+    Args:
+        particle_crossing_list: array of # of crossings per iteration
+        iteration: number of iterations
+        subsample: value to subsample by (use if data too large)
+        fp_out: save location 
     """
     plt.clf()
     fig = plt.figure(figsize=(8,7))
@@ -151,12 +151,12 @@ def crossing_info2(particle_crossing_list, particle_age_list, n_iterations, subs
     """Plot of particle crossing/flux vs. particle age. For very large values the
     data can be subsampled using the subsample parameter
     
-    Keyowrd arguments:
-    particle_crossing_list -- array of # of crossings per iteration
-    particle_crossing_list -- array of average particle age per iteration
-    n_iteration -- number of iterations
-    subsample -- value to subsample by (use if data too large)
-    fp_out -- save location 
+    Args:
+        particle_crossing_list: array of # of crossings per iteration
+        particle_crossing_list: array of average particle age per iteration
+        n_iteration: number of iterations
+        subsample: value to subsample by (use if data too large)
+        fp_out: save location 
     
     """
     plt.clf()

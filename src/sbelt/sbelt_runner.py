@@ -1,59 +1,87 @@
-import numpy as np
-# import yaml
-import logging
-import logging.config
-from datetime import datetime
-from pathlib import Path 
-import h5py
-# import time
-from tqdm import tqdm
-# from jsonschema import validate, exceptions
+""" 
+This module is responsible for executing a run of the sbelt numerical model.
+Default parameter/argument values are provided for the run function. See
+the documentation in the project repository for more information on the 
+arguments and how to change them. Have fun and entrain on!
 
+Examples:
+    The model execution can be initiated by executing the script with an 
+    appropriate interpreter::
+    
+        $ python sbelt_runner.py
+
+    or, by directly calling the run function once the module has been imported::
+
+        sbelt_runner.run()
+
+Attributes:
+    ITERATION_HEADER: String used to delineate iterations in INFO-level logs
+    ENTRAINMENT_HEADER: String used to idenitfy event particle being
+                            entrained each iteration in INFO-level logs
+
+Todo:
+    * setuptools console_scripts and '$ python sbelt_runner.py' executions 
+        can only use the default values currently. Need to add in sys.argv 
+        parsing to let parameters be user-defined in these cases
+"""
+import numpy as np
+import h5py
+import logging
+from tqdm import tqdm
+
+import utils
 import logic
-import sys
 
 ITERATION_HEADER = ('Beginning iteration {iteration}...')
 ENTRAINMENT_HEADER = ('Entraining particles {event_particles}')
 logging.getLogger(__name__)
 
 def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens = 0.78, \
-                num_subregions=3, level_limit=3, poiss_lambda=5, gauss=False, gauss_mu=1, \
+                num_subregions=4, level_limit=3, poiss_lambda=5, gauss=False, gauss_mu=1, \
                 gauss_sigma=0.25, data_save_interval=1, height_dependant_entr=False, \
-                out_path='./', out_name='sbelt-out'):
+                out_path='.', out_name='sbelt-out'): 
+    """ Execute an sbelt run.
+
+    This function is responsible for calling appropriate logic
+    and storing relevant information, as outlined in project documentation. 
+    
+    An sbelt run consists of (generally) the following:
+        (1) argument/parameter validation
+        (2) building the stream data structures
+        (3) running x iterations of entrainments over the stream
+        (4) storing particle and flux data from each iteration
+    
+    Args: 
+        iterations: An int indicating number of iterations for model
+        bed_length: A float indicating the length of the stream to build 
+        particle_diam: A float 
+        particle_pack_dens: A float indicating the packing fraction of 
+            the model particles
+        num_subregions: An int representing the number of subregions to 
+            define in the stream
+        level_limit: An int representing the maximum number of levels 
+            permitted in-stream at any time (i.e how many particles high to stack)
+        poiss_lambda: A float representing Lamba for poisson dist., 
+            used to determine the number of entrainment events
+        gauss: A boolean flag indicating which distribution to sample from for 
+            hop calculations. True=Normal, False=logNormal
+        gauss_mu: A float representing mean/expectation of the logNormal/Normal
+            distribution for hop calculations
+        gauss_sigma: A float representing standard deviation of logNormal/Normal 
+            distribution for hop calculations
+        data_save_interval: An int representing how often to record model 
+            particle arrays (e.g 1=save every iteration, 2=save every other)
+        height_dependant_entr: A boolean flag indicating whether model 
+            automatically entrains particles that are on the level limit
+        out_path: A string representing the relative location to save the output
+        out_name: A string representing the name of the output file
+    """ 
+    #############################################################################
+    # validate parameters
+    #############################################################################
     
     parameters = locals()
-    # run_id = datetime.now().strftime('%y%m-%d%H')
-    # logConf_path, log_path, schema_path, output_path = get_relative_paths()
-
-    #############################################################################
-    # Set up logging
-    #############################################################################
-    
-    # TODO: temp removed 
-    # Packages/libraries should not configure logging:
-    #    https://stackoverflow.com/questions/50714316/
-    # configure_logging(run_id, logConf_path, log_path)
-    
-    #############################################################################
-    # Get and validate parameters
-    #############################################################################
-    
-    # TODO: validate parameters in python
-    # with open(schema_path, 'r') as s:
-    #     schema = yaml.safe_load(s.read())
-    # with open(param_path, 'r') as p:
-    #     parameters = yaml.safe_load(p.read())
-    # try:
-    #     validate(parameters, schema)
-    # except exceptions.ValidationError as e:
-    #     print("Invalid configuration of param file at {param_path}. See the exception below:\n" )
-    #     raise e
-    # if parameters['x_max'] % parameters['set_diam'] != 0:
-    #     print("Invalid configuration of param file at {param_path}: x_max must be divisible by set_diam.")
-    #     raise ValueError("x_max must be divisible by set_diam")
-    # if parameters['x_max'] % parameters['num_subregions'] != 0:
-    #     print("Invalid configuration of param file at {param_path}: x_max must be divisible by num_subregions.")
-    #     raise ValueError("x_max must be divisible by num_subregions")
+    utils.validate_arguments(parameters)
 
     #############################################################################
     #  Create model data and data structures
@@ -70,11 +98,12 @@ def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens =
     # Build the required structures for entrainment events
     bed_particles, model_particles, model_supp, subregions = _build_stream(parameters, h)
     print(f'Bed and Model particles built.')
+
     #############################################################################
     #  Create entrainment data and data structures
     #############################################################################
 
-    particle_age_array = np.ones(iterations)*(-1)
+    particle_age_array = np.ones(iterations)*(-1) # -1 represents an untouched element
     particle_range_array = np.ones(iterations)*(-1)
     snapshot_counter = 0
 
@@ -96,6 +125,7 @@ def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens =
         #############################################################################
         #  Entrainment iterations
         #############################################################################
+        
         print(f'Model and event particle arrays will be written to {hdf5_path} every {data_save_interval} iteration(s).')
         print(f'Beginning entrainments...')
         for iteration in tqdm(range(iterations)):
@@ -146,6 +176,7 @@ def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens =
         #############################################################################
         # Store flux and age information
         #############################################################################
+        
         print(f'Writting flux and age information to file...')
         grp_final = f.create_group(f'final_metrics')
         grp_sub = grp_final.create_group(f'subregions')
@@ -175,16 +206,9 @@ def _build_stream(parameters, h):
     in an array. Finally, define an array of subregion objects. 
 
     Args:
-        parameters: 
-            A dictionary (hopefully validated) of the 13 parameters 
-            required by the model. For example:
-
-            {'pack_density': (0.78),
-            'x_max': (100),
-                ...
-            'filename_prefix': ('hello-river')}
-        h: 
-            Geometric value used in calculations of particle placement. See
+        parameters: A dictionary of the 13 parameters required by the model.
+            
+        h: Geometric value used in calculations of particle placement. See
             in-line and project documentation for further explanation.
 
     Returns:
@@ -235,9 +259,8 @@ def _run_entrainments(model_particles, model_supp, bed_particles, event_particle
             (event particles) downstream.
         (2) Recording crossings/flux across each downstream 
             boundary of the subregions.
-        (3) Update model particles states (can it be
-            selected for entrainment next iter?) and
-            ages are updated 
+        (3) Updating model particles states (i.e can it be
+            selected for entrainment next iter?) and ages
     
     Args:
         model_particles: An n-7 NumPy array representing the stream's 
@@ -270,24 +293,6 @@ def _run_entrainments(model_particles, model_supp, bed_particles, event_particle
     model_particles = logic.increment_age(model_particles, event_particle_ids)
 
     return model_particles, model_supp, subregions
-
-
-# def _configure_logging(run_id, logConf_path, log_path):
-#     """Configure logging procedure using conf.yaml"""
-#     # with open(logConf_path, 'r') as f:
-#     #     config = yaml.safe_load(f.read())
-#     #     config['handlers']['file']['filename'] = f'{log_path}/{run_id}.log'
-#     #     logging.config.dictConfig(config)
-#     logging.getLogger('sbelt').addHandler(logging.NullHandler())
-
-
-# def _get_relative_paths():
-#     """Return relavent relative paths in the project"""
-#     # logConf_path = Path(__file__).parent / 'logs/conf.yaml'
-#     # log_path =  Path(__file__).parent / 'logs/'
-#     schema_path = Path(__file__).parent / 'parameters/schema.yaml'
-#     output_path = Path(__file__).parent / 'output/'
-#     return logConf_path,log_path, schema_path, output_path
 
 if __name__ == '__main__':
     run()

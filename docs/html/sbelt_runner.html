@@ -85,8 +85,8 @@ import h5py
 import logging
 from tqdm import tqdm
 
-import utils
-import logic
+from sbelt import utils
+from sbelt import logic
 
 ITERATION_HEADER = (&#39;Beginning iteration {iteration}...&#39;)
 ENTRAINMENT_HEADER = (&#39;Entraining particles {event_particles}&#39;)
@@ -100,37 +100,38 @@ def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens =
 
     This function is responsible for calling appropriate logic
     and storing relevant information, as outlined in project documentation. 
-    
+        
     An sbelt run consists of (generally) the following:
         (1) argument/parameter validation
         (2) building the stream data structures
         (3) running x iterations of entrainments over the stream
         (4) storing particle and flux data from each iteration
-    
-    Args: 
-        iterations: An int indicating number of iterations for model
+        
+        
+    Args:
+        iterations: An int indicating number of iterations for model.
         bed_length: A float indicating the length of the stream to build 
-        particle_diam: A float 
+        particle_diam: A float. 
         particle_pack_dens: A float indicating the packing fraction of 
-            the model particles
+            the model particles.
         num_subregions: An int representing the number of subregions to 
-            define in the stream
-        level_limit: An int representing the maximum number of levels 
+            define in the stream.
+        level_limit: An int representing the maximum number of levels.
             permitted in-stream at any time (i.e how many particles high to stack)
-        poiss_lambda: A float representing Lamba for poisson dist., 
-            used to determine the number of entrainment events
+        poiss_lambda: A float representing Lamba for poisson dist, 
+            used to determine the number of entrainment events.
         gauss: A boolean flag indicating which distribution to sample from for 
-            hop calculations. True=Normal, False=logNormal
+            hop calculations. True=Normal, False=logNormal.
         gauss_mu: A float representing mean/expectation of the logNormal/Normal
-            distribution for hop calculations
+            distribution for hop calculations.
         gauss_sigma: A float representing standard deviation of logNormal/Normal 
-            distribution for hop calculations
+            distribution for hop calculations.
         data_save_interval: An int representing how often to record model 
-            particle arrays (e.g 1=save every iteration, 2=save every other)
+            particle arrays (e.g 1=save every iteration, 2=save every other).
         height_dependant_entr: A boolean flag indicating whether model 
-            automatically entrains particles that are on the level limit
-        out_path: A string representing the relative location to save the output
-        out_name: A string representing the name of the output file
+            automatically entrains particles that are on the level limit.
+        out_path: A string representing the relative location to save the output.
+        out_name: A string representing the name of the output file.
     &#34;&#34;&#34; 
     #############################################################################
     # validate parameters
@@ -152,7 +153,7 @@ def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens =
                                         particle_diam)
     h = np.sqrt(np.square(particle_diam) - np.square(d))
     # Build the required structures for entrainment events
-    bed_particles, model_particles, model_supp, subregions = _build_stream(parameters, h)
+    bed_particles, model_particles, model_supp, subregions = build_stream(parameters, h)
     print(f&#39;Bed and Model particles built.&#39;)
 
     #############################################################################
@@ -206,7 +207,7 @@ def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens =
                                                         level_limit,
                                                         lifted_particles=event_particle_ids)
             # Run entrainment event                    
-            model_particles, model_supp, subregions = _run_entrainments(model_particles, 
+            model_particles, model_supp, subregions = entrainment_event(model_particles, 
                                                                     model_supp,
                                                                     bed_particles, 
                                                                     event_particle_ids,
@@ -252,7 +253,7 @@ def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens =
 # Helper functions
 #############################################################################
 
-def _build_stream(parameters, h):
+def build_stream(parameters, h):
     &#34;&#34;&#34; Build the data structures which define a stream.       
 
     Build array of m bed particles and array of n model particles. 
@@ -305,7 +306,7 @@ def _build_stream(parameters, h):
     return bed_particles,model_particles, model_supp, subregions
 
 
-def _run_entrainments(model_particles, model_supp, bed_particles, event_particle_ids, avail_vertices, 
+def entrainment_event(model_particles, model_supp, bed_particles, event_particle_ids, avail_vertices, 
                                                                     unverified_e, subregions, iteration, h):
     &#34;&#34;&#34; This function mimics a single entrainment event through
     calls to the entrainment-related logic functions. 
@@ -361,6 +362,198 @@ if __name__ == &#39;__main__&#39;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="sbelt_runner.build_stream"><code class="name flex">
+<span>def <span class="ident">build_stream</span></span>(<span>parameters, h)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Build the data structures which define a stream.
+</p>
+<p>Build array of m bed particles and array of n model particles.
+Model particles will be assigned (x,y) positions which represent
+resting on top of the bed particles. At the end of the build, each
+model particle will have 2 support particles from the bed recorded
+in an array. Finally, define an array of subregion objects. </p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>parameters</code></strong></dt>
+<dd>A dictionary of the 13 parameters required by the model.</dd>
+<dt><strong><code>h</code></strong></dt>
+<dd>Geometric value used in calculations of particle placement. See
+in-line and project documentation for further explanation.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bed_particles</code></dt>
+<dd>An m-7 NumPy array representing the stream's m bed
+particles. For example:</dd>
+</dl>
+<p>[[x, diam, y, uid, active, age, loops], &hellip; ,[x, diam, y, uid, active, age, loops]]</p>
+<p>All bed particles should share the same diameter and y (elevation valu), all uids
+must be negative, and to represent 'static' bed particles active = 0 and loops = 0. </p>
+<dl>
+<dt><code>model_particles</code></dt>
+<dd>An n-7 NumPy array representing the stream's n model
+particles in their initial placement. For example:</dd>
+</dl>
+<p>[[x, diam, y, uid, active, age, loops], &hellip; ,[x, diam, y, uid, active, age, loops]]</p>
+<dl>
+<dt><code>model_supp</code></dt>
+<dd>An n-2 NumPy array with the uids of the two particles supporting each
+model particle. For example:</dd>
+</dl>
+<p>model_supp = [[[-1,-2]], &hellip; ,[-3,-4]]</p>
+<p>The above example states that model particle with uid 0 (model_supp[0]) is supported
+by bed particles with uids -1 and -2. Similarly, the model particle with uid n
+(model_supp[n]) is supported by bed particles with uids -3 and -4.</p>
+<dl>
+<dt><code>subregions</code></dt>
+<dd>An array of Subregion objects</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_stream(parameters, h):
+    &#34;&#34;&#34; Build the data structures which define a stream.       
+
+    Build array of m bed particles and array of n model particles. 
+    Model particles will be assigned (x,y) positions which represent 
+    resting on top of the bed particles. At the end of the build, each 
+    model particle will have 2 support particles from the bed recorded 
+    in an array. Finally, define an array of subregion objects. 
+
+    Args:
+        parameters: A dictionary of the 13 parameters required by the model.
+            
+        h: Geometric value used in calculations of particle placement. See
+            in-line and project documentation for further explanation.
+
+    Returns:
+        bed_particles: An m-7 NumPy array representing the stream&#39;s m bed
+            particles. For example:
+
+        [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
+        
+        All bed particles should share the same diameter and y (elevation valu), all uids 
+        must be negative, and to represent &#39;static&#39; bed particles active = 0 and loops = 0. 
+
+        model_particles: An n-7 NumPy array representing the stream&#39;s n model 
+            particles in their initial placement. For example:
+        
+        [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
+
+        model_supp: An n-2 NumPy array with the uids of the two particles supporting each 
+            model particle. For example:
+        
+        model_supp = [[[-1,-2]], ... ,[-3,-4]]
+
+        The above example states that model particle with uid 0 (model_supp[0]) is supported
+        by bed particles with uids -1 and -2. Similarly, the model particle with uid n 
+        (model_supp[n]) is supported by bed particles with uids -3 and -4.
+
+        subregions: An array of Subregion objects
+    
+    &#34;&#34;&#34;
+    bed_particles = logic.build_streambed(parameters[&#39;bed_length&#39;], parameters[&#39;particle_diam&#39;])
+    empty_model = np.empty((0, 7))      
+    available_vertices = logic.compute_available_vertices(empty_model, bed_particles, parameters[&#39;particle_diam&#39;],
+                                                        parameters[&#39;level_limit&#39;])    
+    # Create model particle array and set on top of bed particles
+    model_particles, model_supp = logic.set_model_particles(bed_particles, available_vertices, parameters[&#39;particle_diam&#39;], 
+                                                        parameters[&#39;particle_pack_dens&#39;],  h)
+    # Define stream&#39;s subregions
+    subregions = logic.define_subregions(parameters[&#39;bed_length&#39;], parameters[&#39;num_subregions&#39;], parameters[&#39;iterations&#39;])
+    return bed_particles,model_particles, model_supp, subregions</code></pre>
+</details>
+</dd>
+<dt id="sbelt_runner.entrainment_event"><code class="name flex">
+<span>def <span class="ident">entrainment_event</span></span>(<span>model_particles, model_supp, bed_particles, event_particle_ids, avail_vertices, unverified_e, subregions, iteration, h)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>This function mimics a single entrainment event through
+calls to the entrainment-related logic functions. </p>
+<p>An entrainment event consists of:
+(1) Moving a set of the model particles
+(event particles) downstream.
+(2) Recording crossings/flux across each downstream
+boundary of the subregions.
+(3) Updating model particles states (i.e can it be
+selected for entrainment next iter?) and ages</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>model_particles</code></strong></dt>
+<dd>An n-7 NumPy array representing the stream's
+n model particles. </dd>
+<dt><strong><code>model_supp</code></strong></dt>
+<dd>An n-2 NumPy array with the uids of the two particles supporting each
+model particle (e.g model_supp[j] = supports for model particle j). </dd>
+<dt><strong><code>bed_particles</code></strong></dt>
+<dd>An m-7 NumPy array representing the stream's m
+bed particles.</dd>
+<dt><strong><code>event_particle_ids</code></strong></dt>
+<dd>A NumPy array of k uids representing the model particles
+that have been selected for entrainment.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>model_particles</code></dt>
+<dd>Updated model_particles (Args) with updated age, location,
+loops, and states, based on entrainment event placements.</dd>
+<dt><code>model_supp</code></dt>
+<dd>An updated model_supports (Args) based on placements.</dd>
+<dt><code>subregions</code></dt>
+<dd>Python array of Subregion objects with updated flux lists.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def entrainment_event(model_particles, model_supp, bed_particles, event_particle_ids, avail_vertices, 
+                                                                    unverified_e, subregions, iteration, h):
+    &#34;&#34;&#34; This function mimics a single entrainment event through
+    calls to the entrainment-related logic functions. 
+    
+    An entrainment event consists of:
+        (1) Moving a set of the model particles 
+            (event particles) downstream.
+        (2) Recording crossings/flux across each downstream 
+            boundary of the subregions.
+        (3) Updating model particles states (i.e can it be
+            selected for entrainment next iter?) and ages
+    
+    Args:
+        model_particles: An n-7 NumPy array representing the stream&#39;s 
+            n model particles. 
+        model_supp: An n-2 NumPy array with the uids of the two particles supporting each 
+            model particle (e.g model_supp[j] = supports for model particle j). 
+        bed_particles: An m-7 NumPy array representing the stream&#39;s m 
+            bed particles.
+        event_particle_ids: A NumPy array of k uids representing the model particles
+            that have been selected for entrainment.
+        
+    Returns:
+        model_particles: Updated model_particles (Args) with updated age, location, 
+            loops, and states, based on entrainment event placements.
+        model_supp: An updated model_supports (Args) based on placements.
+        subregions: Python array of Subregion objects with updated flux lists.
+    &#34;&#34;&#34;
+
+    initial_x = model_particles[event_particle_ids][:,0]
+    model_particles, model_supp = logic.move_model_particles(unverified_e, 
+                                                                model_particles,
+                                                                model_supp, 
+                                                                bed_particles, 
+                                                                avail_vertices,
+                                                                h)
+    final_x = model_particles[event_particle_ids][:,0]
+    subregions = logic.update_flux(initial_x, final_x, iteration, subregions)
+    model_particles = logic.update_particle_states(model_particles, model_supp)
+    # Increment age at the end of each entrainment
+    model_particles = logic.increment_age(model_particles, event_particle_ids)
+
+    return model_particles, model_supp, subregions</code></pre>
+</details>
+</dd>
 <dt id="sbelt_runner.run"><code class="name flex">
 <span>def <span class="ident">run</span></span>(<span>iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens=0.78, num_subregions=4, level_limit=3, poiss_lambda=5, gauss=False, gauss_mu=1, gauss_sigma=0.25, data_save_interval=1, height_dependant_entr=False, out_path='.', out_name='sbelt-out')</span>
 </code></dt>
@@ -373,30 +566,46 @@ and storing relevant information, as outlined in project documentation. </p>
 (2) building the stream data structures
 (3) running x iterations of entrainments over the stream
 (4) storing particle and flux data from each iteration</p>
-<p>Args:
-iterations: An int indicating number of iterations for model
-bed_length: A float indicating the length of the stream to build
-particle_diam: A float
-particle_pack_dens: A float indicating the packing fraction of
-the model particles
-num_subregions: An int representing the number of subregions to
-define in the stream
-level_limit: An int representing the maximum number of levels
-permitted in-stream at any time (i.e how many particles high to stack)
-poiss_lambda: A float representing Lamba for poisson dist.,
-used to determine the number of entrainment events
-gauss: A boolean flag indicating which distribution to sample from for
-hop calculations. True=Normal, False=logNormal
-gauss_mu: A float representing mean/expectation of the logNormal/Normal
-distribution for hop calculations
-gauss_sigma: A float representing standard deviation of logNormal/Normal
-distribution for hop calculations
-data_save_interval: An int representing how often to record model
-particle arrays (e.g 1=save every iteration, 2=save every other)
-height_dependant_entr: A boolean flag indicating whether model
-automatically entrains particles that are on the level limit
-out_path: A string representing the relative location to save the output
-out_name: A string representing the name of the output file</p></div>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>iterations</code></strong></dt>
+<dd>An int indicating number of iterations for model.</dd>
+<dt><strong><code>bed_length</code></strong></dt>
+<dd>A float indicating the length of the stream to build </dd>
+<dt><strong><code>particle_diam</code></strong></dt>
+<dd>A float. </dd>
+<dt><strong><code>particle_pack_dens</code></strong></dt>
+<dd>A float indicating the packing fraction of
+the model particles.</dd>
+<dt><strong><code>num_subregions</code></strong></dt>
+<dd>An int representing the number of subregions to
+define in the stream.</dd>
+<dt><strong><code>level_limit</code></strong></dt>
+<dd>An int representing the maximum number of levels.
+permitted in-stream at any time (i.e how many particles high to stack)</dd>
+<dt><strong><code>poiss_lambda</code></strong></dt>
+<dd>A float representing Lamba for poisson dist,
+used to determine the number of entrainment events.</dd>
+<dt><strong><code>gauss</code></strong></dt>
+<dd>A boolean flag indicating which distribution to sample from for
+hop calculations. True=Normal, False=logNormal.</dd>
+<dt><strong><code>gauss_mu</code></strong></dt>
+<dd>A float representing mean/expectation of the logNormal/Normal
+distribution for hop calculations.</dd>
+<dt><strong><code>gauss_sigma</code></strong></dt>
+<dd>A float representing standard deviation of logNormal/Normal
+distribution for hop calculations.</dd>
+<dt><strong><code>data_save_interval</code></strong></dt>
+<dd>An int representing how often to record model
+particle arrays (e.g 1=save every iteration, 2=save every other).</dd>
+<dt><strong><code>height_dependant_entr</code></strong></dt>
+<dd>A boolean flag indicating whether model
+automatically entrains particles that are on the level limit.</dd>
+<dt><strong><code>out_path</code></strong></dt>
+<dd>A string representing the relative location to save the output.</dd>
+<dt><strong><code>out_name</code></strong></dt>
+<dd>A string representing the name of the output file.</dd>
+</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -409,37 +618,38 @@ out_name: A string representing the name of the output file</p></div>
 
     This function is responsible for calling appropriate logic
     and storing relevant information, as outlined in project documentation. 
-    
+        
     An sbelt run consists of (generally) the following:
         (1) argument/parameter validation
         (2) building the stream data structures
         (3) running x iterations of entrainments over the stream
         (4) storing particle and flux data from each iteration
-    
-    Args: 
-        iterations: An int indicating number of iterations for model
+        
+        
+    Args:
+        iterations: An int indicating number of iterations for model.
         bed_length: A float indicating the length of the stream to build 
-        particle_diam: A float 
+        particle_diam: A float. 
         particle_pack_dens: A float indicating the packing fraction of 
-            the model particles
+            the model particles.
         num_subregions: An int representing the number of subregions to 
-            define in the stream
-        level_limit: An int representing the maximum number of levels 
+            define in the stream.
+        level_limit: An int representing the maximum number of levels.
             permitted in-stream at any time (i.e how many particles high to stack)
-        poiss_lambda: A float representing Lamba for poisson dist., 
-            used to determine the number of entrainment events
+        poiss_lambda: A float representing Lamba for poisson dist, 
+            used to determine the number of entrainment events.
         gauss: A boolean flag indicating which distribution to sample from for 
-            hop calculations. True=Normal, False=logNormal
+            hop calculations. True=Normal, False=logNormal.
         gauss_mu: A float representing mean/expectation of the logNormal/Normal
-            distribution for hop calculations
+            distribution for hop calculations.
         gauss_sigma: A float representing standard deviation of logNormal/Normal 
-            distribution for hop calculations
+            distribution for hop calculations.
         data_save_interval: An int representing how often to record model 
-            particle arrays (e.g 1=save every iteration, 2=save every other)
+            particle arrays (e.g 1=save every iteration, 2=save every other).
         height_dependant_entr: A boolean flag indicating whether model 
-            automatically entrains particles that are on the level limit
-        out_path: A string representing the relative location to save the output
-        out_name: A string representing the name of the output file
+            automatically entrains particles that are on the level limit.
+        out_path: A string representing the relative location to save the output.
+        out_name: A string representing the name of the output file.
     &#34;&#34;&#34; 
     #############################################################################
     # validate parameters
@@ -461,7 +671,7 @@ out_name: A string representing the name of the output file</p></div>
                                         particle_diam)
     h = np.sqrt(np.square(particle_diam) - np.square(d))
     # Build the required structures for entrainment events
-    bed_particles, model_particles, model_supp, subregions = _build_stream(parameters, h)
+    bed_particles, model_particles, model_supp, subregions = build_stream(parameters, h)
     print(f&#39;Bed and Model particles built.&#39;)
 
     #############################################################################
@@ -515,7 +725,7 @@ out_name: A string representing the name of the output file</p></div>
                                                         level_limit,
                                                         lifted_particles=event_particle_ids)
             # Run entrainment event                    
-            model_particles, model_supp, subregions = _run_entrainments(model_particles, 
+            model_particles, model_supp, subregions = entrainment_event(model_particles, 
                                                                     model_supp,
                                                                     bed_particles, 
                                                                     event_particle_ids,
@@ -571,6 +781,8 @@ out_name: A string representing the name of the output file</p></div>
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="sbelt_runner.build_stream" href="#sbelt_runner.build_stream">build_stream</a></code></li>
+<li><code><a title="sbelt_runner.entrainment_event" href="#sbelt_runner.entrainment_event">entrainment_event</a></code></li>
 <li><code><a title="sbelt_runner.run" href="#sbelt_runner.run">run</a></code></li>
 </ul>
 </li>

@@ -72,7 +72,7 @@ setup(
     # executes the function `main` from this package when invoked:
     entry_points={  
         'console_scripts': [
-            'sbelt-run=sbelt.sbelt_runner',
+            'sbelt-run=sbelt.sbelt_runner:run',
         ],
     },
 )

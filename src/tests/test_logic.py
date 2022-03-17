@@ -545,12 +545,12 @@ class TestComputeAvailableVerticesNotLifted(unittest.TestCase):
     """ Test compute_available_vertices function with 
     the lifted argument set to False.
 
-        Attributes:
-            stream_length: int representing length of test stream
-            diam: float representing diam of test particles
-            bed_particles: An n-7 array representing the test bed particles
-            expected_bed_vertices: An np array of the available vertices 
-                that an empty bed should produce if all is working well
+    Attributes:
+        stream_length: int representing length of test stream
+        diam: float representing diam of test particles
+        bed_particles: An n-7 array representing the test bed particles
+        expected_bed_vertices: An np array of the available vertices 
+            that an empty bed should produce if all is working well
     """
     def setUp(self):
         # make bed particles
@@ -1190,7 +1190,8 @@ class TestMoveModelParticles(unittest.TestCase):
 
 
 class TestUpdateFlux(unittest.TestCase): # Easy
-    """ Unit test for the update_flux function
+    """ Unit test for the update_flux function.
+
 
     Attributes: 
         test_length: An int representing the length of the test stream

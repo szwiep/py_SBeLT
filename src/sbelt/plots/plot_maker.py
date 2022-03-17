@@ -3,7 +3,7 @@ import h5py
 import argparse
 import os
 
-import plotting
+from sbelt.plots import plotting
 
 
 def main(sbelt_filename, iter_min, iter_max, save_location='./'):

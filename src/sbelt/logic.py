@@ -1,3 +1,20 @@
+""" 
+This module contains all the logic required to execute
+sbelt simulations/runs. All functions/classes are designed 
+for internal use and may change without note.
+
+A primary purpose of this module is to manipulate n-7 NumPy 
+arrays which represent multiple stream particles. In these
+n-7 arrays, a _single_ particle is represented by a NumPy array 
+with 7 attributes::
+
+    [x_location, diam, y_location, UID, active state, age, loop age]
+
+In this general example, x_location and y_location define the centre point of 
+spherical particle whose diameter is defined by diam. See the project docs for
+more information on the other attributes. 
+"""
+
 import math
 import random
 import numpy as np
@@ -15,9 +32,9 @@ class Subregion():
     subregion maintains a NumPy list which is 
     used to record the number of model particles that 
     pass the downstream boundary in a given iteration. 
-    For example:
+    For example::
 
-    flux_list = [0,3,2,1]
+        flux_list = [0,3,2,1]
 
     Means that 0 crossings happened in the first iteration, 
     3 happened in the 2nd, and so on. The list has 
@@ -64,7 +81,7 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
 
     Will loop through each subregion and select n = e_events
     model particles (within a subregion boundaries) at random 
-    to be entrained.
+    to be entrained. No particle will be selected twice.
 
     Args:
         e_events: The number of events requested per subregion (int).
@@ -74,13 +91,12 @@ def get_event_particles(e_events, subregions, model_particles, level_limit, heig
 
     Returns:
         event_particles: A NumPy array of k uids representing the model particles
-            that have been selected for entrainment. For example:
+            that have been selected for entrainment. For example::
 
-            [2.0, 5.0, 25.0]
+                [2.0, 5.0, 25.0]
 
             Will represent that model particles with uids 2.0, 5.0 and
-            25.0 have been selected for entrainment. No particle uuid 
-            will appear twice in the array.
+            25.0 have been selected for entrainment. 
     """
     if e_events == 0:
         e_events = 1 #???
@@ -172,10 +188,10 @@ def build_streambed(bed_length, particle_diam):
     
     Returns:
         bed_particles: An m-7 NumPy array representing the stream's m 
-            bed particles. For example:
+            bed particles. For example::
 
-            [[x1, diam, y, uid1, active, age, loops], ... 
-                        ,[xM, diam, y, uidM, active, age, loops]]
+                [[x1, diam, y, uid1, active, age, loops], ... 
+                            ,[xM, diam, y, uidM, active, age, loops]]
             
             Where all bed particles share the same diam (diam1=...=diamM) and 
             y (y1=...=yM), all uids are negative, and to represent 'static-ness'
@@ -289,14 +305,12 @@ def find_supports(particle, model_particles, bed_particles):
 
     Provided a particle p at location x, this function 
     will search the stream for particles that p would
-    rest on, if being dropped at x. 
-    
-    More generally, supporting particles are those 
-    particles which directly hold up a particle. Supporting
+    rest on, if being dropped at x. More generally, supporting particles 
+    are those particles which directly hold up a particle. Supporting
     particles will always have a centre location that is 
     exactly a radius length away from p's centre.
 
-    Args:   
+    Args:
         particle: 1-7 NumPy array representing a model particle.
         model_particles: An n-7 NumPy array representing the stream's 
             n model particles.
@@ -345,16 +359,6 @@ def set_model_particles(bed_particles, available_vertices, particle_diam, pack_f
     Model particles are randomly placed at available vertex
     locations (x,y) across the bed. Location and initial attribute
     values are stored in the returned NumPy array. 
-
-    As a reminder, the structure of a model particle is a
-    array with 7 float attributes:
-        [0] = horizontal location (x/centre),
-        [1] = diameter,
-        [2] = elevation (y/centre),
-        [3] = uid,
-        [4] = active
-        [5] = age counter
-        [6] = loop age counter
     
     Args:
         bed_particles: An m-7 NumPy array representing the stream's m bed particles.
@@ -367,18 +371,18 @@ def set_model_particles(bed_particles, available_vertices, particle_diam, pack_f
     
     Returns:
         model_particles: An n-7 NumPy array representing the stream's n model particles and their 
-            initial placement in the stream. For example:
+            initial placement in the stream. For example::
             
-            [[x1, diam, y1, uid1, active, age, loops], ... ,[xN, diam, yN, uidN, active, age, loops]]
+                [[x1, diam, y1, uid1, active, age, loops], ... ,[xN, diam, yN, uidN, active, age, loops]]
 
             Where (xi, yi) pairs will define the centre location of each particle and no two particles
             will have the same (xi, yi) pair values. All uids are unique and are positive whole numbers.
             All particles will start with active = 1, age = 0, and loops = 0.
 
         model_supp: An n-2 NumPy array with the uids of the two particles supporting each 
-            model particle. For example:
+            model particle. For example::
         
-            [[[-1,-2]], ... ,[-3,-4]]
+                [[[-1,-2]], ... ,[-3,-4]]
 
             The above example states that model particle with uid 0 (model_supp[0]) is supported
             by bed particles with uids -1 and -2. Similarly, the model particle with uid n 
@@ -437,17 +441,16 @@ def compute_available_vertices(model_particles, bed_particles, particle_diam, le
     is considered nulled. Then vertices v created by two 
     particles touching are considered. If v is not already 
     nulled by a particle occupying the location at a higher
-    level, then it is considered an available vertex.
+    level, then it is considered an available vertex. This ends once the bed 
+    particles (the lowest elevation) have been considered.
     
-    This ends once the bed particles (the lowest elevation)
-    have been considered.
-    
-    Args: 
+
+    Args:
         model_particles: An n-7 NumPy array representing the stream's 
             n model particles.
         bed_particles: An m-7 NumPy array representing the stream's m 
             bed particles. 
-        lifted_particles (Default = none): UID of particles that are 'lifted'. Lifted 
+        lifted_particles: UID of particles that are 'lifted'. Lifted 
             particles will not be considered as present in the stream
             when the available vertices are being calculated; their
             (x,y) location will not be considered as occupied.
@@ -668,7 +671,7 @@ def find_closest_vertex(desired_hop, available_vertices):
 
 
 def increment_age(model_particles, e_event_ids):
-    """"Increment model particles' age, set event particles to age 0"""
+    """Increment model particles' age, set event particles to age 0"""
     
     model_particles[:,5] = model_particles[:,5] + 1 
     model_particles[e_event_ids, 5] = 0

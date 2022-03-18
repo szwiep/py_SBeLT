@@ -9,14 +9,12 @@ from matplotlib.collections import PatchCollection
 from matplotlib.patches import Circle
 from scipy.optimize import curve_fit
 from scipy.special import factorial
-from PIL import Image
 
-def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out=None, out_name=None):
+def stream(iteration, bed_particles, model_particles, x_lim, y_lim, out_location=None, out_name=None):
     """ Plot the complete stream from 0,0 to x_lim and y_lim. Bed particles 
-    are plotted as light grey and model particles are platted in a colour
-    range dependant on their age. 
-    Allows for closer look at state of a subregion of the stream during simulation.
-    Also makes for fun gifs.
+    are plotted as light grey and model particles are plotted in a colour
+    range dependant on their age. Allows for closer look at state of a subregion of the 
+    stream during simulation. Also makes for fun gifs!
 
 
     Args:
@@ -25,12 +23,14 @@ def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out=None,
         model_particles: array of all model particles
         x_lim: length of stream to plot
         y_lim: height of stream to plot
-        fp_out: save location
-        out_name: filename (ignored if fp_out not set) 
+        out_location: save location
+        out_name: filename (ignored if out_location not set) 
     """
-    plt.clf()
+    if out_location is not None:
+        if out_name is None:
+            raise ValueError('The out_name argument must be set if saving file.')
     fig = plt.figure(1)
-    fig.set_size_inches(20, 6.5)
+    # fig.set_size_inches(20, 6.5)
     ax = fig.add_subplot(1, 1, 1, aspect='equal')
     # NOTE: xlim and ylim modified for aspec ratio -- WIP
     ax.set_xlim((-2, x_lim))
@@ -62,54 +62,33 @@ def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out=None,
     plt.colorbar(p_m,orientation='horizontal',fraction=0.046, pad=0.1,label='Particle Age (iterations since last hop)')
     plt.title(f'Iteration {iteration}')
 
-    if fp_out is None:
+    if out_location is None:
         plt.show()
     else:
         filename = f'iter{iteration}.png'
-        plots_path = fp_out + filename
+        plots_path = out_location + filename
         plt.savefig(plots_path, format='png',)
-        
     return
 
-def stream_gif(start, stop, fp_out, out_name):
-    """Plot gif of the streambed
-    
-    Args: 
-        start: first iterations to plot
-        stop: final iteration to plot
-        fp_out: save location
-        out_name: filename 
-    """
-    in_filename = 'iter{i}.png'
-    out_filename = out_name
-
-    fp_in = dir + in_filename
-    fp_out = dir + out_filename
-
-    step = 1
-    images = []
-
-    for i in range(start, stop, step):
-        im = Image.open(fp_in.format(i=i))
-        images.append(im)
-
-    images[0].save(fp_out, save_all=True, append_images=images[1:], optimize=True, duration=150, loop=0)
-
-def crossing_info(particle_crossing_list, iterations, subsample, fp_out=None, out_name=None):
+def downstream_boundary_hist(particle_crossing_list, iterations, out_location=None, out_name=None):
     """Histogram of downstream particle crossings per iteration
     
     Args:
         particle_crossing_list: array of # of crossings per iteration
         iteration: number of iterations
         subsample: value to subsample by (use if data too large)
-        fp_out: save location
-        out_name: filename (ignored if fp_out not set) 
+        out_location: save location. Default=None will print plot to screen
+            but will not save.
+        out_name: filename (ignored if out_location not set) 
     """
-    plt.clf()
+    if out_location is not None:
+        if out_name is None:
+            raise ValueError('The out_name argument must be set if saving file.')
+
     fig = plt.figure(figsize=(8,7))
     ax = fig.add_subplot(1, 1, 1)
     bins = np.arange(-0.5, 11.5, 1) # fixed bin size
-    plt.title('Histogram of Particle Crossing, I = %i iterations' % iterations, fontsize=10, style='italic')
+    plt.title(f'Histogram of Particle Crossing, I = {iterations} iterations', fontsize=10, style='italic')
     plt.xlabel('Downstream Crossing (particle count)')
     plt.ylabel('Fraction')
     ax.set_xlim((-1, max(bins)+1))
@@ -130,21 +109,32 @@ def crossing_info(particle_crossing_list, iterations, subsample, fp_out=None, ou
     plt.plot(bin_middles, poisson(bin_middles, *parameters), color='black', marker='o', fillstyle = 'none', markersize=4, lw=0, markeredgecolor='black', markeredgewidth=1, label='Poisson PMF Fit')
 
     plt.legend(loc='upper right',frameon=0)
-    if fp_out is None:
+    if out_location is None:
         plt.show()
     else:
-        filename = 'CrossingDownstreamBoundaryHist.png'
-        fi_path = fp_out + filename
+        fi_path = out_location + out_name  + '.png'
         fig.savefig(fi_path, format='png', dpi=600)
+    return
 
-    #####
+def downstream_boundary_ts(particle_crossing_list, iterations, subsample, out_location=None, out_name=None):
+    """Time series plot of downstream particle crossings per iteration
+    
+    Args:
+        particle_crossing_list: array of # of crossings per iteration
+        iteration: number of iterations
+        subsample: value to subsample by (use if data too large)
+        out_location: save location
+        out_name: filename (ignored if out_location not set) 
+    """
+    if out_location is not None:
+        if out_name is None:
+            raise ValueError('The out_name argument must be set if saving file.')
     crossing_list_avg = np.convolve(particle_crossing_list, np.ones(subsample)/subsample, mode='valid')
 
     crossing_list = crossing_list_avg[0::subsample]
     Time = np.arange(1,  iterations + 1, subsample)
     Crossing_CS = np.cumsum(crossing_list)
     
-    plt.clf()
     fig = plt.figure(figsize=(8,7))
     ax1 = fig.add_subplot(1,1,1)
     ax1.plot(Time, crossing_list, 'lightgray')
@@ -159,14 +149,16 @@ def crossing_info(particle_crossing_list, iterations, subsample, fp_out=None, ou
     ax2.tick_params('y', colors='black')
     
     fig.tight_layout()
-    if fp_out is None:
+    if out_location is None:
         plt.show()
     else:
-        filenameCS = 'CrossingDownstreamBoundary_2YAx.png'
-        fiCS_path = fp_out + filenameCS
+        fiCS_path = out_location + out_name  + '.png'
         fig.savefig(fiCS_path, format='png', dpi=600)
-        
-def crossing_info2(particle_crossing_list, particle_age_list, n_iterations, subsample, fp_out=None, out_name=None):
+    return
+
+
+
+def crossing_info_age(particle_crossing_list, particle_age_list, n_iterations, subsample, out_location=None, out_name=None):
     """Plot of particle crossing/flux vs. particle age. For very large values the
     data can be subsampled using the subsample parameter
     
@@ -175,11 +167,13 @@ def crossing_info2(particle_crossing_list, particle_age_list, n_iterations, subs
         particle_crossing_list: array of average particle age per iteration
         n_iteration: number of iterations
         subsample: value to subsample by (use if data too large)
-        fp_out: save location
-        out_name: filename (ignored if fp_out not set) 
+        out_location: save location
+        out_name: filename (ignored if out_location not set) 
     
     """
-    plt.clf()
+    if out_location is not None:
+        if out_name is None:
+            raise ValueError('The out_name argument must be set if saving file.')
     fig = plt.figure(figsize=(8,7))
     ax3 = fig.add_subplot(1, 1, 1)
     #####
@@ -204,9 +198,8 @@ def crossing_info2(particle_crossing_list, particle_age_list, n_iterations, subs
     ax4.tick_params('y', colors='black')
     
     fig.tight_layout()
-    if fp_out is None:
+    if out_location is None:
         plt.show()
     else:
-        filename = 'CrossingDownstreamBoundary_Age.png'
-        fi_path = fp_out + filename
+        fi_path = out_location + out_name + '.png'
         fig.savefig(fi_path, format='png', dpi=600)

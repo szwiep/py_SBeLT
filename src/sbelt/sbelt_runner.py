@@ -22,7 +22,9 @@ Attributes:
 Todo:
     * setuptools console_scripts and '$ python sbelt_runner.py' executions 
         can only use the default values currently. Need to add in sys.argv 
-        parsing to let parameters be user-defined in these cases
+        parsing to let parameters be user-defined in these cases. For now
+        users using sbelt from source code can pass desired arguments to
+        the run call in the ``if __name_ == '__main__' function.``.
 """
 import numpy as np
 import h5py
@@ -44,6 +46,7 @@ def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens =
 
     This function is responsible for calling appropriate logic
     and storing relevant information as outlined in project documentation. 
+    It is the intended 
         
     An sbelt run consists of (generally) the following:
         (1) argument/parameter validation
@@ -86,7 +89,7 @@ def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens =
 
     #############################################################################
     #  Create model data and data structures
-    # TODO: Better names for d, h variables
+    # TODO: Better names for d, h variables. What would be more intuitive?
     #############################################################################
 
     print(f'Building Bed and Model particle arrays...')
@@ -214,22 +217,22 @@ def build_stream(parameters, h):
 
     Returns:
         bed_particles: An m-7 NumPy array representing the stream's m bed
-            particles. For example:
+            particles. For example::
 
-        [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
+            [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
         
         All bed particles should share the same diameter and y (elevation valu), all uids 
         must be negative, and to represent 'static' bed particles active = 0 and loops = 0. 
 
         model_particles: An n-7 NumPy array representing the stream's n model 
-            particles in their initial placement. For example:
+            particles in their initial placement. For example::
         
-        [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
+            [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
 
         model_supp: An n-2 NumPy array with the uids of the two particles supporting each 
-            model particle. For example:
+            model particle. For example::
         
-        model_supp = [[[-1,-2]], ... ,[-3,-4]]
+            model_supp = [[[-1,-2]], ... ,[-3,-4]]
 
         The above example states that model particle with uid 0 (model_supp[0]) is supported
         by bed particles with uids -1 and -2. Similarly, the model particle with uid n 
@@ -296,4 +299,5 @@ def entrainment_event(model_particles, model_supp, bed_particles, event_particle
     return model_particles, model_supp, subregions
 
 if __name__ == '__main__':
+    # assign argument values here if running from source code!
     run()

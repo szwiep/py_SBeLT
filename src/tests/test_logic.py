@@ -10,7 +10,7 @@ import unittest
 import numpy as np
 from unittest.mock import Mock
 
-from sbelt import logic
+from ..sbelt import logic
 
 ATTR_COUNT = 7 # Number of attributes associated with a Particle
 # For reference:

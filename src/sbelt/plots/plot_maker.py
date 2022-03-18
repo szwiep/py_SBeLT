@@ -3,14 +3,14 @@ import h5py
 import argparse
 import os
 
-import plotting
+from sbelt.plots import plotting
 
 
-def main(filename, save_location, iter_min, iter_max):
-    # Path to run-info file
-    fp_in = filename
+def main(sbelt_filename, iter_min, iter_max, save_location='./'):
+    # Path to the file we want to plot
+    fp_in = sbelt_filename
     # Path to output directory
-    fp_out = save_location + '/'
+    fp_out = save_location 
     # Range to plot
     iteration_range = [iter_min, iter_max] 
     # Plot height
@@ -40,7 +40,7 @@ def main(filename, save_location, iter_min, iter_max):
         #   model particles are stored (runpy) at the end of each iteration, 
         #   we need to plot 1 index back.
         print(f'Plotting stream bed...')
-        for iter in range(iteration_range[0], iteration_range[1]+1):
+        for iter in range(iteration_range[0], iteration_range[1]+1, f['params']['data_save_interval'][()]):
             if iter == 0:
                 model_particles = np.array(f['initial_values']['model'])
             else:

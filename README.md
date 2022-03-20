@@ -28,11 +28,33 @@ Then set your working directory to `py_SBeLT/` and build the project
  pip install -e .
 ```
 
+## Getting Started
+
+Users can work through the Jupyter Notebooks provided to gain a better understanding of py_SBeLT's basic usage, potential, and data storage methods. Either launch the binder instance (), clone the repository, or download the notebooks directly to get started.
+
+If notebook's aren't your thing, simply run:
+
+```bash
+sbelt-run
+```
+
+or
+
+```bash
+from sbelt import sbelt_runner
+sbelt_runner.run()
+```
+
+To get started. For help, reach out with questions to the repository owner `szwiep` and reference the documenation in `docs/` and `paper/`! 
+
+
 ## Documentation
 
-Documentation, including Jupyter Notebooks outlining basic usage and data storage methods, API documentation, and model nomeculture/vocabulary, can be found in the repository's `docs/` directory. Additional information regarding the theoritical motivation of the model can be found in the `paper/paper.md` and `THEORY.md` files.
+Documentation, including Jupyter Notebooks, API documentation, default parameters, and model nomeculture, can be found in the repository's `docs/` directory. Additional information regarding the theoritical motivation of the model can be found in the `paper/paper.md` and `THEORY.md` files.
 
-## Examples
+
+
+
 
 ## Attribution
 

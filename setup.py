@@ -18,7 +18,7 @@ setup(
 
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
-    version='1.0.0',  # Required
+    version='1.0.1',  # Required
 
     # A one-line description of what your project does.
     description='A Markov-type numerical model of sediment particle transport in rivers',  

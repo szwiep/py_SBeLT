@@ -6,7 +6,7 @@
 <meta name="generator" content="pdoc 0.10.0" />
 <title>plotting API documentation</title>
 <meta name="description" content="All things plotting related.
-Most of the plotting logic created by Dr. Shawn Chartrand." />
+Logic created by Dr. Shawn Chartrand." />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -24,14 +24,14 @@ Most of the plotting logic created by Dr. Shawn Chartrand." />
 </header>
 <section id="section-intro">
 <p>All things plotting related.
-Most of the plotting logic created by Dr. Shawn Chartrand.</p>
+Logic created by Dr. Shawn Chartrand.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
 All things plotting related.
-Most of the plotting logic created by Dr. Shawn Chartrand.
+Logic created by Dr. Shawn Chartrand.
 &#34;&#34;&#34;
 import numpy as np
 import matplotlib
@@ -40,14 +40,13 @@ from matplotlib.collections import PatchCollection
 from matplotlib.patches import Circle
 from scipy.optimize import curve_fit
 from scipy.special import factorial
-from PIL import Image
 
-def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out):
+def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fig_size=[10, 6.5], out_location=None, out_name=None):
     &#34;&#34;&#34; Plot the complete stream from 0,0 to x_lim and y_lim. Bed particles 
-    are plotted as light grey and model particles are platted in a colour
-    range dependant on their age. 
-    Allows for closer look at state of a subregion of the stream during simulation.
-    Also makes for fun gifs.
+    are plotted as light grey and model particles are plotted in a colour
+    range dependant on their age. Allows for closer look at state of a subregion of the 
+    stream during simulation. Also makes for fun gifs!
+
 
     Args:
         iteration: the iteration of the stream being plotted 
@@ -55,11 +54,14 @@ def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out):
         model_particles: array of all model particles
         x_lim: length of stream to plot
         y_lim: height of stream to plot
-        fp_out: save location
+        fig_size: x and y dimension of figure in inches
+        out_location: save location
+        out_name: filename (ignored if out_location not set) 
     &#34;&#34;&#34;
-    plt.clf()
-    fig = plt.figure(1)
-    fig.set_size_inches(20, 6.5)
+    if out_location is not None:
+        if out_name is None:
+            raise ValueError(&#39;The out_name argument must be set if saving file.&#39;)
+    fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
     ax = fig.add_subplot(1, 1, 1, aspect=&#39;equal&#39;)
     # NOTE: xlim and ylim modified for aspec ratio -- WIP
     ax.set_xlim((-2, x_lim))
@@ -91,43 +93,33 @@ def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out):
     plt.colorbar(p_m,orientation=&#39;horizontal&#39;,fraction=0.046, pad=0.1,label=&#39;Particle Age (iterations since last hop)&#39;)
     plt.title(f&#39;Iteration {iteration}&#39;)
 
-    filename = f&#39;iter{iteration}.png&#39;
-    plots_path = fp_out + filename
-    plt.savefig(plots_path, format=&#39;png&#39;,)
-        
+    if out_location is None:
+        plt.show()
+    else:
+        plots_path = out_location + out_name + &#39;.png&#39;
+        plt.savefig(plots_path, format=&#39;png&#39;,)
     return
 
-def stream_gif(start, stop, dir):
-    &#34;&#34;&#34;Plot gif of the streambed&#34;&#34;&#34;
-    in_filename = &#39;iter{i}.png&#39;
-    out_filename = &#39;simulation_snapshot.gif&#39;
-
-    fp_in = dir + in_filename
-    fp_out = dir + out_filename
-
-    step = 1
-    images = []
-
-    for i in range(start, stop, step):
-        im = Image.open(fp_in.format(i=i))
-        images.append(im)
-
-    images[0].save(fp_out, save_all=True, append_images=images[1:], optimize=True, duration=150, loop=0)
-
-def crossing_info(particle_crossing_list, iterations, subsample, fp_out):
+def downstream_boundary_hist(particle_crossing_list, iterations, fig_size=[8, 7], out_location=None, out_name=None):
     &#34;&#34;&#34;Histogram of downstream particle crossings per iteration
     
     Args:
         particle_crossing_list: array of # of crossings per iteration
         iteration: number of iterations
         subsample: value to subsample by (use if data too large)
-        fp_out: save location 
+        fig_size: x and y dimension of figure in inches
+        out_location: save location. Default=None will print plot to screen
+            but will not save.
+        out_name: filename (ignored if out_location not set) 
     &#34;&#34;&#34;
-    plt.clf()
-    fig = plt.figure(figsize=(8,7))
+    if out_location is not None:
+        if out_name is None:
+            raise ValueError(&#39;The out_name argument must be set if saving file.&#39;)
+
+    fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
     ax = fig.add_subplot(1, 1, 1)
     bins = np.arange(-0.5, 11.5, 1) # fixed bin size
-    plt.title(&#39;Histogram of Particle Crossing, I = %i iterations&#39; % iterations, fontsize=10, style=&#39;italic&#39;)
+    plt.title(f&#39;Histogram of Particle Crossing, I = {iterations} iterations&#39;, fontsize=10, style=&#39;italic&#39;)
     plt.xlabel(&#39;Downstream Crossing (particle count)&#39;)
     plt.ylabel(&#39;Fraction&#39;)
     ax.set_xlim((-1, max(bins)+1))
@@ -148,19 +140,34 @@ def crossing_info(particle_crossing_list, iterations, subsample, fp_out):
     plt.plot(bin_middles, poisson(bin_middles, *parameters), color=&#39;black&#39;, marker=&#39;o&#39;, fillstyle = &#39;none&#39;, markersize=4, lw=0, markeredgecolor=&#39;black&#39;, markeredgewidth=1, label=&#39;Poisson PMF Fit&#39;)
 
     plt.legend(loc=&#39;upper right&#39;,frameon=0)
-    filename = &#39;CrossingDownstreamBoundaryHist.png&#39;
-    fi_path = fp_out + filename
-    fig.savefig(fi_path, format=&#39;png&#39;, dpi=600)
+    if out_location is None:
+        plt.show()
+    else:
+        fi_path = out_location + out_name  + &#39;.png&#39;
+        fig.savefig(fi_path, format=&#39;png&#39;, dpi=600)
+    return
 
-    #####
+def downstream_boundary_ts(particle_crossing_list, iterations, subsample, fig_size=[8, 7], out_location=None, out_name=None):
+    &#34;&#34;&#34;Time series plot of downstream particle crossings per iteration
+    
+    Args:
+        particle_crossing_list: array of # of crossings per iteration
+        iteration: number of iterations
+        subsample: value to subsample by (use if data too large)
+        fig_size: x and y dimension of figure in inches
+        out_location: save location
+        out_name: filename (ignored if out_location not set) 
+    &#34;&#34;&#34;
+    if out_location is not None:
+        if out_name is None:
+            raise ValueError(&#39;The out_name argument must be set if saving file.&#39;)
     crossing_list_avg = np.convolve(particle_crossing_list, np.ones(subsample)/subsample, mode=&#39;valid&#39;)
 
     crossing_list = crossing_list_avg[0::subsample]
     Time = np.arange(1,  iterations + 1, subsample)
     Crossing_CS = np.cumsum(crossing_list)
     
-    plt.clf()
-    fig = plt.figure(figsize=(8,7))
+    fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
     ax1 = fig.add_subplot(1,1,1)
     ax1.plot(Time, crossing_list, &#39;lightgray&#39;)
     plt.title(&#39;Timeseries of Particle Crossing at Downstream Boundary&#39;)
@@ -174,11 +181,16 @@ def crossing_info(particle_crossing_list, iterations, subsample, fp_out):
     ax2.tick_params(&#39;y&#39;, colors=&#39;black&#39;)
     
     fig.tight_layout()
-    filenameCS = &#39;CrossingDownstreamBoundary_2YAx.png&#39;
-    fiCS_path = fp_out + filenameCS
-    fig.savefig(fiCS_path, format=&#39;png&#39;, dpi=600)
-        
-def crossing_info2(particle_crossing_list, particle_age_list, n_iterations, subsample, fp_out):
+    if out_location is None:
+        plt.show()
+    else:
+        fiCS_path = out_location + out_name  + &#39;.png&#39;
+        fig.savefig(fiCS_path, format=&#39;png&#39;, dpi=600)
+    return
+
+
+
+def crossing_info_age(particle_crossing_list, particle_age_list, n_iterations, subsample, fig_size=[8, 7],out_location=None, out_name=None):
     &#34;&#34;&#34;Plot of particle crossing/flux vs. particle age. For very large values the
     data can be subsampled using the subsample parameter
     
@@ -187,12 +199,15 @@ def crossing_info2(particle_crossing_list, particle_age_list, n_iterations, subs
         particle_crossing_list: array of average particle age per iteration
         n_iteration: number of iterations
         subsample: value to subsample by (use if data too large)
-        fp_out: save location 
+        fig_size: x and y dimension of figure in inches
+        out_location: save location
+        out_name: filename (ignored if out_location not set) 
     
     &#34;&#34;&#34;
-    plt.clf()
-    fig = plt.figure(figsize=(8,7))
-    ax3 = fig.add_subplot(1, 1, 1)
+    if out_location is not None:
+        if out_name is None:
+            raise ValueError(&#39;The out_name argument must be set if saving file.&#39;)
+
     #####
     crossing_list_avg = np.convolve(particle_crossing_list, np.ones(subsample)/subsample, mode=&#39;valid&#39;)
     age_list_avg = np.convolve(particle_age_list, np.ones(subsample)/subsample, mode=&#39;valid&#39;)
@@ -201,10 +216,10 @@ def crossing_info2(particle_crossing_list, particle_age_list, n_iterations, subs
     age_list = age_list_avg[0::subsample]
     Time = np.arange(1,  n_iterations + 1, subsample)
 
-    fig = plt.figure(figsize=(8,7))
+    fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
     ax3 = fig.add_subplot(1,1,1)
     ax3.plot(Time, crossing_list, &#39;lightgray&#39;)
-    plt.title(&#39;Timeseries of Particle Crossing at Downstream Boundary&#39;)
+    plt.title(&#39;Timeseries of Particle Crossing at Downstream Boundary and Average Age&#39;)
     ax3.set_xlabel(&#39;Numerical Step&#39;)
     ax3.set_ylabel(&#39;Particle Crossing&#39;)
     ax3.set_yticks([0, 1, 2, 3, 4, 5, 6, 7, 8])
@@ -215,9 +230,11 @@ def crossing_info2(particle_crossing_list, particle_age_list, n_iterations, subs
     ax4.tick_params(&#39;y&#39;, colors=&#39;black&#39;)
     
     fig.tight_layout()
-    filename = &#39;CrossingDownstreamBoundary_Age.png&#39;
-    fi_path = fp_out + filename
-    fig.savefig(fi_path, format=&#39;png&#39;, dpi=600)</code></pre>
+    if out_location is None:
+        plt.show()
+    else:
+        fi_path = out_location + out_name + &#39;.png&#39;
+        fig.savefig(fi_path, format=&#39;png&#39;, dpi=600)</code></pre>
 </details>
 </section>
 <section>
@@ -227,93 +244,8 @@ def crossing_info2(particle_crossing_list, particle_age_list, n_iterations, subs
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="plotting.crossing_info"><code class="name flex">
-<span>def <span class="ident">crossing_info</span></span>(<span>particle_crossing_list, iterations, subsample, fp_out)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Histogram of downstream particle crossings per iteration</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>particle_crossing_list</code></strong></dt>
-<dd>array of # of crossings per iteration</dd>
-<dt><strong><code>iteration</code></strong></dt>
-<dd>number of iterations</dd>
-<dt><strong><code>subsample</code></strong></dt>
-<dd>value to subsample by (use if data too large)</dd>
-<dt><strong><code>fp_out</code></strong></dt>
-<dd>save location</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def crossing_info(particle_crossing_list, iterations, subsample, fp_out):
-    &#34;&#34;&#34;Histogram of downstream particle crossings per iteration
-    
-    Args:
-        particle_crossing_list: array of # of crossings per iteration
-        iteration: number of iterations
-        subsample: value to subsample by (use if data too large)
-        fp_out: save location 
-    &#34;&#34;&#34;
-    plt.clf()
-    fig = plt.figure(figsize=(8,7))
-    ax = fig.add_subplot(1, 1, 1)
-    bins = np.arange(-0.5, 11.5, 1) # fixed bin size
-    plt.title(&#39;Histogram of Particle Crossing, I = %i iterations&#39; % iterations, fontsize=10, style=&#39;italic&#39;)
-    plt.xlabel(&#39;Downstream Crossing (particle count)&#39;)
-    plt.ylabel(&#39;Fraction&#39;)
-    ax.set_xlim((-1, max(bins)+1))
-    ax.set_xticks([-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
-    hist, bin_edges = np.histogram(particle_crossing_list, bins=bins, density=True)
-
-    # calculate binmiddles
-    bin_middles = 0.5*(bin_edges[1:] + bin_edges[:-1])
-    plt.bar(bin_middles,hist,color=&#39;lightgray&#39;)
-    #fig.savefig(&#39;./ScriptTest/DownstreamCrossingHistogram.pdf&#39;, format=&#39;pdf&#39;, dpi=600)
-
-    # poisson function, parameter lamb is the fit parameter
-    def poisson(k, lamb):
-        return (lamb**k/factorial(k)) * np.exp(-lamb)
-
-    # fit with curve_fit
-    parameters, cov_matrix = curve_fit(poisson, bin_middles, hist)
-    plt.plot(bin_middles, poisson(bin_middles, *parameters), color=&#39;black&#39;, marker=&#39;o&#39;, fillstyle = &#39;none&#39;, markersize=4, lw=0, markeredgecolor=&#39;black&#39;, markeredgewidth=1, label=&#39;Poisson PMF Fit&#39;)
-
-    plt.legend(loc=&#39;upper right&#39;,frameon=0)
-    filename = &#39;CrossingDownstreamBoundaryHist.png&#39;
-    fi_path = fp_out + filename
-    fig.savefig(fi_path, format=&#39;png&#39;, dpi=600)
-
-    #####
-    crossing_list_avg = np.convolve(particle_crossing_list, np.ones(subsample)/subsample, mode=&#39;valid&#39;)
-
-    crossing_list = crossing_list_avg[0::subsample]
-    Time = np.arange(1,  iterations + 1, subsample)
-    Crossing_CS = np.cumsum(crossing_list)
-    
-    plt.clf()
-    fig = plt.figure(figsize=(8,7))
-    ax1 = fig.add_subplot(1,1,1)
-    ax1.plot(Time, crossing_list, &#39;lightgray&#39;)
-    plt.title(&#39;Timeseries of Particle Crossing at Downstream Boundary&#39;)
-    ax1.set_xlabel(&#39;Numerical Step&#39;)
-    ax1.set_ylabel(&#39;Particle Crossing&#39;)
-    ax1.set_yticks([0, 1, 2, 3, 4, 5, 6, 7, 8])
-    ax2 = ax1.twinx()
-
-    ax2.plot(Time, Crossing_CS, &#39;black&#39;)
-    ax2.set_ylabel(&#39;Particle Crossing Cumulative Sum&#39;, color=&#39;black&#39;, rotation=270, labelpad=15)
-    ax2.tick_params(&#39;y&#39;, colors=&#39;black&#39;)
-    
-    fig.tight_layout()
-    filenameCS = &#39;CrossingDownstreamBoundary_2YAx.png&#39;
-    fiCS_path = fp_out + filenameCS
-    fig.savefig(fiCS_path, format=&#39;png&#39;, dpi=600)</code></pre>
-</details>
-</dd>
-<dt id="plotting.crossing_info2"><code class="name flex">
-<span>def <span class="ident">crossing_info2</span></span>(<span>particle_crossing_list, particle_age_list, n_iterations, subsample, fp_out)</span>
+<dt id="plotting.crossing_info_age"><code class="name flex">
+<span>def <span class="ident">crossing_info_age</span></span>(<span>particle_crossing_list, particle_age_list, n_iterations, subsample, fig_size=[8, 7], out_location=None, out_name=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Plot of particle crossing/flux vs. particle age. For very large values the
@@ -328,14 +260,18 @@ data can be subsampled using the subsample parameter</p>
 <dd>number of iterations</dd>
 <dt><strong><code>subsample</code></strong></dt>
 <dd>value to subsample by (use if data too large)</dd>
-<dt><strong><code>fp_out</code></strong></dt>
+<dt><strong><code>fig_size</code></strong></dt>
+<dd>x and y dimension of figure in inches</dd>
+<dt><strong><code>out_location</code></strong></dt>
 <dd>save location</dd>
+<dt><strong><code>out_name</code></strong></dt>
+<dd>filename (ignored if out_location not set)</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def crossing_info2(particle_crossing_list, particle_age_list, n_iterations, subsample, fp_out):
+<pre><code class="python">def crossing_info_age(particle_crossing_list, particle_age_list, n_iterations, subsample, fig_size=[8, 7],out_location=None, out_name=None):
     &#34;&#34;&#34;Plot of particle crossing/flux vs. particle age. For very large values the
     data can be subsampled using the subsample parameter
     
@@ -344,12 +280,15 @@ data can be subsampled using the subsample parameter</p>
         particle_crossing_list: array of average particle age per iteration
         n_iteration: number of iterations
         subsample: value to subsample by (use if data too large)
-        fp_out: save location 
+        fig_size: x and y dimension of figure in inches
+        out_location: save location
+        out_name: filename (ignored if out_location not set) 
     
     &#34;&#34;&#34;
-    plt.clf()
-    fig = plt.figure(figsize=(8,7))
-    ax3 = fig.add_subplot(1, 1, 1)
+    if out_location is not None:
+        if out_name is None:
+            raise ValueError(&#39;The out_name argument must be set if saving file.&#39;)
+
     #####
     crossing_list_avg = np.convolve(particle_crossing_list, np.ones(subsample)/subsample, mode=&#39;valid&#39;)
     age_list_avg = np.convolve(particle_age_list, np.ones(subsample)/subsample, mode=&#39;valid&#39;)
@@ -358,10 +297,10 @@ data can be subsampled using the subsample parameter</p>
     age_list = age_list_avg[0::subsample]
     Time = np.arange(1,  n_iterations + 1, subsample)
 
-    fig = plt.figure(figsize=(8,7))
+    fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
     ax3 = fig.add_subplot(1,1,1)
     ax3.plot(Time, crossing_list, &#39;lightgray&#39;)
-    plt.title(&#39;Timeseries of Particle Crossing at Downstream Boundary&#39;)
+    plt.title(&#39;Timeseries of Particle Crossing at Downstream Boundary and Average Age&#39;)
     ax3.set_xlabel(&#39;Numerical Step&#39;)
     ax3.set_ylabel(&#39;Particle Crossing&#39;)
     ax3.set_yticks([0, 1, 2, 3, 4, 5, 6, 7, 8])
@@ -372,20 +311,160 @@ data can be subsampled using the subsample parameter</p>
     ax4.tick_params(&#39;y&#39;, colors=&#39;black&#39;)
     
     fig.tight_layout()
-    filename = &#39;CrossingDownstreamBoundary_Age.png&#39;
-    fi_path = fp_out + filename
-    fig.savefig(fi_path, format=&#39;png&#39;, dpi=600)</code></pre>
+    if out_location is None:
+        plt.show()
+    else:
+        fi_path = out_location + out_name + &#39;.png&#39;
+        fig.savefig(fi_path, format=&#39;png&#39;, dpi=600)</code></pre>
+</details>
+</dd>
+<dt id="plotting.downstream_boundary_hist"><code class="name flex">
+<span>def <span class="ident">downstream_boundary_hist</span></span>(<span>particle_crossing_list, iterations, fig_size=[8, 7], out_location=None, out_name=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Histogram of downstream particle crossings per iteration</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>particle_crossing_list</code></strong></dt>
+<dd>array of # of crossings per iteration</dd>
+<dt><strong><code>iteration</code></strong></dt>
+<dd>number of iterations</dd>
+<dt><strong><code>subsample</code></strong></dt>
+<dd>value to subsample by (use if data too large)</dd>
+<dt><strong><code>fig_size</code></strong></dt>
+<dd>x and y dimension of figure in inches</dd>
+<dt><strong><code>out_location</code></strong></dt>
+<dd>save location. Default=None will print plot to screen
+but will not save.</dd>
+<dt><strong><code>out_name</code></strong></dt>
+<dd>filename (ignored if out_location not set)</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def downstream_boundary_hist(particle_crossing_list, iterations, fig_size=[8, 7], out_location=None, out_name=None):
+    &#34;&#34;&#34;Histogram of downstream particle crossings per iteration
+    
+    Args:
+        particle_crossing_list: array of # of crossings per iteration
+        iteration: number of iterations
+        subsample: value to subsample by (use if data too large)
+        fig_size: x and y dimension of figure in inches
+        out_location: save location. Default=None will print plot to screen
+            but will not save.
+        out_name: filename (ignored if out_location not set) 
+    &#34;&#34;&#34;
+    if out_location is not None:
+        if out_name is None:
+            raise ValueError(&#39;The out_name argument must be set if saving file.&#39;)
+
+    fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
+    ax = fig.add_subplot(1, 1, 1)
+    bins = np.arange(-0.5, 11.5, 1) # fixed bin size
+    plt.title(f&#39;Histogram of Particle Crossing, I = {iterations} iterations&#39;, fontsize=10, style=&#39;italic&#39;)
+    plt.xlabel(&#39;Downstream Crossing (particle count)&#39;)
+    plt.ylabel(&#39;Fraction&#39;)
+    ax.set_xlim((-1, max(bins)+1))
+    ax.set_xticks([-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+    hist, bin_edges = np.histogram(particle_crossing_list, bins=bins, density=True)
+
+    # calculate binmiddles
+    bin_middles = 0.5*(bin_edges[1:] + bin_edges[:-1])
+    plt.bar(bin_middles,hist,color=&#39;lightgray&#39;)
+    #fig.savefig(&#39;./ScriptTest/DownstreamCrossingHistogram.pdf&#39;, format=&#39;pdf&#39;, dpi=600)
+
+    # poisson function, parameter lamb is the fit parameter
+    def poisson(k, lamb):
+        return (lamb**k/factorial(k)) * np.exp(-lamb)
+
+    # fit with curve_fit
+    parameters, cov_matrix = curve_fit(poisson, bin_middles, hist)
+    plt.plot(bin_middles, poisson(bin_middles, *parameters), color=&#39;black&#39;, marker=&#39;o&#39;, fillstyle = &#39;none&#39;, markersize=4, lw=0, markeredgecolor=&#39;black&#39;, markeredgewidth=1, label=&#39;Poisson PMF Fit&#39;)
+
+    plt.legend(loc=&#39;upper right&#39;,frameon=0)
+    if out_location is None:
+        plt.show()
+    else:
+        fi_path = out_location + out_name  + &#39;.png&#39;
+        fig.savefig(fi_path, format=&#39;png&#39;, dpi=600)
+    return</code></pre>
+</details>
+</dd>
+<dt id="plotting.downstream_boundary_ts"><code class="name flex">
+<span>def <span class="ident">downstream_boundary_ts</span></span>(<span>particle_crossing_list, iterations, subsample, fig_size=[8, 7], out_location=None, out_name=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Time series plot of downstream particle crossings per iteration</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>particle_crossing_list</code></strong></dt>
+<dd>array of # of crossings per iteration</dd>
+<dt><strong><code>iteration</code></strong></dt>
+<dd>number of iterations</dd>
+<dt><strong><code>subsample</code></strong></dt>
+<dd>value to subsample by (use if data too large)</dd>
+<dt><strong><code>fig_size</code></strong></dt>
+<dd>x and y dimension of figure in inches</dd>
+<dt><strong><code>out_location</code></strong></dt>
+<dd>save location</dd>
+<dt><strong><code>out_name</code></strong></dt>
+<dd>filename (ignored if out_location not set)</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def downstream_boundary_ts(particle_crossing_list, iterations, subsample, fig_size=[8, 7], out_location=None, out_name=None):
+    &#34;&#34;&#34;Time series plot of downstream particle crossings per iteration
+    
+    Args:
+        particle_crossing_list: array of # of crossings per iteration
+        iteration: number of iterations
+        subsample: value to subsample by (use if data too large)
+        fig_size: x and y dimension of figure in inches
+        out_location: save location
+        out_name: filename (ignored if out_location not set) 
+    &#34;&#34;&#34;
+    if out_location is not None:
+        if out_name is None:
+            raise ValueError(&#39;The out_name argument must be set if saving file.&#39;)
+    crossing_list_avg = np.convolve(particle_crossing_list, np.ones(subsample)/subsample, mode=&#39;valid&#39;)
+
+    crossing_list = crossing_list_avg[0::subsample]
+    Time = np.arange(1,  iterations + 1, subsample)
+    Crossing_CS = np.cumsum(crossing_list)
+    
+    fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
+    ax1 = fig.add_subplot(1,1,1)
+    ax1.plot(Time, crossing_list, &#39;lightgray&#39;)
+    plt.title(&#39;Timeseries of Particle Crossing at Downstream Boundary&#39;)
+    ax1.set_xlabel(&#39;Numerical Step&#39;)
+    ax1.set_ylabel(&#39;Particle Crossing&#39;)
+    ax1.set_yticks([0, 1, 2, 3, 4, 5, 6, 7, 8])
+    ax2 = ax1.twinx()
+
+    ax2.plot(Time, Crossing_CS, &#39;black&#39;)
+    ax2.set_ylabel(&#39;Particle Crossing Cumulative Sum&#39;, color=&#39;black&#39;, rotation=270, labelpad=15)
+    ax2.tick_params(&#39;y&#39;, colors=&#39;black&#39;)
+    
+    fig.tight_layout()
+    if out_location is None:
+        plt.show()
+    else:
+        fiCS_path = out_location + out_name  + &#39;.png&#39;
+        fig.savefig(fiCS_path, format=&#39;png&#39;, dpi=600)
+    return</code></pre>
 </details>
 </dd>
 <dt id="plotting.stream"><code class="name flex">
-<span>def <span class="ident">stream</span></span>(<span>iteration, bed_particles, model_particles, x_lim, y_lim, fp_out)</span>
+<span>def <span class="ident">stream</span></span>(<span>iteration, bed_particles, model_particles, x_lim, y_lim, fig_size=[10, 6.5], out_location=None, out_name=None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Plot the complete stream from 0,0 to x_lim and y_lim. Bed particles
-are plotted as light grey and model particles are platted in a colour
-range dependant on their age.
-Allows for closer look at state of a subregion of the stream during simulation.
-Also makes for fun gifs.</p>
+are plotted as light grey and model particles are plotted in a colour
+range dependant on their age. Allows for closer look at state of a subregion of the
+stream during simulation. Also makes for fun gifs!</p>
 <h2 id="args">Args</h2>
 <dl>
 <dt><strong><code>iteration</code></strong></dt>
@@ -398,19 +477,23 @@ Also makes for fun gifs.</p>
 <dd>length of stream to plot</dd>
 <dt><strong><code>y_lim</code></strong></dt>
 <dd>height of stream to plot</dd>
-<dt><strong><code>fp_out</code></strong></dt>
+<dt><strong><code>fig_size</code></strong></dt>
+<dd>x and y dimension of figure in inches</dd>
+<dt><strong><code>out_location</code></strong></dt>
 <dd>save location</dd>
+<dt><strong><code>out_name</code></strong></dt>
+<dd>filename (ignored if out_location not set)</dd>
 </dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fp_out):
+<pre><code class="python">def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fig_size=[10, 6.5], out_location=None, out_name=None):
     &#34;&#34;&#34; Plot the complete stream from 0,0 to x_lim and y_lim. Bed particles 
-    are plotted as light grey and model particles are platted in a colour
-    range dependant on their age. 
-    Allows for closer look at state of a subregion of the stream during simulation.
-    Also makes for fun gifs.
+    are plotted as light grey and model particles are plotted in a colour
+    range dependant on their age. Allows for closer look at state of a subregion of the 
+    stream during simulation. Also makes for fun gifs!
+
 
     Args:
         iteration: the iteration of the stream being plotted 
@@ -418,11 +501,14 @@ Also makes for fun gifs.</p>
         model_particles: array of all model particles
         x_lim: length of stream to plot
         y_lim: height of stream to plot
-        fp_out: save location
+        fig_size: x and y dimension of figure in inches
+        out_location: save location
+        out_name: filename (ignored if out_location not set) 
     &#34;&#34;&#34;
-    plt.clf()
-    fig = plt.figure(1)
-    fig.set_size_inches(20, 6.5)
+    if out_location is not None:
+        if out_name is None:
+            raise ValueError(&#39;The out_name argument must be set if saving file.&#39;)
+    fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
     ax = fig.add_subplot(1, 1, 1, aspect=&#39;equal&#39;)
     # NOTE: xlim and ylim modified for aspec ratio -- WIP
     ax.set_xlim((-2, x_lim))
@@ -454,38 +540,12 @@ Also makes for fun gifs.</p>
     plt.colorbar(p_m,orientation=&#39;horizontal&#39;,fraction=0.046, pad=0.1,label=&#39;Particle Age (iterations since last hop)&#39;)
     plt.title(f&#39;Iteration {iteration}&#39;)
 
-    filename = f&#39;iter{iteration}.png&#39;
-    plots_path = fp_out + filename
-    plt.savefig(plots_path, format=&#39;png&#39;,)
-        
+    if out_location is None:
+        plt.show()
+    else:
+        plots_path = out_location + out_name + &#39;.png&#39;
+        plt.savefig(plots_path, format=&#39;png&#39;,)
     return</code></pre>
-</details>
-</dd>
-<dt id="plotting.stream_gif"><code class="name flex">
-<span>def <span class="ident">stream_gif</span></span>(<span>start, stop, dir)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Plot gif of the streambed</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def stream_gif(start, stop, dir):
-    &#34;&#34;&#34;Plot gif of the streambed&#34;&#34;&#34;
-    in_filename = &#39;iter{i}.png&#39;
-    out_filename = &#39;simulation_snapshot.gif&#39;
-
-    fp_in = dir + in_filename
-    fp_out = dir + out_filename
-
-    step = 1
-    images = []
-
-    for i in range(start, stop, step):
-        im = Image.open(fp_in.format(i=i))
-        images.append(im)
-
-    images[0].save(fp_out, save_all=True, append_images=images[1:], optimize=True, duration=150, loop=0)</code></pre>
 </details>
 </dd>
 </dl>
@@ -501,10 +561,10 @@ Also makes for fun gifs.</p>
 <ul id="index">
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="plotting.crossing_info" href="#plotting.crossing_info">crossing_info</a></code></li>
-<li><code><a title="plotting.crossing_info2" href="#plotting.crossing_info2">crossing_info2</a></code></li>
+<li><code><a title="plotting.crossing_info_age" href="#plotting.crossing_info_age">crossing_info_age</a></code></li>
+<li><code><a title="plotting.downstream_boundary_hist" href="#plotting.downstream_boundary_hist">downstream_boundary_hist</a></code></li>
+<li><code><a title="plotting.downstream_boundary_ts" href="#plotting.downstream_boundary_ts">downstream_boundary_ts</a></code></li>
 <li><code><a title="plotting.stream" href="#plotting.stream">stream</a></code></li>
-<li><code><a title="plotting.stream_gif" href="#plotting.stream_gif">stream_gif</a></code></li>
 </ul>
 </li>
 </ul>

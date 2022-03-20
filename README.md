@@ -45,7 +45,7 @@ from sbelt import sbelt_runner
 sbelt_runner.run()
 ```
 
-To get started. For help, reach out with questions to the repository owner `szwiep` and reference the documenation in `docs/` and `paper/`! 
+For help, reach out with questions to the repository owner `szwiep` and reference the documenation in `docs/` and `paper/`! 
 
 
 ## Documentation

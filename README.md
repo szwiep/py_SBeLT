@@ -30,7 +30,7 @@ Then set your working directory to `py_SBeLT/` and build the project
 
 ## Getting Started
 
-Users can work through the Jupyter Notebooks provided to gain a better understanding of py_SBeLT's basic usage, potential, and data storage methods. Either launch the binder instance ([![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/szwiep/py_SBeLT/master?labpath=https%3A%2F%2Fgithub.com%2Fszwiep%2Fpy_SBeLT%2Ftree%2Fmaster%2Fdocs%2Fnotebooks)), clone the repository, or download the notebooks directly to get started.
+Users can work through the Jupyter Notebooks provided to gain a better understanding of py_SBeLT's basic usage, potential, and data storage methods. Either launch the binder instance ([![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/szwiep/py_SBeLT/master?labpath=docs%2Fnotebooks%2F)), clone the repository, or download the notebooks directly to get started.
 
 If notebook's aren't your thing, simply run:
 

@@ -48,7 +48,9 @@ entrained each iteration in INFO-level logs</dd>
 <ul>
 <li>setuptools console_scripts and '$ python sbelt_runner.py' executions
 can only use the default values currently. Need to add in sys.argv
-parsing to let parameters be user-defined in these cases</li>
+parsing to let parameters be user-defined in these cases. For now
+users using sbelt from source code can pass desired arguments to
+the run call in the <code>if __name_ == '__main__' function.</code>.</li>
 </ul>
 <details class="source">
 <summary>
@@ -78,7 +80,9 @@ Attributes:
 Todo:
     * setuptools console_scripts and &#39;$ python sbelt_runner.py&#39; executions 
         can only use the default values currently. Need to add in sys.argv 
-        parsing to let parameters be user-defined in these cases
+        parsing to let parameters be user-defined in these cases. For now
+        users using sbelt from source code can pass desired arguments to
+        the run call in the ``if __name_ == &#39;__main__&#39; function.``.
 &#34;&#34;&#34;
 import numpy as np
 import h5py
@@ -96,10 +100,11 @@ def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens =
                 num_subregions=4, level_limit=3, poiss_lambda=5, gauss=False, gauss_mu=1, \
                 gauss_sigma=0.25, data_save_interval=1, height_dependant_entr=False, \
                 out_path=&#39;.&#39;, out_name=&#39;sbelt-out&#39;): 
-    &#34;&#34;&#34; Execute an sbelt run.
+    &#34;&#34;&#34; Execute an sbelt run. 
 
     This function is responsible for calling appropriate logic
-    and storing relevant information, as outlined in project documentation. 
+    and storing relevant information as outlined in project documentation. 
+    It is the intended 
         
     An sbelt run consists of (generally) the following:
         (1) argument/parameter validation
@@ -107,7 +112,7 @@ def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens =
         (3) running x iterations of entrainments over the stream
         (4) storing particle and flux data from each iteration
         
-        
+
     Args:
         iterations: An int indicating number of iterations for model.
         bed_length: A float indicating the length of the stream to build 
@@ -142,7 +147,7 @@ def run(iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens =
 
     #############################################################################
     #  Create model data and data structures
-    # TODO: Better names for d, h variables
+    # TODO: Better names for d, h variables. What would be more intuitive?
     #############################################################################
 
     print(f&#39;Building Bed and Model particle arrays...&#39;)
@@ -270,22 +275,22 @@ def build_stream(parameters, h):
 
     Returns:
         bed_particles: An m-7 NumPy array representing the stream&#39;s m bed
-            particles. For example:
+            particles. For example::
 
-        [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
+            [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
         
         All bed particles should share the same diameter and y (elevation valu), all uids 
         must be negative, and to represent &#39;static&#39; bed particles active = 0 and loops = 0. 
 
         model_particles: An n-7 NumPy array representing the stream&#39;s n model 
-            particles in their initial placement. For example:
+            particles in their initial placement. For example::
         
-        [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
+            [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
 
         model_supp: An n-2 NumPy array with the uids of the two particles supporting each 
-            model particle. For example:
+            model particle. For example::
         
-        model_supp = [[[-1,-2]], ... ,[-3,-4]]
+            model_supp = [[[-1,-2]], ... ,[-3,-4]]
 
         The above example states that model particle with uid 0 (model_supp[0]) is supported
         by bed particles with uids -1 and -2. Similarly, the model particle with uid n 
@@ -352,6 +357,7 @@ def entrainment_event(model_particles, model_supp, bed_particles, event_particle
     return model_particles, model_supp, subregions
 
 if __name__ == &#39;__main__&#39;:
+    # assign argument values here if running from source code!
     run()</code></pre>
 </details>
 </section>
@@ -384,24 +390,28 @@ in-line and project documentation for further explanation.</dd>
 <h2 id="returns">Returns</h2>
 <dl>
 <dt><code>bed_particles</code></dt>
-<dd>An m-7 NumPy array representing the stream's m bed
-particles. For example:</dd>
-</dl>
+<dd>
+<p>An m-7 NumPy array representing the stream's m bed
+particles. For example::</p>
 <p>[[x, diam, y, uid, active, age, loops], &hellip; ,[x, diam, y, uid, active, age, loops]]</p>
+</dd>
+</dl>
 <p>All bed particles should share the same diameter and y (elevation valu), all uids
 must be negative, and to represent 'static' bed particles active = 0 and loops = 0. </p>
 <dl>
 <dt><code>model_particles</code></dt>
-<dd>An n-7 NumPy array representing the stream's n model
-particles in their initial placement. For example:</dd>
-</dl>
+<dd>
+<p>An n-7 NumPy array representing the stream's n model
+particles in their initial placement. For example::</p>
 <p>[[x, diam, y, uid, active, age, loops], &hellip; ,[x, diam, y, uid, active, age, loops]]</p>
-<dl>
+</dd>
 <dt><code>model_supp</code></dt>
-<dd>An n-2 NumPy array with the uids of the two particles supporting each
-model particle. For example:</dd>
-</dl>
+<dd>
+<p>An n-2 NumPy array with the uids of the two particles supporting each
+model particle. For example::</p>
 <p>model_supp = [[[-1,-2]], &hellip; ,[-3,-4]]</p>
+</dd>
+</dl>
 <p>The above example states that model particle with uid 0 (model_supp[0]) is supported
 by bed particles with uids -1 and -2. Similarly, the model particle with uid n
 (model_supp[n]) is supported by bed particles with uids -3 and -4.</p>
@@ -430,22 +440,22 @@ by bed particles with uids -1 and -2. Similarly, the model particle with uid n
 
     Returns:
         bed_particles: An m-7 NumPy array representing the stream&#39;s m bed
-            particles. For example:
+            particles. For example::
 
-        [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
+            [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
         
         All bed particles should share the same diameter and y (elevation valu), all uids 
         must be negative, and to represent &#39;static&#39; bed particles active = 0 and loops = 0. 
 
         model_particles: An n-7 NumPy array representing the stream&#39;s n model 
-            particles in their initial placement. For example:
+            particles in their initial placement. For example::
         
-        [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
+            [[x, diam, y, uid, active, age, loops], ... ,[x, diam, y, uid, active, age, loops]]
 
         model_supp: An n-2 NumPy array with the uids of the two particles supporting each 
-            model particle. For example:
+            model particle. For example::
         
-        model_supp = [[[-1,-2]], ... ,[-3,-4]]
+            model_supp = [[[-1,-2]], ... ,[-3,-4]]
 
         The above example states that model particle with uid 0 (model_supp[0]) is supported
         by bed particles with uids -1 and -2. Similarly, the model particle with uid n 
@@ -558,9 +568,10 @@ loops, and states, based on entrainment event placements.</dd>
 <span>def <span class="ident">run</span></span>(<span>iterations=1000, bed_length=100, particle_diam=0.5, particle_pack_dens=0.78, num_subregions=4, level_limit=3, poiss_lambda=5, gauss=False, gauss_mu=1, gauss_sigma=0.25, data_save_interval=1, height_dependant_entr=False, out_path='.', out_name='sbelt-out')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Execute an sbelt run.</p>
+<div class="desc"><p>Execute an sbelt run. </p>
 <p>This function is responsible for calling appropriate logic
-and storing relevant information, as outlined in project documentation. </p>
+and storing relevant information as outlined in project documentation.
+It is the intended </p>
 <p>An sbelt run consists of (generally) the following:
 (1) argument/parameter validation
 (2) building the stream data structures
@@ -614,10 +625,11 @@ automatically entrains particles that are on the level limit.</dd>
                 num_subregions=4, level_limit=3, poiss_lambda=5, gauss=False, gauss_mu=1, \
                 gauss_sigma=0.25, data_save_interval=1, height_dependant_entr=False, \
                 out_path=&#39;.&#39;, out_name=&#39;sbelt-out&#39;): 
-    &#34;&#34;&#34; Execute an sbelt run.
+    &#34;&#34;&#34; Execute an sbelt run. 
 
     This function is responsible for calling appropriate logic
-    and storing relevant information, as outlined in project documentation. 
+    and storing relevant information as outlined in project documentation. 
+    It is the intended 
         
     An sbelt run consists of (generally) the following:
         (1) argument/parameter validation
@@ -625,7 +637,7 @@ automatically entrains particles that are on the level limit.</dd>
         (3) running x iterations of entrainments over the stream
         (4) storing particle and flux data from each iteration
         
-        
+
     Args:
         iterations: An int indicating number of iterations for model.
         bed_length: A float indicating the length of the stream to build 
@@ -660,7 +672,7 @@ automatically entrains particles that are on the level limit.</dd>
 
     #############################################################################
     #  Create model data and data structures
-    # TODO: Better names for d, h variables
+    # TODO: Better names for d, h variables. What would be more intuitive?
     #############################################################################
 
     print(f&#39;Building Bed and Model particle arrays...&#39;)

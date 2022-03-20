@@ -10,7 +10,7 @@ from matplotlib.patches import Circle
 from scipy.optimize import curve_fit
 from scipy.special import factorial
 
-def stream(iteration, bed_particles, model_particles, x_lim, y_lim, out_location=None, out_name=None):
+def stream(iteration, bed_particles, model_particles, x_lim, y_lim, fig_size=[10, 6.5], out_location=None, out_name=None):
     """ Plot the complete stream from 0,0 to x_lim and y_lim. Bed particles 
     are plotted as light grey and model particles are plotted in a colour
     range dependant on their age. Allows for closer look at state of a subregion of the 
@@ -23,14 +23,14 @@ def stream(iteration, bed_particles, model_particles, x_lim, y_lim, out_location
         model_particles: array of all model particles
         x_lim: length of stream to plot
         y_lim: height of stream to plot
+        fig_size: x and y dimension of figure in inches
         out_location: save location
         out_name: filename (ignored if out_location not set) 
     """
     if out_location is not None:
         if out_name is None:
             raise ValueError('The out_name argument must be set if saving file.')
-    fig = plt.figure(1)
-    # fig.set_size_inches(20, 6.5)
+    fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
     ax = fig.add_subplot(1, 1, 1, aspect='equal')
     # NOTE: xlim and ylim modified for aspec ratio -- WIP
     ax.set_xlim((-2, x_lim))
@@ -65,18 +65,18 @@ def stream(iteration, bed_particles, model_particles, x_lim, y_lim, out_location
     if out_location is None:
         plt.show()
     else:
-        filename = f'iter{iteration}.png'
-        plots_path = out_location + filename
+        plots_path = out_location + out_name + '.png'
         plt.savefig(plots_path, format='png',)
     return
 
-def downstream_boundary_hist(particle_crossing_list, iterations, out_location=None, out_name=None):
+def downstream_boundary_hist(particle_crossing_list, iterations, fig_size=[8, 7], out_location=None, out_name=None):
     """Histogram of downstream particle crossings per iteration
     
     Args:
         particle_crossing_list: array of # of crossings per iteration
         iteration: number of iterations
         subsample: value to subsample by (use if data too large)
+        fig_size: x and y dimension of figure in inches
         out_location: save location. Default=None will print plot to screen
             but will not save.
         out_name: filename (ignored if out_location not set) 
@@ -85,7 +85,7 @@ def downstream_boundary_hist(particle_crossing_list, iterations, out_location=No
         if out_name is None:
             raise ValueError('The out_name argument must be set if saving file.')
 
-    fig = plt.figure(figsize=(8,7))
+    fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
     ax = fig.add_subplot(1, 1, 1)
     bins = np.arange(-0.5, 11.5, 1) # fixed bin size
     plt.title(f'Histogram of Particle Crossing, I = {iterations} iterations', fontsize=10, style='italic')
@@ -116,13 +116,14 @@ def downstream_boundary_hist(particle_crossing_list, iterations, out_location=No
         fig.savefig(fi_path, format='png', dpi=600)
     return
 
-def downstream_boundary_ts(particle_crossing_list, iterations, subsample, out_location=None, out_name=None):
+def downstream_boundary_ts(particle_crossing_list, iterations, subsample, fig_size=[8, 7], out_location=None, out_name=None):
     """Time series plot of downstream particle crossings per iteration
     
     Args:
         particle_crossing_list: array of # of crossings per iteration
         iteration: number of iterations
         subsample: value to subsample by (use if data too large)
+        fig_size: x and y dimension of figure in inches
         out_location: save location
         out_name: filename (ignored if out_location not set) 
     """
@@ -135,7 +136,7 @@ def downstream_boundary_ts(particle_crossing_list, iterations, subsample, out_lo
     Time = np.arange(1,  iterations + 1, subsample)
     Crossing_CS = np.cumsum(crossing_list)
     
-    fig = plt.figure(figsize=(8,7))
+    fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
     ax1 = fig.add_subplot(1,1,1)
     ax1.plot(Time, crossing_list, 'lightgray')
     plt.title('Timeseries of Particle Crossing at Downstream Boundary')
@@ -158,7 +159,7 @@ def downstream_boundary_ts(particle_crossing_list, iterations, subsample, out_lo
 
 
 
-def crossing_info_age(particle_crossing_list, particle_age_list, n_iterations, subsample, out_location=None, out_name=None):
+def crossing_info_age(particle_crossing_list, particle_age_list, n_iterations, subsample, fig_size=[8, 7],out_location=None, out_name=None):
     """Plot of particle crossing/flux vs. particle age. For very large values the
     data can be subsampled using the subsample parameter
     
@@ -167,6 +168,7 @@ def crossing_info_age(particle_crossing_list, particle_age_list, n_iterations, s
         particle_crossing_list: array of average particle age per iteration
         n_iteration: number of iterations
         subsample: value to subsample by (use if data too large)
+        fig_size: x and y dimension of figure in inches
         out_location: save location
         out_name: filename (ignored if out_location not set) 
     
@@ -174,8 +176,7 @@ def crossing_info_age(particle_crossing_list, particle_age_list, n_iterations, s
     if out_location is not None:
         if out_name is None:
             raise ValueError('The out_name argument must be set if saving file.')
-    fig = plt.figure(figsize=(8,7))
-    ax3 = fig.add_subplot(1, 1, 1)
+
     #####
     crossing_list_avg = np.convolve(particle_crossing_list, np.ones(subsample)/subsample, mode='valid')
     age_list_avg = np.convolve(particle_age_list, np.ones(subsample)/subsample, mode='valid')
@@ -184,10 +185,10 @@ def crossing_info_age(particle_crossing_list, particle_age_list, n_iterations, s
     age_list = age_list_avg[0::subsample]
     Time = np.arange(1,  n_iterations + 1, subsample)
 
-    fig = plt.figure(figsize=(8,7))
+    fig = plt.figure(figsize=(fig_size[0], fig_size[1]))
     ax3 = fig.add_subplot(1,1,1)
     ax3.plot(Time, crossing_list, 'lightgray')
-    plt.title('Timeseries of Particle Crossing at Downstream Boundary')
+    plt.title('Timeseries of Particle Crossing at Downstream Boundary and Average Age')
     ax3.set_xlabel('Numerical Step')
     ax3.set_ylabel('Particle Crossing')
     ax3.set_yticks([0, 1, 2, 3, 4, 5, 6, 7, 8])

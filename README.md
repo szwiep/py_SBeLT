@@ -1,3 +1,6 @@
+[![status](https://joss.theoj.org/papers/d7b9cc16b87e8875ec7115a22e1413fe/status.svg)](https://joss.theoj.org/papers/d7b9cc16b87e8875ec7115a22e1413fe)
+[![szwiep](https://circleci.com/gh/szwiep/py_SBeLT.svg?style=svg)](https://app.circleci.com/pipelines/github/szwiep/py_SBeLT?filter=all)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/szwiep/py_SBeLT/master?labpath=docs%2Fnotebooks%2F)
 # Py_SBeLT
 
 |![gif of 500 model runs](figures/Cropped_ModelGif.gif)

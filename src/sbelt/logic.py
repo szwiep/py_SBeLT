@@ -8,7 +8,7 @@ arrays which represent multiple stream particles. In these
 n-7 arrays, a _single_ particle is represented by a NumPy array 
 with 7 attributes::
 
-    [x_location, diam, y_location, UID, active state, age, loop age]
+    [x_location, diam, y_location, UID, active state, age, loop]
 
 In this general example, x_location and y_location define the centre point of 
 spherical particle whose diameter is defined by diam. See the project docs for

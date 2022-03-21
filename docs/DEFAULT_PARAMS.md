@@ -7,8 +7,7 @@ concerning the ranges of parameter values that have been testing using **'py_SBe
 
 **Default Value = 1000**
 
-We use a default value of 1000 for *Iterations* to allow users to explore **'py_SBeLT'** in an efficient way without having to wait to long for results.
-Simulations are run using *Iterations = 10$^6$*.
+We use a default value of 1000 for *Iterations* to allow users to explore **'py_SBeLT'** in an efficient way without having to wait too long for results.
 
 ### Bed_length
 
@@ -116,4 +115,3 @@ We use a default setting of writing output to the active directory.
 **Default Value = 'sbelt-out'**
 
 We use a default setting of writing output to *sbelt-out*.
-Simulations are run using *Iterations = 10$^6$*.

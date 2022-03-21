@@ -52,7 +52,7 @@ For help, reach out with questions to the repository owner `szwiep` and referenc
 
 ## Documentation
 
-Documentation, including Jupyter Notebooks, API documentation, default parameters, and model nomeculture, can be found in the repository's `docs/` directory. Additional information regarding the theoritical motivation of the model can be found in the `paper/paper.md` and `THEORY.md` files.
+Documentation, including Jupyter Notebooks, API documentation, default parameters, and model nomenclature, can be found in the repository's `docs/` directory. Additional information regarding the theoritical motivation of the model can be found in the `paper/paper.md` and `THEORY.md` files.
 
 
 ## Attribution and Citation

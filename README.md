@@ -57,7 +57,7 @@ Documentation, including Jupyter Notebooks, API documentation, default parameter
 
 ## Attribution and Citation
 
-If you use `Simframe`, please remember to cite []().
+If you use `Simframe`, please remember to cite (to be updated later)[]().
 
 ```
 @article{pySBelt,

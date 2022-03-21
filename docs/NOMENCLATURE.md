@@ -1,4 +1,4 @@
-# Nomeculture
+# Nomenclature
 
 ## A quick overview of terms used in source code and documentation
 

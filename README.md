@@ -55,9 +55,28 @@ For help, reach out with questions to the repository owner `szwiep` and referenc
 Documentation, including Jupyter Notebooks, API documentation, default parameters, and model nomeculture, can be found in the repository's `docs/` directory. Additional information regarding the theoritical motivation of the model can be found in the `paper/paper.md` and `THEORY.md` files.
 
 
+## Attribution and Citation
 
+If you use `Simframe`, please remember to cite []().
 
+```
+@article{pySBelt,
+  doi = {},
+  url = {},
+  year = {2022},
+  publisher = {The Open Journal},
+  volume = {},
+  number = {},
+  pages = {},
+  author = {Sarah Zwiep, Shawn Chartrand and Greg Baker},
+  title = {pySBeLT: A Python software for stochastic sediment transport under rarefied conditions},
+  journal = {Journal of Open Source Software}
+}
 
-## Attribution
+```
 
-TBD
+## Ackowledgements
+
+`py_SBeLT` has received funding from NSERC Undergraduate Student Research Awards Program and Simon Fraser University.
+
+`py_SBeLT` was developed at the [Simon Fraser University](https://www.sfu.ca/) within the [School of Environmental Science](https://www.sfu.ca/evsc.html).

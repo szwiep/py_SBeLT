@@ -57,6 +57,8 @@ For help, reach out with questions to the repository owner `szwiep` and referenc
 
 Documentation, including Jupyter Notebooks, API documentation, default parameters, and model nomenclature, can be found in the repository's `docs/` directory. Additional information regarding the theoritical motivation of the model can be found in the `paper/paper.md` and `THEORY.md` files.
 
+The API documentation is in HTML format. These files can either be downloaded and viewed directly in your browser or can be viewed using the [GitHub HTML preview project](https://htmlpreview.github.io/). For example here are the [sbelt_runner](https://htmlpreview.github.io/?https://github.com/szwiep/py_SBeLT/blob/update_docs/docs/API/sbelt_runner.html) and [plotting](https://htmlpreview.github.io/?https://github.com/szwiep/py_SBeLT/blob/update_docs/docs/API/plotting.html) API through the HTML preview.
+
 
 ## Attribution and Citation
 

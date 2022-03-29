@@ -35,9 +35,10 @@ Then set your working directory to `py_SBeLT/` and build the project
 
 ### Testing your installation
 
-Put a few sentences here describing how someone would test their local installation. May be as simple as instructing someone to run 
+If you've installed from source, you can test the installation by setting your working directory to `py_SBeLT/` 
+and running the following
 
-```
+```bash
 python -m unittest src/tests/test_*
 ```
 

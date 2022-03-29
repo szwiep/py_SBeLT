@@ -33,6 +33,14 @@ Then set your working directory to `py_SBeLT/` and build the project
  pip install -e .
 ```
 
+### Testing your installation
+
+Put a few sentences here describing how someone would test their local installation. May be as simple as instructing someone to run 
+
+```
+python -m unittest src/tests/test_*
+```
+
 ## Getting Started
 
 Users can work through the Jupyter Notebooks provided to gain a better understanding of py_SBeLT's basic usage, potential, and data storage methods. Either launch the binder instance ([![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/szwiep/py_SBeLT/master?labpath=docs%2Fnotebooks%2F)), clone the repository, or download the notebooks directly to get started.
@@ -55,9 +63,16 @@ For help, reach out with questions to the repository owner `szwiep` and referenc
 
 ## Documentation
 
-Documentation, including Jupyter Notebooks, API documentation, default parameters, and model nomenclature, can be found in the repository's `docs/` directory. Additional information regarding the theoritical motivation of the model can be found in the `paper/paper.md` and `THEORY.md` files.
+Documentation, including Jupyter Notebooks, API documentation, [default parameters](https://github.com/szwiep/py_SBeLT/blob/master/docs/DEFAULT_PARAMS.md), and [model nomenclature](https://github.com/szwiep/py_SBeLT/blob/master/docs/NOMENCLATURE.md), can be found in the repository's `docs/` directory. Additional information regarding the theoritical motivation of the model can be found in the [`paper/paper.md`](https://github.com/szwiep/py_SBeLT/blob/master/paper/paper.md) and [`THEORY.md`](https://github.com/szwiep/py_SBeLT/blob/master/THEORY.md) files.
 
-The API documentation is in HTML format. These files can either be downloaded and viewed directly in your browser or can be viewed using the [GitHub HTML preview project](https://htmlpreview.github.io/). For example here are the [sbelt_runner](https://htmlpreview.github.io/?https://github.com/szwiep/py_SBeLT/blob/update_docs/docs/API/sbelt_runner.html) and [plotting](https://htmlpreview.github.io/?https://github.com/szwiep/py_SBeLT/blob/update_docs/docs/API/plotting.html) API through the HTML preview.
+Two Jupyter Notebooks describe [basic usage](https://github.com/szwiep/py_SBeLT/blob/master/docs/notebooks/basic_usage_sbelt.ipynb) and [the structure of the output hdf5 format file](data_storage_sbelt.ipynb).
+
+The API documentation is in HTML format. These files can either be downloaded and viewed directly in your browser or can be viewed using the [GitHub HTML preview project](https://htmlpreview.github.io/). 
+  - [sbelt_runner](https://htmlpreview.github.io/?https://github.com/szwiep/py_SBeLT/blob/update_docs/docs/API/sbelt_runner.html)
+  - [plotting](https://htmlpreview.github.io/?https://github.com/szwiep/py_SBeLT/blob/update_docs/docs/API/plotting.html)
+  - [logic](https://htmlpreview.github.io/?https://github.com/szwiep/py_SBeLT/blob/update_docs/docs/API/logic.html)
+  - [test_logic](https://htmlpreview.github.io/?https://github.com/szwiep/py_SBeLT/blob/update_docs/docs/API/test_logic.html)
+  - [utils](https://htmlpreview.github.io/?https://github.com/szwiep/py_SBeLT/blob/update_docs/docs/API/utils.html)
 
 
 ## Attribution and Citation

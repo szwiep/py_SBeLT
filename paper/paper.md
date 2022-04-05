@@ -56,28 +56,26 @@ flux is represented as a counting phenomenon where the number of particles in mo
 variable [@Ancey:2008]. The model supports ensemble simulations so that repeat numerical experiments can be conducted efficiently,
 or the problem can be probed across a range of input parameter values (discussed below).
 
-`pySBeLT` is run forward in time according to default or user specified parameter values (see README.md and DEFAULT_PARAMS.md for 
-more details). After initialization, `pySBeLT` first constructs a bed of fixed particles of set_diam in both the downstream and 
-cross-stream dimensions (one particle wide in the present build), and over a downstream domain length **'x_max'**. Bed surface particles
-of **'set_diam'** are then randomly placed at vertices between fixed bed particles until the **'pack_density'** is met. Vertices are defined 
+`pySBeLT` is run forward in time according to default or user specified parameter values. After initialization, `pySBeLT` first constructs a bed of fixed particles of set_diam in both the downstream and 
+cross-stream dimensions (one particle wide in the present build), and over a downstream domain length **'bed_length'**. Bed surface particles
+of **'particle_diam'** are then randomly placed at vertices between fixed bed particles until the **'particle_pack_frac'** is met. Vertices are defined 
 by a contact point between two adjacent particles. The bed of surface particles is then separated into **'num_subregions'**, and at this 
-point the forward simulations are ready to commence. The subregion boundaries are located by: (1) default or user specified **'num_subregions'**(see 
-README.md and DEFAULT_PARAMS.md), and (2) the subregion boundaries occur at domain locations set by a distance = **'x_max'** / **'num_subregions'**.
+point the forward simulations are ready to commence. The subregion boundaries are located by: (1) the user specifies the **'num_subregions'**, and (2) the subregion boundaries occur at domain locations set by a distance = **'bed_length'** / **'num_subregions'**.
 
 Simulation iterations involve three steps (Fig. 1): (1) the number of particle entrainment events per **'num_subregions'** are drawn from a Poisson pmf, 
-and this is done randomly for each numerical step up to **'n_iterations'**; (2) surface particles from each subregion are randomly selected 
+and this is done randomly for each numerical step up to **'iterations'**; (2) surface particles from each subregion are randomly selected 
 for entrainment, and if there are insufficient surface particles available for entrainment, then all available particles are moved; (3) each 
-entrained particle moves a distance according to a randomly sampled value from either the normal or lognormal distribution (see THEORY.md for more 
-details), and is placed at the nearest vertex between two particles that is available for placement. Placed particles are permitted to stack up to the 
-**'level_limit in height'**. Particles are not permitted to travel to the same available vertex. When this occurs the discrepancy is addressed by 
-randomly sampling for one particle to deposit at the identified vertex and the remaining particle(s) are placed at the nearest available vertices. Travel 
-distances of particles that exceed **'x_max'** are returned and queued at the upstream boundary, and are introduced back into the domain at the next 
-numerical step according to travel distance sampling described above. This overall process repeats for the specified **'n_iterations'**.
+entrained particle moves a distance according to a randomly sampled value from either the normal or lognormal distribution (see THEORY.md for more details), and 
+is placed at the nearest vertex between two particles that is available for placement. Placed particles are permitted to stack up to the **'level_limit'** in 
+height. Particles are not permitted to travel to the same available vertex. To stop this from occuring the entrained particles are moved in random order and once a particle is placed on a vertex, that vertex is no longer considered available for any subsequent particle entrainments for that iteration. Travel distances of particles that exceed 
+**'bed_length'** are returned and queued at the upstream boundary, and are introduced back into the domain at the next numerical step according to travel distance 
+sampling described above. This overall process repeats for the specified **'iterations'**.
 
 `pySBeLT` tracks a number of different parameters through a simulation: the vertical and horizontal positions of every particle center, 
-the randomly sampled number of entrainment events, the number of particles actually entrained, the randomly sampled particle travel 
-distance, the actual particle travel distance, the particle ‘age’, or the number of numerical steps since last entrainment for every 
-particle, and the number of particles which cross all boundaries, i.e. sub-region and downstream at x_max. All values are stored 
+the randomly sampled number of entrainment events, the number of particles actually entrained, the actual particle travel distance, 
+the particle ‘age’, or the number of numerical steps since last entrainment for every 
+particle, and the number of particles which cross all boundaries, i.e. sub-region and downstream at x_max. All values, or the values needed to 
+derive this information, are stored 
 in HDF5 data files using the `h5py` package [@Collette:2014]. 
 
 `pySBeLT` produces a time varying signal of particle flux counted at the downstream domain (as well as internal subregion domains), with a particle 
@@ -92,7 +90,7 @@ graduate courses emphasizing bed load sediment transport.
 
 |![Image](../paper/figures/Figure1.png)
 |:--:| 
-| *Figure 1. Graphic illustrating the three steps of particle transport modelling by `py_SBeLT`. The **'level_limit in height'** is set to 3 in the graphic.* |
+| *Figure 1. Graphic illustrating the three steps of particle transport modelling by `py_SBeLT`. The **'level_limit'** in height is set to 3 in the graphic.* |
 
 |![Image](../paper/figures/Figure2.png)
 |:--:| 

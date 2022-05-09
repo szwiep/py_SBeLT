@@ -33,7 +33,8 @@ nature of transport due to the movements of individual particles [@Einstein:1937
 moving particles and those on the bed surface [@Ancey:2006; @Ancey:2008;LeeJerol:2018]. Here, we present an open-source Python model,
 `pySBeLT`, which simulates the kinematics of rarefied particle transport (low rates) as a stochastic process along a riverbed profile.
 The primary aim of `pySBeLT` is to offer an efficient and reasonable numerical means to help in examining connections between individual
-particle motions and local transport rates, or the flux.
+particle motions and local transport rates, or the flux. We suggest that `pySBeLT` is a suitable teaching tool to help introduce 
+bed load transport to advanced undergraduate and graduate students alike.
 
 # Statement of need
 
@@ -74,7 +75,9 @@ details), and is placed at the nearest vertex between two particles that is avai
 **'level_limit'** in height. Particles are not permitted to travel to the same available vertex. To stop this from occuring the entrained particles are
 moved in random order and once a particle is placed on a vertex, that vertex is no longer considered available for any subsequent particle entrainments
 for that iteration. Travel distances of particles that exceed **'bed_length'** are returned and queued at the upstream boundary, and are introduced back
-into the domain at the next numerical step according to travel distance sampling described above. This overall process repeats for the specified
+into the domain at the next numerical step according to travel distance sampling described above. This specifially means that the particle travel
+distance which resulted in crossing of the downstream domain does not influence the travel distance of the particle when queued at the upstream
+domain--a new travel distance for such particles will be sampled during the next numerical step. This overall process repeats for the specified
 **'iterations'**.
 
 `pySBeLT` tracks a number of different parameters through a simulation: the vertical and horizontal positions of every particle center, 

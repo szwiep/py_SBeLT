@@ -44,7 +44,7 @@ The particle bed in the model is characterized by a discrete number of available
 between adjacent particles (subject to the level limit--see DEFAULT_PARAMS.md). As a result, the total number of deposition locations scales 
 with the total number of particles which define the domain length. This may appear problematic because, in essence, this model setup may bias simulated 
 particle motions by limiting travel distances to a finite number of deposition locations. However, sediment particle disentrainment in rivers is 
-influenced by the positions of particles on the bed surface, and previous publications commonly express travel distance as a probability mass function, 
+influenced by the position of particles on the bed surface, and previous publications commonly express travel distance as a probability mass function, 
 or a discrete density function (Lajueness et al., 2010; Fathel et al., 2015). 
 
 Model testing revealed two important outcomes with respect to parameterizing the particle travel distance, noting that **'py_SBeLT'** samples distances 
@@ -52,9 +52,8 @@ from probability density functions (pdf) because it simplifies the process of fi
 functions with modes increasingly close to zero, or scaling as a few particle diameter equivalents in length or less, leads to two challenges. First, the 
 development of isolated particle piles, and second, realized particle travel distances that increasingly diverge from the underlying randmoly sampled 
 distance. For example, if the travel distance mode is 1 or 2 particle diameter equivalents in length, the model searches for deposition locations which 
-are relatively close to the point of 
-entrainment. When this occurs at multiple locations on the bed, over a relatively short period of time particle piles emerge--i.e. particles stack and 
-form triangular piles (see gif at github home page). 
+are relatively close to the point of entrainment. When this occurs at multiple locations on the bed, over a relatively short period of time particle
+piles emerge--i.e. particles stack and form triangular piles (see gif at github home page). 
 
 Because **'py_SBeLT'** simulates rarefied transport conditions, these piles tend to initially occupy isolated posiitons in space. However, as the 
 particle piles grow in height up to a vertical height limit (see readme.md and paper.md), locally available deposition locations are increasingly distant 
@@ -66,22 +65,29 @@ and anomalous transport behavior.
 We overcame these two challenges by using probability density functions which provide for modes displaced from zero (generally > 1 or more particle 
 diameter equivalents in length), and for which the probability of sampling relatively small values Pr(X<=x) vanishes as x &#8594; 0. At present, 
 **'py_SBeLT'** uses the normal or lognormal probability density functions to specify sediment particle travel distances (Fig. 2). The normal distribution 
-notably does not satisfy observations of travel distance distributions that are skewed to long lengths. However, we have incorporated the normal 
-distribution as a model reference condition with respect to generating quasi-random sets of travel distances. 
+notably does not satisfy observations of travel distance distributions that are skewed to long lengths, and it can also yield negative travel distances.
+With respect to the first issue, we have incorporated the normal distribution within the model build as a reference condition for generating
+quasi-random sets of travel distances, consistent with numerous statistical sampling approaches. We address the second issue by limiting possible travel
+distance values to >= 0 when the normal distribution is selected.
 
 |![Image](/figures/lognormal.png)
 |:--:| 
 | *Figure 2. Example Lognormal pdf used to set the particle travel distance in **`py_SBeLT`**.* |
 
 The selected probability density function is specified by the user or default settings can be used (see README.md, paper.md and DEFAULT_PARAMS.md).
-The readme.md provides the distribution function parameter value ranges tested to date. The gamma distribution, for example, can also provide modes 
-displaced from zero, and with distribution shapes that are skewed to longer lengths. Furthermore, physical experiments that in part motivated development 
-of **`py_SBeLT`** report that particle hop distances are well described by the Weibull distribution (Fathel et al., 2015)(Fig. 3). Note however that 
-**'py_SBeLT'** would likely produce isolated particle piles if the shape parameter *k* were constrained to values <1 (Fathel et al., 2015). This 
-limitation reflects the present model build which simulates rarefied transport along a downstream profile of particles with available deposition 
-locations constrained by particle diameter. We expect that a model build expanded to cross-stream scales of many particle diameters in length might be 
-more capable of simulating the experimental conditions reported by Fathel et al. (2015). These additional pdfs can be easily incorporated into future 
-model extensions using the **'scipy.stats'** library of functions.
+The readme.md provides the distribution function parameter value ranges tested to date. Additional probability density functions can also be used to 
+sample particle travel distances. For example, the gamma distribution can provide modes displaced from zero, and with distribution shapes that are 
+skewed to longer lengths. Physical experiments that in part motivated development of **`py_SBeLT`** report that particle hop distances are 
+well described by the Weibull distribution (Fathel et al., 2015)(Fig. 3). Note however that **'py_SBeLT'** would likely produce isolated particle piles 
+if the shape parameter *k* of the Weibull distribution were constrained to values <1 (Fathel et al., 2015). This limitation reflects the present model
+build which simulates rarefied transport along a downstream profile of particles with available deposition locations constrained by particle diameter. We 
+expect that a model build expanded to cross-stream scales of many particle diameters in length might be more capable of simulating the experimental 
+conditions reported by Fathel et al. (2015). An additional probability density function that could be incorporated for travel distance sampling is the 
+Pareto distribution, which is subject to a minimum value for the model random variable. In the present case the minimum value could be set to ~> 1 or 
+more particle diameter equivalents in length in order to avoid the particle piling issue described above. The Pareto distribution, like the lognormal 
+distribution, also has the advantage of being heavy-tailed where the variance becomes undefined for certain shape parameters. This provides an 
+additional opportunities to illustrate the consequences of heavy-tailed distributions and the influence on the time-series of sediment flux. These 
+additional and other pdfs can be easily incorporated into future model extensions using the **'scipy.stats'** library of functions.
 
 |![Image](/figures/weibull.png)
 |:--:| 

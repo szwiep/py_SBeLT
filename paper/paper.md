@@ -49,8 +49,8 @@ the transport of less than approximately 12% of particles on the upstream bed su
 suggests that the flux measured across a boundary or within an area of bed surface is directly linked to the motions 
 of individual particles arriving from upstream locations [@Furbish:2012]. 
 
-Because particle motions are controlled by fluid turbulence, the irregular bed surface, and collective effects 
-[@Ancey:2006; @Ancey:2008; @LeeJerol:2018], the connection between particle movements and the bedload 
+Particle motions are controlled by several influencing factors including fluid turbulence, the irregular bed surface, and collective effects 
+[@Ancey:2006; @Ancey:2008; @LeeJerol:2018]. As a result, the connection between particle movements and the bedload 
 transport rate has been difficult to formulate mathematically. `pySBeLT` provides an extensible framework within 
 Python to numerically examine correlations between upstream particle entrainment rates and travel distances, with downstream 
 flux. `pySBeLT` was motivated by a birth-death, immigration-emigration Markov model for bedload transport [@Ancey:2008; @Ancey:2010]. 

@@ -46,7 +46,7 @@ moving particles are rare, and a relatively small fraction of particles on the b
 [@Ancey:2010; @Roseberry:2012; @Fathel:2015; @Wu:2019]. For example, laboratory experiments 
 using a downstream light table counting device and conducted at roughly twice the shear stress threshold for particle motion involve 
 the transport of less than approximately 12% of particles on the upstream bed surface [@Chartrand:2017]. This result 
-highlights that the flux measured across a boundary or within an area of bed surface is directly linked to the motions 
+suggests that the flux measured across a boundary or within an area of bed surface is directly linked to the motions 
 of individual particles arriving from upstream locations [@Furbish:2012]. 
 
 Because particle motions are controlled by fluid turbulence, the irregular bed surface, and collective effects 

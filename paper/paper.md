@@ -73,8 +73,8 @@ for entrainment, and if there are insufficient surface particles available for e
 entrained particle moves a distance according to a randomly sampled value from either the normal or lognormal distribution (see THEORY.md for more 
 details), and is placed at the nearest vertex between two particles that is available for placement. Placed particles are permitted to stack up to the
 **'level_limit'** in height. Particles are not permitted to travel to the same available vertex. To stop this from occuring the entrained particles are
-moved in random order and once a particle is placed on a vertex, that vertex is no longer considered available for any subsequent particle entrainments
-for that iteration. Travel distances of particles that exceed **'bed_length'** are returned and queued at the upstream boundary, and are introduced back
+moved in random order and once a particle is placed on a vertex, that vertex is no longer considered available for the present iteration. Travel
+distances of particles that exceed **'bed_length'** are returned and queued at the upstream boundary, and are introduced back
 into the domain at the next numerical step according to travel distance sampling described above. This specifially means that the particle travel
 distance which resulted in crossing of the downstream domain does not influence the travel distance of the particle when queued at the upstream
 domain--a new travel distance for such particles will be sampled during the next numerical step. This overall process repeats for the specified

@@ -85,7 +85,7 @@ conditions reported by Fathel et al. (2015). An additional probability density f
 Pareto distribution, which is subject to a minimum value for the model random variable. In the present case the minimum value could be set to ~> 1 or 
 more particle diameter equivalents in length in order to avoid the particle piling issue described above. The Pareto distribution, like the lognormal 
 distribution, also has the advantage of being heavy-tailed where the variance becomes undefined for certain shape parameters. This provides an 
-additional opportunity to illustrate the consequences of heavy-tailed distributions and the influence on the time-series of sediment flux. These 
+additional opportunity to illustrate the consequences of heavy-tailed distributions and resulting effects on the time-series of sediment flux. These 
 additional and other pdfs can be easily incorporated into future model extensions using the **'scipy.stats'** library of functions.
 
 |![Image](/figures/weibull.png)

@@ -44,7 +44,7 @@ a theoretical foundation for the treatment of bedload transport as a stochastic 
 conditions [@Furb:2016], where transport rates are low to moderate, interactions between two or more 
 moving particles are rare, and a relatively small fraction of particles on the bed surface participate in transport 
 [@Ancey:2010; @Roseberry:2012; @Fathel:2015; @Wu:2019]. For example, laboratory experiments 
-using a downstream light table counting device and conducted at roughly twice the threshold for particle motion involve 
+using a downstream light table counting device and conducted at roughly twice the shear stress threshold for particle motion involve 
 the transport of less than approximately 12% of particles on the upstream bed surface [@Chartrand:2017]. This result 
 highlights that the flux measured across a boundary or within an area of bed surface is directly linked to the motions 
 of individual particles arriving from upstream locations [@Furbish:2012]. 

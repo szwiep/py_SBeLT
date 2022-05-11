@@ -74,7 +74,7 @@ distance values to >= 0 when the normal distribution is selected.
 | *Figure 2. Example Lognormal pdf used to set the particle travel distance in **`py_SBeLT`**.* |
 
 The selected probability density function is specified by the user or default settings can be used (see README.md, paper.md and DEFAULT_PARAMS.md).
-The readme.md provides the distribution function parameter value ranges tested to date. Additional probability density functions can also be used to 
+The README.md provides the distribution function parameter value ranges tested to date. Additional probability density functions can also be used to 
 sample particle travel distances. For example, the gamma distribution can provide modes displaced from zero, and with distribution shapes that are 
 skewed to longer lengths. Physical experiments that in part motivated development of **`py_SBeLT`** report that particle hop distances are 
 well described by the Weibull distribution (Fathel et al., 2015)(Fig. 3). Note however that **'py_SBeLT'** would likely produce isolated particle piles 

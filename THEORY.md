@@ -21,10 +21,9 @@ randomly sampled from the Poisson pmf to define the entrainment events.
 
 Use of the Poisson pmf is linked to sediment transport theory and supporting experimental results which show **'rarefied'** transport (Furbish et al., 
 2016) can be characterized as a Poisson process when entrainment includes effects related to fluid phenomena under steady state transport conditions
-(Ancey et al., 2008). Collective related entrainment effects are not represented (Ancey et al., 2008; Lee and Jerolmack, 2018). We have tested 
-2018) **'py_SBeLT'** for a range of rate constant values (see readme.md). Results from our testing reveal that the value specified for &#955;<sub>1</sub> 
-2019) along with the **'num_subregions'** controls the intensity, or magnitude of transport. This makes intuitive sense because the local transport 
-2020) intensity is directly linked to the number of sediment particles entrained from the bed surface.
+(Ancey et al., 2008). Collective related entrainment effects are not included in the present build of **'py_SBeLT'** (Ancey et al., 2008; Lee and
+Jerolmack, 2018). We have tested **'py_SBeLT'** for a range of rate constant values (see README.md). Results from our testing reveal that the value
+specified for &#955;<sub>1</sub> along with the **'num_subregions'** controls the intensity, or magnitude of transport. This makes intuitive sense because the local transport intensity is directly linked to the number of sediment particles entrained from the bed surface.
 
 ### Travel Distance
 

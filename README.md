@@ -89,7 +89,7 @@ If you use `Simframe`, please remember to cite (to be updated later)[]().
   volume = {},
   number = {},
   pages = {},
-  author = {Sarah Zwiep, Shawn Chartrand and Greg Baker},
+  author = {Sarah Zwiep, Shawn Chartrand},
   title = {pySBeLT: A Python software for stochastic sediment transport under rarefied conditions},
   journal = {Journal of Open Source Software}
 }

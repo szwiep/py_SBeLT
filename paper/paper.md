@@ -30,7 +30,7 @@ It is common to treat the transport process as a predictive problem in which the
 observation point is a function of local water flow conditions and the grain size distribution of the bed material 
 [@Parker:2008; @Wainwright:2015; @Ancey:2020]. However, a predictive approach to the bed load problem neglects the stochastic 
 nature of transport due to the movements of individual particles [@Einstein:1937; @FurbDoane:2021], and interactions between
-moving particles and those on the bed surface [@Ancey:2006; @Ancey:2008;LeeJerol:2018]. Here, we present an open-source Python model,
+moving particles and those on the bed surface [@Ancey:2006; @Ancey:2008; LeeJerol:2018]. Here, we present an open-source Python model,
 `pySBeLT` (which stands for Stochastic Bed Load Transport), which simulates the kinematics of rarefied particle transport (low rates) 
 as a stochastic process along a riverbed profile. The primary aim of `pySBeLT` is to offer an efficient and reasonable numerical means
 to probe connections between individual particle motions and local transport rates, or the flux. We suggest that `pySBeLT` is a suitable 

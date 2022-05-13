@@ -31,10 +31,10 @@ observation point is a function of local water flow conditions and the grain siz
 [@Parker:2008; @Wainwright:2014; @Ancey:2020]. However, a predictive approach to the bed load problem neglects the stochastic 
 nature of transport due to the movements of individual particles [@Einstein:1937; @FurbDoane:2021], and interactions between
 moving particles and those on the bed surface [@Ancey:2006; @Ancey:2008;LeeJerol:2018]. Here, we present an open-source Python model,
-`pySBeLT`, which simulates the kinematics of rarefied particle transport (low rates) as a stochastic process along a riverbed profile.
-The primary aim of `pySBeLT` is to offer an efficient and reasonable numerical means to probe connections between individual
-particle motions and local transport rates, or the flux. We suggest that `pySBeLT` is a suitable teaching tool to help introduce 
-bed load transport to advanced undergraduate and graduate students alike.
+`pySBeLT` (which stands for Stochastic Bed Load Transport), which simulates the kinematics of rarefied particle transport (low rates) 
+as a stochastic process along a riverbed profile. The primary aim of `pySBeLT` is to offer an efficient and reasonable numerical means
+to probe connections between individual particle motions and local transport rates, or the flux. We suggest that `pySBeLT` is a suitable 
+teaching tool to help introduce bed load transport to advanced undergraduate and graduate students alike.
 
 # Statement of need
 

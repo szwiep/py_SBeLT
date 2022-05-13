@@ -28,7 +28,7 @@ Granular sediment of various sizes moves downstream along river beds when water 
 the bed surface. This process is known as bed load sediment transport because the particles travel close to the boundary. 
 It is common to treat the transport process as a predictive problem in which the mean transport rate past a stationary 
 observation point is a function of local water flow conditions and the grain size distribution of the bed material 
-[@Parker:2008; @Wainwright:2014; @Ancey:2020]. However, a predictive approach to the bed load problem neglects the stochastic 
+[@Parker:2008; @Wainwright:2015; @Ancey:2020]. However, a predictive approach to the bed load problem neglects the stochastic 
 nature of transport due to the movements of individual particles [@Einstein:1937; @FurbDoane:2021], and interactions between
 moving particles and those on the bed surface [@Ancey:2006; @Ancey:2008;LeeJerol:2018]. Here, we present an open-source Python model,
 `pySBeLT` (which stands for Stochastic Bed Load Transport), which simulates the kinematics of rarefied particle transport (low rates) 
@@ -43,7 +43,7 @@ a theoretical foundation for the treatment of bedload transport as a stochastic 
 @FurbDoane:2021]. Associated theories are commonly tested against laboratory data from "rarefied" transport 
 conditions [@Furb:2016], where transport rates are low to moderate, interactions between two or more 
 moving particles are rare, and a relatively small fraction of particles on the bed surface participate in transport 
-[@Ancey:2010; @Roseberry:2012; @Fathel:2015; @Wu:2019]. For example, laboratory experiments 
+[@Ancey:2010; @Roseberry:2012; @Fathel:2015; @Wu:2020]. For example, laboratory experiments 
 using a downstream light table counting device and conducted at roughly twice the shear stress threshold for particle motion involve 
 the transport of less than approximately 12% of particles on the upstream bed surface [@Chartrand:2017]. This result 
 suggests that the flux measured across a boundary or within an area of bed surface is directly linked to the motions 

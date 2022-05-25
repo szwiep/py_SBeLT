@@ -8,7 +8,7 @@ Todo:
     A headache to resolve, but not impedeing functionality.
 """
 import unittest
-from ..sbelt import utils
+from src.sbelt import utils
 
 class TestValidateArguments(unittest.TestCase):
 

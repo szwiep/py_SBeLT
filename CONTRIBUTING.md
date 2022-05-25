@@ -9,7 +9,7 @@ The model is tested with Python's [unittest](https://docs.python.org/3/library/u
 To locally test the model and/or any changes you make to the source code, set your working directory to the root of the project `py_SBeLT/` and run the following
 
 ```bash
-python3 -m unittest src/tests/test_*
+python3 -m unittest discover -s src/tests
 ```
 
 ## Submitting Changes

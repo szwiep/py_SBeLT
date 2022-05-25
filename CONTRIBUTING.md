@@ -13,10 +13,6 @@ python3 -m unittest discover -s src/tests --buffer
 ```
 If you see an 'OK' at the bottom of the output that means all the tests have passed. If you would like to test the code and have the stdout and stderr from passing tests be displayed, run the same command without the `--buffer` flag. 
 
-```bash
-python3 -m unittest discover -s src/tests
-```
-
 ## Submitting Changes
 
 Once you're ready to submit code, please create a pull request that clearly outlines the changes you've made. Additionally, when committing code please use 

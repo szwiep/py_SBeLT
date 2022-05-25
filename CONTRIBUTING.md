@@ -9,6 +9,11 @@ The model is tested with Python's [unittest](https://docs.python.org/3/library/u
 To locally test the model and/or any changes you make to the source code, set your working directory to the root of the project `py_SBeLT/` and run the following
 
 ```bash
+python3 -m unittest discover -s src/tests --buffer
+```
+If you see an 'OK' at the bottom of the output that means all the tests have passed. If you would like to test the code and have the stdout and stderr from passing tests be displayed, run the same command without the `--buffer` flag. 
+
+```bash
 python3 -m unittest discover -s src/tests
 ```
 

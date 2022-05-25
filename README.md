@@ -39,7 +39,7 @@ If you've installed from source, you can test the installation by setting your w
 and running the following
 
 ```bash
-python -m unittest src/tests/test_*
+python -m unittest discover -s src/tests
 ```
 
 ## Getting Started

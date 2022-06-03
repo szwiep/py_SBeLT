@@ -1,5 +1,5 @@
 ---
-title: 'pySBeLT: A Python software for stochastic sediment transport under rarefied conditions'
+title: 'pySBeLT: A Python software package for stochastic sediment transport under rarefied conditions'
 tags:
   - Python
   - geomorphology
@@ -39,7 +39,7 @@ teaching tool to help introduce bed load transport to advanced undergraduate and
 # Statement of need
 
 Research at the intersection of geomorphology, geophysics and hydraulics is increasingly focused on building 
-a theoretical foundation for the treatment of bedload transport as a stochastic phenomenon [@Ancey:2020; 
+a theoretical foundation for the treatment of bed load transport as a stochastic phenomenon [@Ancey:2020; 
 @FurbDoane:2021]. Associated theories are commonly tested against laboratory data from "rarefied" transport 
 conditions [@Furb:2016], where transport rates are low to moderate, interactions between two or more 
 moving particles are rare, and a relatively small fraction of particles on the bed surface participate in transport 
@@ -50,10 +50,10 @@ suggests that the flux measured across a boundary or within an area of bed surfa
 of individual particles arriving from upstream locations [@Furbish:2012]. 
 
 Particle motions are controlled by several influencing factors including fluid turbulence, the irregular bed surface, and collective effects 
-[@Ancey:2006; @Ancey:2008; @LeeJerol:2018]. As a result, the connection between particle movements and the bedload 
+[@Ancey:2006; @Ancey:2008; @LeeJerol:2018]. As a result, the connection between particle movements and the bed load 
 transport rate has been difficult to formulate mathematically. `pySBeLT` provides an extensible framework within 
 Python to numerically examine correlations between upstream particle entrainment rates and travel distances, with downstream 
-flux. `pySBeLT` was motivated by a birth-death, immigration-emigration Markov model for bedload transport [@Ancey:2008; @Ancey:2010]. 
+flux. `pySBeLT` was motivated by a birth-death, immigration-emigration Markov model for bed load transport [@Ancey:2008; @Ancey:2010]. 
 Here, the movements of individual particles are represented by stochastic entrainment, motion, and deposition processes, and sediment 
 flux is represented as a counting phenomenon where the number of particles in motion above the bed surface is a random 
 variable [@Ancey:2008]. The model supports ensemble simulations so that repeat numerical experiments can be conducted efficiently,

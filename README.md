@@ -1,13 +1,13 @@
 [![status](https://joss.theoj.org/papers/d7b9cc16b87e8875ec7115a22e1413fe/status.svg)](https://joss.theoj.org/papers/d7b9cc16b87e8875ec7115a22e1413fe)
 [![szwiep](https://circleci.com/gh/szwiep/py_SBeLT.svg?style=svg)](https://app.circleci.com/pipelines/github/szwiep/py_SBeLT?filter=all)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/szwiep/py_SBeLT/master?labpath=docs%2Fnotebooks%2F)
-# Py_SBeLT
+# pySBeLT
 
 |![gif of 500 model runs](figures/Cropped_ModelGif.gif)
 |:--:|
 | *Figure 1. A .gif of 500 iterations from a `py_SBeLT`run using default parameters. |
 
-Rivers transport sediment particles. Individual particles can exhibit transport behavior that differs significantly when compared to other particles. py_SBeLT, which stands for *Stochastic Bed Load Transport*, provides a simple Python framework to numerically examine how individual particle motions in rivers combine to produce rates of transport that can be measured at one of a number of downstream points. The model can be used for basic research, and the model's relatively straightforward set-up makes it an effective and efficient teaching tool to help students build intuition about river transport of sediment particles.
+Rivers transport sediment particles. Individual particles can exhibit transport behavior that differs significantly when compared to other particles. pySBeLT, which stands for *Stochastic Bed Load Transport*, provides a simple Python framework to numerically examine how individual particle motions in rivers combine to produce rates of transport that can be measured at one of a number of downstream points. The model can be used for basic research, and the model's relatively straightforward set-up makes it an effective and efficient teaching tool to help students build intuition about river transport of sediment particles.
 
 ## Installation
 
@@ -44,7 +44,7 @@ python -m unittest discover -s src/tests --buffer
 
 ## Getting Started
 
-Users can work through the Jupyter Notebooks provided to gain a better understanding of py_SBeLT's basic usage, potential, and data storage methods. Either launch the binder instance ([![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/szwiep/py_SBeLT/master?labpath=docs%2Fnotebooks%2F)), clone the repository, or download the notebooks directly to get started.
+Users can work through the Jupyter Notebooks provided to gain a better understanding of pySBeLT's basic usage, potential, and data storage methods. Either launch the binder instance ([![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/szwiep/py_SBeLT/master?labpath=docs%2Fnotebooks%2F)), clone the repository, or download the notebooks directly to get started.
 
 If notebook's aren't your thing, simply run:
 

@@ -81,23 +81,27 @@ The API documentation is in HTML format. These files can either be downloaded an
 If you use `Simframe`, please remember to cite (to be updated later)[]().
 
 ```
-@article{pySBelt,
-  doi = {},
-  url = {},
+
+@article{Zwiep2022,
+  doi = {10.21105/joss.04282},
+  url = {https://doi.org/10.21105/joss.04282},
   year = {2022},
   publisher = {The Open Journal},
-  volume = {},
-  number = {},
-  pages = {},
-  author = {Sarah Zwiep, Shawn Chartrand},
-  title = {pySBeLT: A Python software for stochastic sediment transport under rarefied conditions},
+  volume = {7},
+  number = {74},
+  pages = {4282},
+  author = {Sarah Zwiep and Shawn M. Chartrand},
+  title = {pySBeLT: A Python software package for stochastic sediment transport under rarefied conditions},
   journal = {Journal of Open Source Software}
 }
 
 ```
+## Publication
+
+The publication with more details can be accessed here: [![DOI](https://joss.theoj.org/papers/10.21105/joss.04282/status.svg)](https://doi.org/10.21105/joss.04282)
 
 ## Ackowledgements
 
-`py_SBeLT` has received funding from NSERC Undergraduate Student Research Awards Program and Simon Fraser University.
+`pySBeLT` has received funding from NSERC Undergraduate Student Research Awards Program and Simon Fraser University.
 
-`py_SBeLT` was developed at the [Simon Fraser University](https://www.sfu.ca/) within the [School of Environmental Science](https://www.sfu.ca/evsc.html).
+`pySBeLT` was developed at the [Simon Fraser University](https://www.sfu.ca/) within the [School of Environmental Science](https://www.sfu.ca/evsc.html).
